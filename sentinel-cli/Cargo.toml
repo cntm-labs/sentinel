@@ -1,0 +1,8 @@
+[package]
+name = "sentinel-cli"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+sentinel-core.workspace = true
+sentinel-migrate.workspace = true

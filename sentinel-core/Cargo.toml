@@ -1,0 +1,10 @@
+[package]
+name = "sentinel-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+tokio.workspace = true

@@ -1,0 +1,7 @@
+[package]
+name = "sentinel-migrate"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+sentinel-core.workspace = true
