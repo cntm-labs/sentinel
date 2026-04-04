@@ -1,0 +1,5 @@
+error: only one field can be marked #[sentinel(primary_key)]
+ --> tests/compile_fail/duplicate_primary_key.rs:9:9
+  |
+9 |     pub uuid: String,
+  |         ^^^^
