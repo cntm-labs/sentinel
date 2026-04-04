@@ -13,6 +13,7 @@ pub struct PartialOpts {
 
 #[derive(Debug, FromField)]
 #[darling(attributes(sentinel))]
+#[allow(dead_code)]
 pub struct PartialFieldOpts {
     pub ident: Option<Ident>,
     pub ty: Type,
@@ -26,6 +27,7 @@ pub struct PartialIR {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct PartialFieldIR {
     pub field_name: Ident,
     pub column_name: String,

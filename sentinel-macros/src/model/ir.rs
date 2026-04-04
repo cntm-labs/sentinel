@@ -32,8 +32,9 @@ pub struct FieldOpts {
     #[darling(default)]
     pub column: Option<String>,
 
-    /// Marks column as unique (metadata for migrations).
+    /// Marks column as unique (metadata for migrations, used in Phase 6).
     #[darling(default)]
+    #[allow(dead_code)]
     pub unique: bool,
 
     /// Skip this field entirely (not a DB column).
@@ -51,6 +52,7 @@ pub struct ModelIR {
 }
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub struct FieldIR {
     pub field_name: Ident,
     pub column_name: String,
@@ -104,10 +106,10 @@ impl ModelOpts {
 
             if f.primary_key {
                 if pk_index.is_some() {
-                    return Err(
-                        darling::Error::custom("only one field can be marked #[sentinel(primary_key)]")
-                            .with_span(&field_name),
-                    );
+                    return Err(darling::Error::custom(
+                        "only one field can be marked #[sentinel(primary_key)]",
+                    )
+                    .with_span(&field_name));
                 }
                 pk_index = Some(i);
             }
@@ -154,10 +156,10 @@ fn to_snake_case(s: &str) -> String {
 
 /// Check if a type is `Option<T>`.
 fn is_option_type(ty: &Type) -> bool {
-    if let Type::Path(tp) = ty {
-        if let Some(seg) = tp.path.segments.last() {
-            return seg.ident == "Option";
-        }
+    if let Type::Path(tp) = ty
+        && let Some(seg) = tp.path.segments.last()
+    {
+        return seg.ident == "Option";
     }
     false
 }
@@ -180,18 +182,16 @@ fn rust_type_to_column_type(ty: &Type) -> &'static str {
 
 /// Extract the outermost type name, unwrapping Option<T> if present.
 fn extract_type_name(ty: &Type) -> String {
-    if let Type::Path(tp) = ty {
-        if let Some(seg) = tp.path.segments.last() {
-            if seg.ident == "Option" {
-                // Unwrap Option<T> and get T's name
-                if let syn::PathArguments::AngleBracketed(args) = &seg.arguments {
-                    if let Some(syn::GenericArgument::Type(inner)) = args.args.first() {
-                        return extract_type_name(inner);
-                    }
-                }
-            }
-            return seg.ident.to_string();
+    if let Type::Path(tp) = ty
+        && let Some(seg) = tp.path.segments.last()
+    {
+        if seg.ident == "Option"
+            && let syn::PathArguments::AngleBracketed(args) = &seg.arguments
+            && let Some(syn::GenericArgument::Type(inner)) = args.args.first()
+        {
+            return extract_type_name(inner);
         }
+        return seg.ident.to_string();
     }
     "unknown".to_string()
 }

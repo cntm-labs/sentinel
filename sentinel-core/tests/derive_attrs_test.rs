@@ -1,5 +1,5 @@
-use sentinel_core::model::Model;
 use sentinel_core::Model as DeriveModel;
+use sentinel_core::model::Model;
 
 // Test: table name inferred from struct name (UserProfile → "user_profiles")
 #[derive(DeriveModel)]

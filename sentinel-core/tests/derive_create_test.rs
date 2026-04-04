@@ -1,5 +1,5 @@
-use sentinel_core::types::Value;
 use sentinel_core::Model;
+use sentinel_core::types::Value;
 
 #[derive(Model)]
 #[sentinel(table = "users")]
@@ -62,6 +62,7 @@ fn create_with_none_optional() {
 #[test]
 fn all_default_fields_model() {
     // A model where only the PK has a default
+    #[allow(dead_code)]
     #[derive(Model)]
     #[sentinel(table = "tags")]
     pub struct Tag {

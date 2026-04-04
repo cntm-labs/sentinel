@@ -1,9 +1,8 @@
-use sentinel_core::expr::Column;
-use sentinel_core::model::{Model, ModelColumn};
+use sentinel_core::Model as DeriveModel;
+use sentinel_core::model::Model;
 use sentinel_core::types::Value;
-use sentinel_core::Model;
 
-#[derive(Model)]
+#[derive(DeriveModel)]
 #[sentinel(table = "users")]
 pub struct User {
     #[sentinel(primary_key, default = "gen_random_uuid()")]

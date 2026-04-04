@@ -1,5 +1,3 @@
-use sentinel_core::model::Model;
-use sentinel_core::types::Value;
 use sentinel_core::{Model, Partial};
 
 #[derive(Model)]

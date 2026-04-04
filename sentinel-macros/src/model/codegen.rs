@@ -82,10 +82,7 @@ pub fn generate_column_consts(ir: &ModelIR) -> TokenStream {
 
 /// Generate the `New<Model>` struct for INSERT (skips fields with `default`).
 pub fn generate_new_struct(ir: &ModelIR) -> TokenStream {
-    let new_name = syn::Ident::new(
-        &format!("New{}", ir.struct_name),
-        ir.struct_name.span(),
-    );
+    let new_name = syn::Ident::new(&format!("New{}", ir.struct_name), ir.struct_name.span());
 
     let fields: Vec<TokenStream> = ir
         .fields
@@ -109,10 +106,7 @@ pub fn generate_new_struct(ir: &ModelIR) -> TokenStream {
 /// Generate the `create(new) -> InsertQuery` method.
 pub fn generate_create_method(ir: &ModelIR) -> TokenStream {
     let struct_name = &ir.struct_name;
-    let new_name = syn::Ident::new(
-        &format!("New{}", ir.struct_name),
-        ir.struct_name.span(),
-    );
+    let new_name = syn::Ident::new(&format!("New{}", ir.struct_name), ir.struct_name.span());
     let table = &ir.table_name;
 
     let column_calls: Vec<TokenStream> = ir

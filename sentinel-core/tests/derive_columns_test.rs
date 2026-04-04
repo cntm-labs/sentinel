@@ -1,5 +1,5 @@
-use sentinel_core::model::Model;
 use sentinel_core::Model;
+use sentinel_core::model::Model;
 
 #[derive(Model)]
 #[sentinel(table = "posts")]
