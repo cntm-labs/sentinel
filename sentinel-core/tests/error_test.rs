@@ -6,10 +6,7 @@ fn error_display_column_not_found() {
         column: "email".into(),
         table: "users".into(),
     };
-    assert_eq!(
-        err.to_string(),
-        "column 'email' not found in table 'users'"
-    );
+    assert_eq!(err.to_string(), "column 'email' not found in table 'users'");
 }
 
 #[test]

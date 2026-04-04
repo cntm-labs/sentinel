@@ -56,5 +56,8 @@ fn always_parameterized() {
     let (sql, binds) = q.build();
     // Value is in binds, NOT in SQL string
     assert_eq!(sql, "SELECT \"id\" FROM \"users\" WHERE \"name\" = $1");
-    assert_eq!(binds[0], Value::Text("Robert'); DROP TABLE users;--".into()));
+    assert_eq!(
+        binds[0],
+        Value::Text("Robert'); DROP TABLE users;--".into())
+    );
 }

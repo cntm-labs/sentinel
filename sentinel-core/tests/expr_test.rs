@@ -61,7 +61,10 @@ fn expr_and_combines() {
     let c1 = Column::new("users", "age");
     let c2 = Column::new("users", "active");
     let expr = c1.gt(18i32).and(c2.eq(true));
-    assert_eq!(expr.to_sql(1), "(\"users\".\"age\" > $1 AND \"users\".\"active\" = $2)");
+    assert_eq!(
+        expr.to_sql(1),
+        "(\"users\".\"age\" > $1 AND \"users\".\"active\" = $2)"
+    );
 }
 
 #[test]
@@ -69,7 +72,10 @@ fn expr_or_combines() {
     let c1 = Column::new("users", "role");
     let c2 = Column::new("users", "role");
     let expr = c1.eq("admin").or(c2.eq("moderator"));
-    assert_eq!(expr.to_sql(1), "(\"users\".\"role\" = $1 OR \"users\".\"role\" = $2)");
+    assert_eq!(
+        expr.to_sql(1),
+        "(\"users\".\"role\" = $1 OR \"users\".\"role\" = $2)"
+    );
 }
 
 #[test]

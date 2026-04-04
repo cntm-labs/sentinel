@@ -43,6 +43,7 @@ static USER_COLUMNS: [ModelColumn; 4] = [
 ];
 
 // Column constants (derive(Model) will generate these)
+#[allow(dead_code)]
 impl User {
     const ID: Column = Column {
         table: std::borrow::Cow::Borrowed("users"),
@@ -99,10 +100,7 @@ fn model_find_builds_select() {
 fn model_find_by_id_builds_select() {
     let q = User::find_by_id(Value::from("abc-123"));
     let (sql, binds) = q.build();
-    assert_eq!(
-        sql,
-        "SELECT \"users\".* FROM \"users\" WHERE \"id\" = $1"
-    );
+    assert_eq!(sql, "SELECT \"users\".* FROM \"users\" WHERE \"id\" = $1");
     assert_eq!(binds.len(), 1);
 }
 

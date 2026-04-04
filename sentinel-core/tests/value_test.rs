@@ -34,8 +34,8 @@ fn value_from_bool() {
 
 #[test]
 fn value_from_f64() {
-    let v: Value = 3.14f64.into();
-    assert!(matches!(v, Value::Double(f) if (f - 3.14).abs() < f64::EPSILON));
+    let v: Value = 2.72f64.into();
+    assert!(matches!(v, Value::Double(f) if (f - 2.72).abs() < f64::EPSILON));
 }
 
 #[test]

@@ -34,10 +34,7 @@ fn insert_with_no_returning() {
         .column("email", "alice@example.com")
         .no_returning();
     let (sql, _) = q.build();
-    assert_eq!(
-        sql,
-        "INSERT INTO \"users\" (\"email\") VALUES ($1)"
-    );
+    assert_eq!(sql, "INSERT INTO \"users\" (\"email\") VALUES ($1)");
 }
 
 #[test]

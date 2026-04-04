@@ -11,8 +11,7 @@ fn select_all_from_table() {
 
 #[test]
 fn select_specific_columns() {
-    let q = SelectQuery::new("users")
-        .columns(vec!["id", "email", "name"]);
+    let q = SelectQuery::new("users").columns(vec!["id", "email", "name"]);
     let (sql, _) = q.build();
     assert_eq!(
         sql,
@@ -23,8 +22,7 @@ fn select_specific_columns() {
 #[test]
 fn select_with_where() {
     let col = Column::new("users", "email");
-    let q = SelectQuery::new("users")
-        .where_(col.eq("alice@example.com"));
+    let q = SelectQuery::new("users").where_(col.eq("alice@example.com"));
     let (sql, binds) = q.build();
     assert_eq!(
         sql,
@@ -51,8 +49,7 @@ fn select_with_multiple_where() {
 #[test]
 fn select_with_order_by() {
     let col = Column::new("users", "created_at");
-    let q = SelectQuery::new("users")
-        .order_by(col.desc());
+    let q = SelectQuery::new("users").order_by(col.desc());
     let (sql, _) = q.build();
     assert_eq!(
         sql,
@@ -62,14 +59,9 @@ fn select_with_order_by() {
 
 #[test]
 fn select_with_limit_offset() {
-    let q = SelectQuery::new("users")
-        .limit(20)
-        .offset(40);
+    let q = SelectQuery::new("users").limit(20).offset(40);
     let (sql, _) = q.build();
-    assert_eq!(
-        sql,
-        "SELECT \"users\".* FROM \"users\" LIMIT 20 OFFSET 40"
-    );
+    assert_eq!(sql, "SELECT \"users\".* FROM \"users\" LIMIT 20 OFFSET 40");
 }
 
 #[test]
@@ -95,11 +87,7 @@ fn select_full_query() {
 
 #[test]
 fn select_for_update() {
-    let q = SelectQuery::new("accounts")
-        .for_update();
+    let q = SelectQuery::new("accounts").for_update();
     let (sql, _) = q.build();
-    assert_eq!(
-        sql,
-        "SELECT \"accounts\".* FROM \"accounts\" FOR UPDATE"
-    );
+    assert_eq!(sql, "SELECT \"accounts\".* FROM \"accounts\" FOR UPDATE");
 }

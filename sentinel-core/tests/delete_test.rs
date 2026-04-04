@@ -15,10 +15,7 @@ fn delete_with_where_expr() {
     let col = Column::new("users", "active");
     let q = DeleteQuery::new("users").where_(col.eq(false));
     let (sql, binds) = q.build();
-    assert_eq!(
-        sql,
-        "DELETE FROM \"users\" WHERE \"users\".\"active\" = $1"
-    );
+    assert_eq!(sql, "DELETE FROM \"users\" WHERE \"users\".\"active\" = $1");
     assert_eq!(binds.len(), 1);
 }
 
@@ -28,8 +25,5 @@ fn delete_with_returning() {
         .where_id(Value::from("abc-123"))
         .returning();
     let (sql, _) = q.build();
-    assert_eq!(
-        sql,
-        "DELETE FROM \"users\" WHERE \"id\" = $1 RETURNING *"
-    );
+    assert_eq!(sql, "DELETE FROM \"users\" WHERE \"id\" = $1 RETURNING *");
 }

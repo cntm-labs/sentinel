@@ -81,12 +81,7 @@ impl SelectQuery {
 
         // WHERE clause
         if !self.wheres.is_empty() {
-            let combined = self
-                .wheres
-                .iter()
-                .cloned()
-                .reduce(|a, b| a.and(b))
-                .unwrap();
+            let combined = self.wheres.iter().cloned().reduce(|a, b| a.and(b)).unwrap();
             let bind_start = binds.len() + 1;
             sql.push_str(&format!(" WHERE {}", combined.to_sql(bind_start)));
             binds.extend(combined.binds());
