@@ -7,3 +7,14 @@ edition.workspace = true
 proc-macro = true
 
 [dependencies]
+syn.workspace = true
+quote.workspace = true
+darling.workspace = true
+proc-macro2.workspace = true
+proc-macro-error2.workspace = true
+
+[dev-dependencies]
+trybuild.workspace = true
+sentinel-core.workspace = true
+uuid.workspace = true
+chrono.workspace = true

@@ -8,3 +8,7 @@ pub mod query;
 pub mod types;
 
 pub use error::{Error, Result};
+
+// Re-export derive macros
+pub use sentinel_macros::Model;
+pub use sentinel_macros::Partial;

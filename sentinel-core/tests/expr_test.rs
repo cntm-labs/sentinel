@@ -98,3 +98,37 @@ fn bind_index_chains_correctly() {
     assert!(sql.contains("$3"));
     assert_eq!(expr.binds().len(), 3);
 }
+
+#[test]
+fn expr_or_binds_and_count() {
+    let c1 = Column::new("users", "role");
+    let c2 = Column::new("users", "role");
+    let expr = c1.eq("admin").or(c2.eq("mod"));
+    assert_eq!(expr.binds().len(), 2);
+    assert_eq!(
+        expr.binds(),
+        vec![Value::Text("admin".into()), Value::Text("mod".into())]
+    );
+}
+
+#[test]
+fn expr_is_null_bind_count() {
+    let col = Column::new("users", "deleted_at");
+    let expr = col.is_null();
+    assert_eq!(expr.bind_count(), 0);
+}
+
+#[test]
+fn expr_in_list_combined_with_and() {
+    let c1 = Column::new("users", "status");
+    let c2 = Column::new("users", "active");
+    let expr = c1
+        .in_list(vec![Value::from("a"), Value::from("b")])
+        .and(c2.eq(true));
+    let sql = expr.to_sql(1);
+    assert_eq!(
+        sql,
+        "(\"users\".\"status\" IN ($1, $2) AND \"users\".\"active\" = $3)"
+    );
+    assert_eq!(expr.binds().len(), 3);
+}

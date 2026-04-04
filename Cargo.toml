@@ -23,3 +23,9 @@ chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
+syn = { version = "2", features = ["full", "extra-traits"] }
+quote = "1"
+darling = "0.20"
+proc-macro2 = "1"
+proc-macro-error2 = "2"
+trybuild = "1"

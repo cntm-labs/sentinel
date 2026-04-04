@@ -1,0 +1,5 @@
+error: Unknown field: `primay_key`. Did you mean `primary_key`?
+ --> tests/compile_fail/unknown_attribute.rs:6:16
+  |
+6 |     #[sentinel(primay_key)]
+  |                ^^^^^^^^^^

@@ -1,0 +1,5 @@
+error: no field marked with #[sentinel(primary_key)] — add it to exactly one field
+ --> tests/compile_fail/no_primary_key.rs:5:12
+  |
+5 | pub struct User {
+  |            ^^^^
