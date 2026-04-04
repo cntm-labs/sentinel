@@ -1,8 +1,8 @@
+pub mod codegen;
 pub mod ir;
 
 use darling::FromDeriveInput;
 use proc_macro2::TokenStream;
-use quote::quote;
 
 use ir::ModelOpts;
 
@@ -22,14 +22,9 @@ pub fn derive_model_impl(input: TokenStream) -> TokenStream {
         Err(e) => return e.write_errors(),
     };
 
-    // Stub: just generate an empty impl to verify parsing works
-    let name = &ir.struct_name;
-    let table = &ir.table_name;
+    let model_impl = codegen::generate_model_impl(&ir);
 
-    quote! {
-        impl #name {
-            /// Table name (temporary stub — full codegen in next task).
-            pub const __TABLE: &'static str = #table;
-        }
+    quote::quote! {
+        #model_impl
     }
 }
