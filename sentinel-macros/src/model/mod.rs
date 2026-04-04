@@ -23,8 +23,10 @@ pub fn derive_model_impl(input: TokenStream) -> TokenStream {
     };
 
     let model_impl = codegen::generate_model_impl(&ir);
+    let column_consts = codegen::generate_column_consts(&ir);
 
     quote::quote! {
         #model_impl
+        #column_consts
     }
 }
