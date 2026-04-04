@@ -1,17 +1,19 @@
+use std::borrow::Cow;
+
 use crate::types::Value;
 
 /// A reference to a table column, used to build type-safe expressions.
 #[derive(Debug, Clone)]
 pub struct Column {
-    pub table: String,
-    pub name: String,
+    pub table: Cow<'static, str>,
+    pub name: Cow<'static, str>,
 }
 
 impl Column {
     pub fn new(table: impl Into<String>, name: impl Into<String>) -> Self {
         Self {
-            table: table.into(),
-            name: name.into(),
+            table: Cow::Owned(table.into()),
+            name: Cow::Owned(name.into()),
         }
     }
 
