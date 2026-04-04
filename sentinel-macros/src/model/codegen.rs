@@ -79,3 +79,60 @@ pub fn generate_column_consts(ir: &ModelIR) -> TokenStream {
         }
     }
 }
+
+/// Generate the `New<Model>` struct for INSERT (skips fields with `default`).
+pub fn generate_new_struct(ir: &ModelIR) -> TokenStream {
+    let new_name = syn::Ident::new(
+        &format!("New{}", ir.struct_name),
+        ir.struct_name.span(),
+    );
+
+    let fields: Vec<TokenStream> = ir
+        .fields
+        .iter()
+        .filter(|f| !f.skip && !f.has_default)
+        .map(|f| {
+            let name = &f.field_name;
+            let ty = &f.rust_type;
+            quote! { pub #name: #ty }
+        })
+        .collect();
+
+    quote! {
+        #[automatically_derived]
+        pub struct #new_name {
+            #(#fields),*
+        }
+    }
+}
+
+/// Generate the `create(new) -> InsertQuery` method.
+pub fn generate_create_method(ir: &ModelIR) -> TokenStream {
+    let struct_name = &ir.struct_name;
+    let new_name = syn::Ident::new(
+        &format!("New{}", ir.struct_name),
+        ir.struct_name.span(),
+    );
+    let table = &ir.table_name;
+
+    let column_calls: Vec<TokenStream> = ir
+        .fields
+        .iter()
+        .filter(|f| !f.skip && !f.has_default)
+        .map(|f| {
+            let col_name = &f.column_name;
+            let field_name = &f.field_name;
+            quote! { .column(#col_name, new.#field_name) }
+        })
+        .collect();
+
+    quote! {
+        #[automatically_derived]
+        impl #struct_name {
+            pub fn create(new: #new_name) -> sentinel_core::query::InsertQuery {
+                sentinel_core::query::InsertQuery::new(#table)
+                    #(#column_calls)*
+            }
+        }
+    }
+}
