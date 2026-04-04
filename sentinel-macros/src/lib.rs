@@ -1,6 +1,7 @@
 //! Sentinel Macros — derive(Model), derive(Partial), #[reducer].
 
 mod model;
+mod partial;
 
 use proc_macro::TokenStream;
 
@@ -20,4 +21,10 @@ use proc_macro::TokenStream;
 #[proc_macro_derive(Model, attributes(sentinel))]
 pub fn derive_model(input: TokenStream) -> TokenStream {
     model::derive_model_impl(input.into()).into()
+}
+
+/// Derive a partial select type.
+#[proc_macro_derive(Partial, attributes(sentinel))]
+pub fn derive_partial(input: TokenStream) -> TokenStream {
+    partial::derive_partial_impl(input.into()).into()
 }
