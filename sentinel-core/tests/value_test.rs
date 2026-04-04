@@ -69,3 +69,9 @@ fn value_from_option_none() {
     let v: Value = Option::<i64>::None.into();
     assert!(matches!(v, Value::Null));
 }
+
+#[test]
+fn value_from_bytes() {
+    let v: Value = vec![0x01u8, 0x02, 0x03].into();
+    assert!(matches!(v, Value::Bytes(b) if b == vec![0x01, 0x02, 0x03]));
+}

@@ -61,3 +61,19 @@ fn always_parameterized() {
         Value::Text("Robert'); DROP TABLE users;--".into())
     );
 }
+
+#[test]
+fn dynamic_select_star() {
+    let q = QueryBuilder::select_from("users");
+    let (sql, binds) = q.build();
+    assert_eq!(sql, "SELECT * FROM \"users\"");
+    assert!(binds.is_empty());
+}
+
+#[test]
+fn dynamic_select_order_by_asc() {
+    let mut q = QueryBuilder::select_from("users");
+    q.order_by_asc("name");
+    let (sql, _) = q.build();
+    assert_eq!(sql, "SELECT * FROM \"users\" ORDER BY \"name\" ASC");
+}
