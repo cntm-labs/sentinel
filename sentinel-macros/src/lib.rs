@@ -1,5 +1,7 @@
 //! Sentinel Macros — derive(Model), derive(Partial), #[reducer].
 
+mod model;
+
 use proc_macro::TokenStream;
 
 /// Derive the `Model` trait for a struct.
@@ -17,7 +19,5 @@ use proc_macro::TokenStream;
 /// ```
 #[proc_macro_derive(Model, attributes(sentinel))]
 pub fn derive_model(input: TokenStream) -> TokenStream {
-    // Stub — full implementation in Task 2
-    let _ = input;
-    TokenStream::new()
+    model::derive_model_impl(input.into()).into()
 }
