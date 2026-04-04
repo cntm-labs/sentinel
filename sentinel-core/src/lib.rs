@@ -2,6 +2,7 @@
 
 pub mod error;
 pub mod expr;
+pub mod query;
 pub mod types;
 
 pub use error::{Error, Result};
