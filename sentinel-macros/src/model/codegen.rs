@@ -103,6 +103,37 @@ pub fn generate_new_struct(ir: &ModelIR) -> TokenStream {
     }
 }
 
+/// Generate `from_row()` method that decodes a driver Row into the model struct.
+pub fn generate_from_row(ir: &ModelIR) -> TokenStream {
+    let name = &ir.struct_name;
+
+    let field_extractions: Vec<TokenStream> = ir
+        .fields
+        .iter()
+        .map(|f| {
+            let field_name = &f.field_name;
+            if f.skip {
+                quote! { #field_name: std::default::Default::default() }
+            } else {
+                let col_name = &f.column_name;
+                quote! { #field_name: row.try_get_by_name(#col_name)? }
+            }
+        })
+        .collect();
+
+    quote! {
+        #[automatically_derived]
+        impl #name {
+            /// Decode a [`sentinel_driver::Row`] into this model.
+            pub fn from_row(row: &sentinel_driver::Row) -> sentinel_driver::Result<Self> {
+                Ok(Self {
+                    #(#field_extractions,)*
+                })
+            }
+        }
+    }
+}
+
 /// Generate the `create(new) -> InsertQuery` method.
 pub fn generate_create_method(ir: &ModelIR) -> TokenStream {
     let struct_name = &ir.struct_name;
