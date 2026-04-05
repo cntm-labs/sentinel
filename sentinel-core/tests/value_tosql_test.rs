@@ -67,6 +67,16 @@ fn value_bytes_to_sql() {
 }
 
 #[test]
+fn value_timestamp_to_sql() {
+    let ts = chrono::Utc::now();
+    let v = Value::Timestamp(ts);
+    assert_eq!(v.oid(), Oid::TIMESTAMPTZ);
+    let mut buf = bytes::BytesMut::new();
+    v.to_sql(&mut buf).unwrap();
+    assert_eq!(buf.len(), 8); // PG binary: i64 microseconds from J2000
+}
+
+#[test]
 fn value_null_to_sql() {
     let v = Value::Null;
     assert_eq!(v.oid(), Oid::TEXT); // default OID for NULL
