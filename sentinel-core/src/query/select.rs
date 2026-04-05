@@ -109,45 +109,4 @@ impl SelectQuery {
 
         (sql, binds)
     }
-
-    /// Execute this query and fetch all rows.
-    pub async fn fetch_all(
-        self,
-        conn: &mut sentinel_driver::Connection,
-    ) -> crate::error::Result<Vec<sentinel_driver::Row>> {
-        let (sql, binds) = self.build();
-        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> = binds
-            .iter()
-            .map(|v| v as &(dyn sentinel_driver::ToSql + Sync))
-            .collect();
-        Ok(conn.query(&sql, &params).await?)
-    }
-
-    /// Execute this query and fetch exactly one row.
-    ///
-    /// Returns `Error::NotFound` if no rows are returned.
-    pub async fn fetch_one(
-        self,
-        conn: &mut sentinel_driver::Connection,
-    ) -> crate::error::Result<sentinel_driver::Row> {
-        let (sql, binds) = self.build();
-        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> = binds
-            .iter()
-            .map(|v| v as &(dyn sentinel_driver::ToSql + Sync))
-            .collect();
-        conn.query_one(&sql, &params).await.map_err(Into::into)
-    }
-
-    /// Execute this query and fetch an optional row.
-    pub async fn fetch_optional(
-        self,
-        conn: &mut sentinel_driver::Connection,
-    ) -> crate::error::Result<Option<sentinel_driver::Row>> {
-        let (sql, binds) = self.build();
-        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> = binds
-            .iter()
-            .map(|v| v as &(dyn sentinel_driver::ToSql + Sync))
-            .collect();
-        Ok(conn.query_opt(&sql, &params).await?)
-    }
 }

@@ -53,17 +53,4 @@ impl DeleteQuery {
 
         (sql, binds)
     }
-
-    /// Execute this DELETE and return the number of rows affected.
-    pub async fn execute(
-        self,
-        conn: &mut sentinel_driver::Connection,
-    ) -> crate::error::Result<u64> {
-        let (sql, binds) = self.build();
-        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> = binds
-            .iter()
-            .map(|v| v as &(dyn sentinel_driver::ToSql + Sync))
-            .collect();
-        Ok(conn.execute(&sql, &params).await?)
-    }
 }

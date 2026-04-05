@@ -1,5 +1,6 @@
 mod delete;
 mod dynamic;
+mod exec;
 mod insert;
 mod select;
 mod update;
