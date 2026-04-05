@@ -45,9 +45,10 @@ async fn delete_by_id_compiles(conn: &mut sentinel_driver::Connection) {
     let affected: u64 = User::delete_by_id(conn, &uuid::Uuid::nil()).await.unwrap();
 }
 
-// Actual unit test (no connection needed)
+// Actual unit test (no connection needed) — compilation proves methods exist
 #[test]
 fn derive_model_generates_execution_methods() {
-    // If this test file compiles, the methods exist with correct signatures.
-    assert!(true);
+    // Verify the Model trait is implemented with expected table name
+    use sentinel_core::model::Model;
+    assert_eq!(User::TABLE, "users");
 }

@@ -1,6 +1,6 @@
 use sentinel_core::types::Value;
-use sentinel_driver::types::ToSql;
 use sentinel_driver::Oid;
+use sentinel_driver::types::ToSql;
 
 #[test]
 fn value_bool_to_sql() {
@@ -40,11 +40,11 @@ fn value_text_to_sql() {
 
 #[test]
 fn value_double_to_sql() {
-    let v = Value::Double(3.14);
+    let v = Value::Double(1.23);
     assert_eq!(v.oid(), Oid::FLOAT8);
     let mut buf = bytes::BytesMut::new();
     v.to_sql(&mut buf).unwrap();
-    assert_eq!(buf.as_ref(), &3.14f64.to_be_bytes());
+    assert_eq!(buf.as_ref(), &1.23f64.to_be_bytes());
 }
 
 #[test]

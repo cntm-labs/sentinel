@@ -116,8 +116,10 @@ impl SelectQuery {
         conn: &mut sentinel_driver::Connection,
     ) -> crate::error::Result<Vec<sentinel_driver::Row>> {
         let (sql, binds) = self.build();
-        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> =
-            binds.iter().map(|v| v as &(dyn sentinel_driver::ToSql + Sync)).collect();
+        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> = binds
+            .iter()
+            .map(|v| v as &(dyn sentinel_driver::ToSql + Sync))
+            .collect();
         Ok(conn.query(&sql, &params).await?)
     }
 
@@ -129,8 +131,10 @@ impl SelectQuery {
         conn: &mut sentinel_driver::Connection,
     ) -> crate::error::Result<sentinel_driver::Row> {
         let (sql, binds) = self.build();
-        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> =
-            binds.iter().map(|v| v as &(dyn sentinel_driver::ToSql + Sync)).collect();
+        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> = binds
+            .iter()
+            .map(|v| v as &(dyn sentinel_driver::ToSql + Sync))
+            .collect();
         conn.query_one(&sql, &params).await.map_err(Into::into)
     }
 
@@ -140,8 +144,10 @@ impl SelectQuery {
         conn: &mut sentinel_driver::Connection,
     ) -> crate::error::Result<Option<sentinel_driver::Row>> {
         let (sql, binds) = self.build();
-        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> =
-            binds.iter().map(|v| v as &(dyn sentinel_driver::ToSql + Sync)).collect();
+        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> = binds
+            .iter()
+            .map(|v| v as &(dyn sentinel_driver::ToSql + Sync))
+            .collect();
         Ok(conn.query_opt(&sql, &params).await?)
     }
 }

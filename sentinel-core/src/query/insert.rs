@@ -92,8 +92,10 @@ impl InsertQuery {
         conn: &mut sentinel_driver::Connection,
     ) -> crate::error::Result<Vec<sentinel_driver::Row>> {
         let (sql, binds) = self.build();
-        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> =
-            binds.iter().map(|v| v as &(dyn sentinel_driver::ToSql + Sync)).collect();
+        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> = binds
+            .iter()
+            .map(|v| v as &(dyn sentinel_driver::ToSql + Sync))
+            .collect();
         Ok(conn.query(&sql, &params).await?)
     }
 
@@ -103,8 +105,10 @@ impl InsertQuery {
         conn: &mut sentinel_driver::Connection,
     ) -> crate::error::Result<u64> {
         let (sql, binds) = self.build();
-        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> =
-            binds.iter().map(|v| v as &(dyn sentinel_driver::ToSql + Sync)).collect();
+        let params: Vec<&(dyn sentinel_driver::ToSql + Sync)> = binds
+            .iter()
+            .map(|v| v as &(dyn sentinel_driver::ToSql + Sync))
+            .collect();
         Ok(conn.execute(&sql, &params).await?)
     }
 }

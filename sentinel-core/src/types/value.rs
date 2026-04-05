@@ -85,7 +85,6 @@ impl sentinel_driver::ToSql for Value {
     }
 
     fn to_sql(&self, buf: &mut bytes::BytesMut) -> sentinel_driver::Result<()> {
-        use sentinel_driver::ToSql;
         match self {
             Value::Null => Ok(()),
             Value::Bool(v) => v.to_sql(buf),
