@@ -2,6 +2,7 @@ use crate::expr::{Expr, OrderExpr};
 use crate::types::Value;
 
 /// Builder for SELECT queries with parameterized bind values.
+#[must_use = "query does nothing until .build() or .fetch_all() is called"]
 #[derive(Debug)]
 pub struct SelectQuery {
     table: String,

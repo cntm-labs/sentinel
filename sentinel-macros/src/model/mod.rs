@@ -26,11 +26,15 @@ pub fn derive_model_impl(input: TokenStream) -> TokenStream {
     let column_consts = codegen::generate_column_consts(&ir);
     let new_struct = codegen::generate_new_struct(&ir);
     let create_method = codegen::generate_create_method(&ir);
+    let from_row = codegen::generate_from_row(&ir);
+    let execution_methods = codegen::generate_execution_methods(&ir);
 
     quote::quote! {
         #model_impl
         #column_consts
         #new_struct
         #create_method
+        #from_row
+        #execution_methods
     }
 }

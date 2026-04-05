@@ -9,3 +9,5 @@ chrono.workspace = true
 uuid.workspace = true
 tokio.workspace = true
 sentinel-macros.workspace = true
+sentinel-driver.workspace = true
+bytes.workspace = true
