@@ -20,6 +20,9 @@ pub enum Error {
 
     #[error("type mismatch: expected {expected}, got {got}")]
     TypeMismatch { expected: String, got: String },
+
+    #[error("driver error: {0}")]
+    Driver(#[from] sentinel_driver::Error),
 }
 
 /// Sentinel result type alias.
