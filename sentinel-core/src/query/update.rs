@@ -9,6 +9,7 @@ enum Returning {
 }
 
 /// Builder for UPDATE queries.
+#[must_use = "query does nothing until .build() or .execute() is called"]
 #[derive(Debug)]
 pub struct UpdateQuery {
     table: String,

@@ -2,6 +2,7 @@ use crate::expr::Expr;
 use crate::types::Value;
 
 /// Builder for DELETE queries.
+#[must_use = "query does nothing until .build() or .execute() is called"]
 #[derive(Debug)]
 pub struct DeleteQuery {
     table: String,

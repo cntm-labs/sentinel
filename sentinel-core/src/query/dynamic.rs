@@ -5,6 +5,7 @@ use crate::types::Value;
 /// Always parameterized — values are never interpolated into SQL strings.
 /// This is the escape hatch for queries that can't be expressed with the
 /// typed builders, while still preventing SQL injection.
+#[must_use = "query does nothing until .build() is called"]
 #[derive(Debug)]
 pub struct QueryBuilder {
     table: String,

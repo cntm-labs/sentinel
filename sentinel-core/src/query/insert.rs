@@ -12,6 +12,7 @@ enum Returning {
 }
 
 /// Builder for INSERT queries.
+#[must_use = "query does nothing until .build() or .execute() is called"]
 #[derive(Debug)]
 pub struct InsertQuery {
     table: String,
