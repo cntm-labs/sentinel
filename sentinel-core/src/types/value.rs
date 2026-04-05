@@ -69,6 +69,37 @@ impl From<Vec<u8>> for Value {
     }
 }
 
+impl sentinel_driver::ToSql for Value {
+    fn oid(&self) -> sentinel_driver::Oid {
+        match self {
+            Value::Null => sentinel_driver::Oid::TEXT,
+            Value::Bool(_) => sentinel_driver::Oid::BOOL,
+            Value::Int(_) => sentinel_driver::Oid::INT4,
+            Value::BigInt(_) => sentinel_driver::Oid::INT8,
+            Value::Double(_) => sentinel_driver::Oid::FLOAT8,
+            Value::Text(_) => sentinel_driver::Oid::TEXT,
+            Value::Uuid(_) => sentinel_driver::Oid::UUID,
+            Value::Timestamp(_) => sentinel_driver::Oid::TIMESTAMPTZ,
+            Value::Bytes(_) => sentinel_driver::Oid::BYTEA,
+        }
+    }
+
+    fn to_sql(&self, buf: &mut bytes::BytesMut) -> sentinel_driver::Result<()> {
+        use sentinel_driver::ToSql;
+        match self {
+            Value::Null => Ok(()),
+            Value::Bool(v) => v.to_sql(buf),
+            Value::Int(v) => v.to_sql(buf),
+            Value::BigInt(v) => v.to_sql(buf),
+            Value::Double(v) => v.to_sql(buf),
+            Value::Text(v) => v.as_str().to_sql(buf),
+            Value::Uuid(v) => v.to_sql(buf),
+            Value::Timestamp(v) => v.to_sql(buf),
+            Value::Bytes(v) => v.as_slice().to_sql(buf),
+        }
+    }
+}
+
 impl<T: Into<Value>> From<Option<T>> for Value {
     fn from(v: Option<T>) -> Self {
         match v {
