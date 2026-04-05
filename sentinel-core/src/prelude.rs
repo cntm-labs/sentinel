@@ -13,3 +13,6 @@ pub use crate::types::Value;
 // Re-export derive macros
 pub use sentinel_macros::Model as DeriveModel;
 pub use sentinel_macros::Partial as DerivePartial;
+
+// Re-export driver types
+pub use sentinel_driver::{Connection, Pool, Config};

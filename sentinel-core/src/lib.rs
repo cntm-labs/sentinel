@@ -12,3 +12,8 @@ pub use error::{Error, Result};
 // Re-export derive macros
 pub use sentinel_macros::Model;
 pub use sentinel_macros::Partial;
+
+// Re-export driver types for user convenience
+pub use sentinel_driver::{Connection, Pool, Config, SslMode};
+pub use sentinel_driver::{IsolationLevel, TransactionConfig, CancelToken};
+pub use sentinel_driver::Row;
