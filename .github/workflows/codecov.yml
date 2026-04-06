@@ -22,7 +22,7 @@ jobs:
       - name: Generate coverage
         run: >-
           cargo llvm-cov --workspace
-          --ignore-filename-regex '(sentinel-cli/|sentinel-macros/|query/exec\.rs)'
+          --ignore-filename-regex '(sntl-cli/|sntl-macros/|query/exec\.rs)'
           --lcov --output-path lcov.info
           --fail-under-lines 100
       - name: Upload to Codecov

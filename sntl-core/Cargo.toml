@@ -1,0 +1,13 @@
+[package]
+name = "sntl-core"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+tokio.workspace = true
+sntl-macros.workspace = true
+sentinel-driver.workspace = true
+bytes.workspace = true

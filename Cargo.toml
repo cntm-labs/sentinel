@@ -1,9 +1,9 @@
 [workspace]
 members = [
-    "sentinel-core",
-    "sentinel-macros",
-    "sentinel-migrate",
-    "sentinel-cli",
+    "sntl-core",
+    "sntl-macros",
+    "sntl-migrate",
+    "sntl-cli",
 ]
 resolver = "2"
 
@@ -11,13 +11,13 @@ resolver = "2"
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/sentinel-orm/sentinel"
+repository = "https://github.com/cntm-labs/sentinel"
 rust-version = "1.85"
 
 [workspace.dependencies]
-sentinel-core = { path = "sentinel-core" }
-sentinel-macros = { path = "sentinel-macros" }
-sentinel-migrate = { path = "sentinel-migrate" }
+sntl-core = { path = "sntl-core" }
+sntl-macros = { path = "sntl-macros" }
+sntl-migrate = { path = "sntl-migrate" }
 thiserror = "2"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4", "serde"] }

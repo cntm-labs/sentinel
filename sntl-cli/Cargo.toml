@@ -1,0 +1,9 @@
+[package]
+name = "sntl-cli"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+sntl-core.workspace = true
+sntl-migrate.workspace = true
+tokio.workspace = true

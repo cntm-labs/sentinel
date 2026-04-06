@@ -14,13 +14,13 @@ Tagline: "Your data's guardian — from compile to production"
 ## Workspace Structure
 ```
 sentinel/
-├── sentinel-core/       # Model trait, QueryBuilder, Transaction, Relations
+├── sntl-core/           # Model trait, QueryBuilder, Transaction, Relations
 │   └── src/
-├── sentinel-macros/     # derive(Model), derive(Partial), #[reducer]
+├── sntl-macros/         # derive(Model), derive(Partial), #[reducer]
 │   └── src/
-├── sentinel-migrate/    # Schema diff, migration generation
+├── sntl-migrate/        # Schema diff, migration generation
 │   └── src/
-├── sentinel-cli/        # CLI binary (`sentinel` command)
+├── sntl-cli/            # CLI binary (`sentinel` command)
 │   └── src/
 ├── examples/            # Usage examples
 ├── docs/
@@ -48,7 +48,7 @@ cargo fmt --all                  # Format
 - **Deadlock prevention**: auto-reorder locks by ID
 
 ## Conventions
-- Zero `unsafe` in sentinel-core
+- Zero `unsafe` in sntl-core
 - All queries parameterized at every layer (no SQL injection possible)
 - Migrations are plain SQL files
 - Every model field should have `doc = "..."` attribute
