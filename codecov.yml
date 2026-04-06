@@ -1,0 +1,19 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: 100%
+
+ignore:
+  - "sntl-cli/"
+  - "sntl-macros/"
+  - "sntl-core/src/query/exec.rs"
+
+comment:
+  layout: "reach,diff,flags,files"
+  behavior: default
+  require_changes: true
