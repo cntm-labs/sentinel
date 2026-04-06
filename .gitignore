@@ -1,3 +1,26 @@
+# Build
 /target
+
+# Lock (workspace)
 Cargo.lock
+
+# Worktrees
 .worktrees/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+coverage-html/
+lcov.info
+*.profraw
+
+# Environment
+.env
