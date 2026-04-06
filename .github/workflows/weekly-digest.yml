@@ -1,0 +1,32 @@
+name: Weekly Digest
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          direct_prompt: |
+            Generate a weekly engineering digest for Sentinel ORM.
+            Analyze the repository and produce a summary covering:
+
+            1. **Test Suite Status** — run `cargo test --workspace` and report results
+            2. **Coverage Trends** — check recent coverage reports
+            3. **New Dependencies** — compare Cargo.lock changes from last week
+            4. **Open Issues Summary** — list open issues grouped by label
+            5. **Recent PRs** — summarize merged and open PRs from the past week
+            6. **Security Advisories** — run `cargo audit` and report findings
+            7. **Action Items** — suggest priorities for next week
+
+            Format as a GitHub issue titled "Weekly Digest — YYYY-MM-DD".
+            Create the issue using `gh issue create`.
