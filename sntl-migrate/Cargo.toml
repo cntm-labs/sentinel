@@ -1,8 +1,0 @@
-[package]
-name = "sntl-migrate"
-version.workspace = true
-edition.workspace = true
-license.workspace = true
-
-[dependencies]
-sntl-core.workspace = true

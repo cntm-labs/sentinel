@@ -15,7 +15,7 @@ proc-macro2.workspace = true
 proc-macro-error2.workspace = true
 
 [dev-dependencies]
-sntl-core.workspace = true
+sntl.workspace = true
 trybuild.workspace = true
 uuid.workspace = true
 chrono.workspace = true

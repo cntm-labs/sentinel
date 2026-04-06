@@ -12,26 +12,21 @@
 //! ```
 
 /// Core — Model trait, QueryBuilder, types, and connection abstraction.
-pub mod core {
-    pub use sntl_core::*;
-}
-
-/// Derive macros — `#[derive(Model)]`, `#[derive(Partial)]`.
-pub mod macros {
-    pub use sntl_macros::Model;
-    pub use sntl_macros::Partial;
-}
+pub mod core;
 
 /// Migration tools — schema diff and migration generation.
-pub mod migrate {
-    pub use sntl_migrate::*;
-}
+pub mod migrate;
 
 /// Prelude — common imports for quick setup.
-///
-/// ```rust
-/// use sntl::prelude::*;
-/// ```
 pub mod prelude {
-    pub use sntl_core::prelude::*;
+    pub use crate::core::prelude::*;
 }
+
+/// PostgreSQL wire protocol driver.
+pub use driver;
+
+/// Derive macros — `#[derive(Model)]`, `#[derive(Partial)]`.
+pub use macros::Model;
+pub use macros::Partial;
+
+pub use core::error::{Error, Result};

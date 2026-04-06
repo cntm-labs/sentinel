@@ -5,6 +5,5 @@ edition.workspace = true
 license.workspace = true
 
 [dependencies]
-sntl-core.workspace = true
-sntl-migrate.workspace = true
+sntl.workspace = true
 tokio.workspace = true

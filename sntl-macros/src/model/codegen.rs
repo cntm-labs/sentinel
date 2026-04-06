@@ -20,7 +20,7 @@ pub fn generate_model_impl(ir: &ModelIR) -> TokenStream {
             let nullable = f.nullable;
             let has_default = f.has_default;
             quote! {
-                sntl_core::model::ModelColumn {
+                sntl::core::ModelColumn {
                     name: #col_name,
                     column_type: #col_type,
                     nullable: #nullable,
@@ -34,12 +34,12 @@ pub fn generate_model_impl(ir: &ModelIR) -> TokenStream {
 
     quote! {
         #[automatically_derived]
-        impl sntl_core::model::Model for #name {
+        impl sntl::core::Model for #name {
             const TABLE: &'static str = #table;
             const PRIMARY_KEY: &'static str = #pk_name;
 
-            fn columns() -> &'static [sntl_core::model::ModelColumn] {
-                static COLUMNS: [sntl_core::model::ModelColumn; #num_columns] = [
+            fn columns() -> &'static [sntl::core::ModelColumn] {
+                static COLUMNS: [sntl::core::ModelColumn; #num_columns] = [
                     #(#column_entries),*
                 ];
                 &COLUMNS
@@ -64,7 +64,7 @@ pub fn generate_column_consts(ir: &ModelIR) -> TokenStream {
             );
             let col_name = &f.column_name;
             quote! {
-                pub const #const_name: sntl_core::expr::Column = sntl_core::expr::Column {
+                pub const #const_name: sntl::core::Column = sntl::core::Column {
                     table: std::borrow::Cow::Borrowed(#table),
                     name: std::borrow::Cow::Borrowed(#col_name),
                 };
@@ -124,8 +124,8 @@ pub fn generate_from_row(ir: &ModelIR) -> TokenStream {
     quote! {
         #[automatically_derived]
         impl #name {
-            /// Decode a [`sentinel_driver::Row`] into this model.
-            pub fn from_row(row: &sentinel_driver::Row) -> sentinel_driver::Result<Self> {
+            /// Decode a [`sntl::core::Row`] into this model.
+            pub fn from_row(row: &sntl::core::Row) -> sntl::driver::Result<Self> {
                 Ok(Self {
                     #(#field_extractions,)*
                 })
@@ -163,31 +163,31 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
         impl #name {
             /// Fetch all rows from this model's table.
             pub async fn find_all(
-                conn: &mut sentinel_driver::Connection,
-            ) -> sntl_core::error::Result<Vec<Self>> {
+                conn: &mut sntl::core::Connection,
+            ) -> sntl::core::Result<Vec<Self>> {
                 let rows = conn.query(#select_sql, &[]).await?;
                 rows.into_iter()
-                    .map(|r| Self::from_row(&r).map_err(sntl_core::error::Error::from))
+                    .map(|r| Self::from_row(&r).map_err(sntl::core::Error::from))
                     .collect()
             }
 
             /// Fetch one row by primary key. Returns error if not found.
             pub async fn find_one(
-                conn: &mut sentinel_driver::Connection,
-                id: &(dyn sentinel_driver::ToSql + Sync),
-            ) -> sntl_core::error::Result<Self> {
+                conn: &mut sntl::core::Connection,
+                id: &(dyn sntl::core::ToSql + Sync),
+            ) -> sntl::core::Result<Self> {
                 let row = conn.query_one(#select_by_id_sql, &[id]).await?;
-                Self::from_row(&row).map_err(sntl_core::error::Error::from)
+                Self::from_row(&row).map_err(sntl::core::Error::from)
             }
 
             /// Fetch one row by primary key. Returns None if not found.
             pub async fn find_optional(
-                conn: &mut sentinel_driver::Connection,
-                id: &(dyn sentinel_driver::ToSql + Sync),
-            ) -> sntl_core::error::Result<Option<Self>> {
+                conn: &mut sntl::core::Connection,
+                id: &(dyn sntl::core::ToSql + Sync),
+            ) -> sntl::core::Result<Option<Self>> {
                 match conn.query_opt(#select_by_id_sql, &[id]).await? {
                     Some(row) => Ok(Some(
-                        Self::from_row(&row).map_err(sntl_core::error::Error::from)?,
+                        Self::from_row(&row).map_err(sntl::core::Error::from)?,
                     )),
                     None => Ok(None),
                 }
@@ -195,24 +195,24 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
 
             /// Insert a new row and return the created model (via RETURNING *).
             pub async fn create_exec(
-                conn: &mut sentinel_driver::Connection,
+                conn: &mut sntl::core::Connection,
                 new: #new_name,
-            ) -> sntl_core::error::Result<Self> {
-                let q = sntl_core::query::InsertQuery::new(#table)
+            ) -> sntl::core::Result<Self> {
+                let q = sntl::core::InsertQuery::new(#table)
                     #(#insert_column_calls)*;
                 let rows = q.fetch_returning(conn).await?;
                 let row = rows
                     .into_iter()
                     .next()
-                    .ok_or(sntl_core::error::Error::NotFound)?;
-                Self::from_row(&row).map_err(sntl_core::error::Error::from)
+                    .ok_or(sntl::core::Error::NotFound)?;
+                Self::from_row(&row).map_err(sntl::core::Error::from)
             }
 
             /// Delete a row by primary key. Returns the number of rows deleted.
             pub async fn delete_by_id(
-                conn: &mut sentinel_driver::Connection,
-                id: &(dyn sentinel_driver::ToSql + Sync),
-            ) -> sntl_core::error::Result<u64> {
+                conn: &mut sntl::core::Connection,
+                id: &(dyn sntl::core::ToSql + Sync),
+            ) -> sntl::core::Result<u64> {
                 Ok(conn.execute(#delete_by_id_sql, &[id]).await?)
             }
         }
@@ -239,8 +239,8 @@ pub fn generate_create_method(ir: &ModelIR) -> TokenStream {
     quote! {
         #[automatically_derived]
         impl #struct_name {
-            pub fn create(new: #new_name) -> sntl_core::query::InsertQuery {
-                sntl_core::query::InsertQuery::new(#table)
+            pub fn create(new: #new_name) -> sntl::core::InsertQuery {
+                sntl::core::InsertQuery::new(#table)
                     #(#column_calls)*
             }
         }

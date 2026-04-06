@@ -13,9 +13,9 @@ pub fn generate_partial_impl(ir: &PartialIR) -> TokenStream {
         #[automatically_derived]
         impl #struct_name {
             /// Build a SELECT query that fetches only this partial type's columns.
-            pub fn select_query() -> sntl_core::query::SelectQuery {
-                sntl_core::query::SelectQuery::new(
-                    <#model_ident as sntl_core::model::Model>::TABLE
+            pub fn select_query() -> sntl::core::SelectQuery {
+                sntl::core::SelectQuery::new(
+                    <#model_ident as sntl::core::Model>::TABLE
                 )
                 .columns(vec![#(#column_strs),*])
             }

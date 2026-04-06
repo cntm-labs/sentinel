@@ -1,9 +1,7 @@
 [workspace]
 members = [
     "sntl",
-    "sntl-core",
     "sntl-macros",
-    "sntl-migrate",
     "sntl-cli",
 ]
 resolver = "2"
@@ -16,9 +14,8 @@ repository = "https://github.com/cntm-labs/sentinel"
 rust-version = "1.85"
 
 [workspace.dependencies]
-sntl-core = { path = "sntl-core" }
+sntl = { path = "sntl" }
 sntl-macros = { path = "sntl-macros" }
-sntl-migrate = { path = "sntl-migrate" }
 thiserror = "2"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4", "serde"] }
