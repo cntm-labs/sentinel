@@ -1,0 +1,23 @@
+core:
+  - changed-files:
+      - any-glob-to-any-file: 'sntl-core/**'
+
+macros:
+  - changed-files:
+      - any-glob-to-any-file: 'sntl-macros/**'
+
+migrate:
+  - changed-files:
+      - any-glob-to-any-file: 'sntl-migrate/**'
+
+cli:
+  - changed-files:
+      - any-glob-to-any-file: 'sntl-cli/**'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: ['docs/**', '*.md']
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ['.github/**']
