@@ -1,60 +1,30 @@
 {
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
   "packages": {
+    "sntl": {
+      "release-type": "rust",
+      "component": "sntl",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true
+    },
     "sntl-macros": {
       "release-type": "rust",
       "component": "sntl-macros",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true
     },
-    "sntl-core": {
-      "release-type": "rust",
-      "component": "sntl-core",
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true,
-      "extra-files": [
-        {
-          "type": "toml",
-          "path": "Cargo.toml",
-          "glob": true,
-          "jsonpath": "$.dependencies.sntl-macros.version"
-        }
-      ]
-    },
-    "sntl-migrate": {
-      "release-type": "rust",
-      "component": "sntl-migrate",
-      "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true,
-      "extra-files": [
-        {
-          "type": "toml",
-          "path": "Cargo.toml",
-          "glob": true,
-          "jsonpath": "$.dependencies.sntl-core.version"
-        }
-      ]
-    },
     "sntl-cli": {
       "release-type": "rust",
       "component": "sntl-cli",
       "bump-minor-pre-major": true,
-      "bump-patch-for-minor-pre-major": true,
-      "extra-files": [
-        {
-          "type": "toml",
-          "path": "Cargo.toml",
-          "glob": true,
-          "jsonpath": "$.dependencies.sntl-core.version"
-        }
-      ]
+      "bump-patch-for-minor-pre-major": true
     }
   },
   "group-pull-request-title-pattern": "chore: release ${version}",
   "linked-versions": [
     {
       "tag": "v",
-      "components": ["sntl-macros", "sntl-core", "sntl-migrate", "sntl-cli"]
+      "components": ["sntl", "sntl-macros", "sntl-cli"]
     }
   ]
 }
