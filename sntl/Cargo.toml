@@ -1,0 +1,19 @@
+[package]
+name = "sntl"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Compile-time guarded ORM for PostgreSQL — your data's guardian from compile to production"
+readme = "../README.md"
+keywords = ["orm", "postgresql", "compile-time", "type-safe", "async"]
+categories = ["database", "asynchronous"]
+
+[dependencies]
+sntl-core.workspace = true
+sntl-macros.workspace = true
+sntl-migrate.workspace = true
+
+[dev-dependencies]
+cargo-husky.workspace = true
