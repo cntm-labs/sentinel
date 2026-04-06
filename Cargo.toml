@@ -31,3 +31,4 @@ proc-macro-error2 = "2"
 trybuild = "1"
 sentinel-driver = { git = "https://github.com/cntm-labs/sentinel-driver.git", tag = "sentinel-driver-v0.1.0" }
 bytes = "1"
+cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-fmt", "run-cargo-clippy", "run-cargo-test"] }

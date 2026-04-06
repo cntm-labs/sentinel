@@ -11,3 +11,6 @@ tokio.workspace = true
 sntl-macros.workspace = true
 sentinel-driver.workspace = true
 bytes.workspace = true
+
+[dev-dependencies]
+cargo-husky.workspace = true
