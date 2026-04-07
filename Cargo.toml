@@ -14,8 +14,8 @@ repository = "https://github.com/cntm-labs/sentinel"
 rust-version = "1.85"
 
 [workspace.dependencies]
-sntl = { path = "sntl" }
-sntl-macros = { path = "sntl-macros" }
+sntl = { path = "sntl", version = "0.1.1" }
+sntl-macros = { path = "sntl-macros", version = "0.1.1" }
 thiserror = "2"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4", "serde"] }
@@ -27,6 +27,6 @@ darling = "0.20"
 proc-macro2 = "1"
 proc-macro-error2 = "2"
 trybuild = "1"
-sentinel-driver = { git = "https://github.com/cntm-labs/sentinel-driver.git", tag = "sentinel-driver-v0.1.0" }
+sentinel-driver = "0.1"
 bytes = "1"
 cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-fmt", "run-cargo-clippy", "run-cargo-test"] }

@@ -3,6 +3,8 @@ name = "sntl-macros"
 version = "0.1.1"
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+description = "Derive macros for Sentinel ORM — #[derive(Model)], #[derive(Partial)]"
 
 [lib]
 proc-macro = true

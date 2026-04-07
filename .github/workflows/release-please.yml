@@ -13,11 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       releases_created: ${{ steps.release.outputs.releases_created }}
+      sntl--release_created: ${{ steps.release.outputs['sntl--release_created'] }}
       sntl-macros--release_created: ${{ steps.release.outputs['sntl-macros--release_created'] }}
-      sntl-core--release_created: ${{ steps.release.outputs['sntl-core--release_created'] }}
-      sntl-migrate--release_created: ${{ steps.release.outputs['sntl-migrate--release_created'] }}
       sntl-cli--release_created: ${{ steps.release.outputs['sntl-cli--release_created'] }}
-      tag_name: ${{ steps.release.outputs['sntl-core--tag_name'] }}
+      tag_name: ${{ steps.release.outputs['sntl--tag_name'] }}
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
@@ -60,24 +59,14 @@ jobs:
         if: needs.release-please.outputs['sntl-macros--release_created'] == 'true'
         run: sleep 30
 
-      - name: Publish sntl-core
-        if: needs.release-please.outputs['sntl-core--release_created'] == 'true'
-        run: cargo publish -p sntl-core --no-verify
+      - name: Publish sntl
+        if: needs.release-please.outputs['sntl--release_created'] == 'true'
+        run: cargo publish -p sntl --no-verify
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
       - name: Wait for crates.io index
-        if: needs.release-please.outputs['sntl-core--release_created'] == 'true'
-        run: sleep 30
-
-      - name: Publish sntl-migrate
-        if: needs.release-please.outputs['sntl-migrate--release_created'] == 'true'
-        run: cargo publish -p sntl-migrate --no-verify
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-      - name: Wait for crates.io index
-        if: needs.release-please.outputs['sntl-migrate--release_created'] == 'true'
+        if: needs.release-please.outputs['sntl--release_created'] == 'true'
         run: sleep 30
 
       - name: Publish sntl-cli

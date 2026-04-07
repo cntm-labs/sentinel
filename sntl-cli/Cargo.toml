@@ -3,6 +3,8 @@ name = "sntl-cli"
 version = "0.1.1"
 edition.workspace = true
 license.workspace = true
+repository.workspace = true
+description = "CLI tool for Sentinel ORM — migrations, codegen, and schema management"
 
 [dependencies]
 sntl.workspace = true

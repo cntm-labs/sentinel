@@ -11,8 +11,8 @@ keywords = ["orm", "postgresql", "compile-time", "type-safe", "async"]
 categories = ["database", "asynchronous"]
 
 [dependencies]
-macros = { package = "sntl-macros", path = "../sntl-macros" }
-driver = { package = "sentinel-driver", git = "https://github.com/cntm-labs/sentinel-driver.git", tag = "sentinel-driver-v0.1.0" }
+macros = { package = "sntl-macros", path = "../sntl-macros", version = "0.1.1" }
+driver = { package = "sentinel-driver", version = "0.1" }
 thiserror.workspace = true
 chrono.workspace = true
 uuid.workspace = true
