@@ -48,3 +48,15 @@ fn relation_spec_const_construction() {
     assert_eq!(POSTS.name(), "posts");
     assert_eq!(POSTS.foreign_key(), "user_id");
 }
+
+#[test]
+fn relation_spec_new_const_at_runtime() {
+    // Exercise new_const at runtime for coverage (const eval is invisible to llvm-cov)
+    let spec = RelationSpec::new_const("comments", "post_id", "comments", RelationKind::HasMany);
+    assert_eq!(spec.name(), "comments");
+    assert_eq!(spec.foreign_key(), "post_id");
+    assert_eq!(spec.target_table(), "comments");
+    assert_eq!(spec.kind(), RelationKind::HasMany);
+    assert_eq!(spec.limit(), None);
+    assert!(!spec.has_filters());
+}
