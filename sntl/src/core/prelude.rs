@@ -7,7 +7,9 @@
 pub use crate::core::error::{Error, Result};
 pub use crate::core::expr::{Column, Expr, OrderExpr};
 pub use crate::core::model::{Model, ModelColumn};
-pub use crate::core::query::{DeleteQuery, InsertQuery, QueryBuilder, SelectQuery, UpdateQuery};
+pub use crate::core::query::{
+    DeleteQuery, InsertQuery, ModelQuery, QueryBuilder, SelectQuery, UpdateQuery,
+};
 pub use crate::core::transaction::Transaction;
 pub use crate::core::types::Value;
 
