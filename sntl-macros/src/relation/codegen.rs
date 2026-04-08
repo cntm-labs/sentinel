@@ -5,9 +5,11 @@ use super::ir::{RelationIR, RelationKindIR};
 
 pub fn generate_relations(ir: &RelationIR) -> TokenStream {
     let relation_consts = generate_relation_constants(ir);
+    let pascal_methods = generate_pascal_find_methods(ir);
 
     quote! {
         #relation_consts
+        #pascal_methods
     }
 }
 
@@ -49,6 +51,34 @@ fn generate_relation_constants(ir: &RelationIR) -> TokenStream {
         #[automatically_derived]
         impl #model {
             #(#consts)*
+        }
+    }
+}
+
+fn generate_pascal_find_methods(ir: &RelationIR) -> TokenStream {
+    let model = &ir.model_name;
+
+    // Uses Self::TABLE from the Model trait — works with any table name,
+    // including custom #[sentinel(table = "...")] overrides.
+    quote! {
+        #[automatically_derived]
+        impl #model {
+            /// Start a SELECT query (PascalCase API).
+            #[allow(non_snake_case)]
+            pub fn Find() -> sntl::core::query::ModelQuery {
+                sntl::core::query::ModelQuery::from_table(<Self as sntl::core::Model>::TABLE)
+            }
+
+            /// SELECT by primary key (PascalCase API).
+            #[allow(non_snake_case)]
+            pub fn FindId(id: impl Into<sntl::core::Value>) -> sntl::core::query::ModelQuery {
+                let pk_col = sntl::core::Column {
+                    table: std::borrow::Cow::Borrowed(<Self as sntl::core::Model>::TABLE),
+                    name: std::borrow::Cow::Borrowed(<Self as sntl::core::Model>::PRIMARY_KEY),
+                };
+                sntl::core::query::ModelQuery::from_table(<Self as sntl::core::Model>::TABLE)
+                    .Where(pk_col.eq(id))
+            }
         }
     }
 }
