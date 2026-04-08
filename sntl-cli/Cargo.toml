@@ -1,10 +1,13 @@
 [package]
 name = "sntl-cli"
-version = "0.1.1"
+version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
 description = "CLI tool for Sentinel ORM — migrations, codegen, and schema management"
+readme = "../README.md"
+keywords = ["orm", "postgresql", "cli", "migration", "codegen"]
+categories = ["database", "command-line-utilities"]
 
 [dependencies]
 sntl.workspace = true

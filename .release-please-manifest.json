@@ -1,5 +1,7 @@
 {
-  "sntl": "0.1.1",
-  "sntl-macros": "0.1.1",
-  "sntl-cli": "0.1.1"
+  "sntl": "0.1.0",
+  "sntl-core": "0.1.0",
+  "sntl-macros": "0.1.0",
+  "sntl-migrate": "0.1.0",
+  "sntl-cli": "0.1.0"
 }

@@ -10,6 +10,8 @@
 [![crates.io sntl](https://img.shields.io/crates/v/sntl?label=sntl&color=fc8d62)](https://crates.io/crates/sntl)
 [![crates.io sntl-core](https://img.shields.io/crates/v/sntl-core?label=sntl-core&color=fc8d62)](https://crates.io/crates/sntl-core)
 [![crates.io sntl-macros](https://img.shields.io/crates/v/sntl-macros?label=sntl-macros&color=fc8d62)](https://crates.io/crates/sntl-macros)
+[![crates.io sntl-migrate](https://img.shields.io/crates/v/sntl-migrate?label=sntl-migrate&color=fc8d62)](https://crates.io/crates/sntl-migrate)
+[![crates.io sntl-cli](https://img.shields.io/crates/v/sntl-cli?label=sntl-cli&color=fc8d62)](https://crates.io/crates/sntl-cli)
 [![docs.rs](https://img.shields.io/docsrs/sntl?label=docs.rs)](https://docs.rs/sntl)
 
 [![Rust](https://img.shields.io/badge/Rust-dea584?logo=rust&logoColor=white)](https://www.rust-lang.org/)
@@ -72,13 +74,16 @@ async fn main() -> Result<(), sntl::core::Error> {
 ## Architecture
 
 ```
-crates/
-├── sntl           # Umbrella crate — cargo add sntl, ready to go
-├── sntl-core      # Model trait, QueryBuilder, types, connection
-├── sntl-macros    # derive(Model), derive(Partial), #[reducer]
-├── sntl-migrate   # Schema diff, migration generation
-└── sntl-cli       # CLI binary (sentinel command)
+sentinel/
+├── sntl           # Main crate — models, queries, transactions, types (cargo add sntl)
+├── sntl-macros    # Proc macros — derive(Model), derive(Partial)
+├── sntl-core      # Core traits extraction (planned)
+├── sntl-migrate   # Schema diff & migration generation (planned)
+└── sntl-cli       # CLI binary — sentinel command (planned)
 ```
+
+> `sntl` is the only crate with implementation today. The others are published on crates.io
+> as name reservations and will be extracted/implemented in future releases.
 
 ## Development
 

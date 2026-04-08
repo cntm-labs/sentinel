@@ -1,21 +1,26 @@
 [workspace]
 members = [
     "sntl",
+    "sntl-core",
     "sntl-macros",
+    "sntl-migrate",
     "sntl-cli",
 ]
 resolver = "2"
 
 [workspace.package]
 version = "0.1.0"
+publish = true
 edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/cntm-labs/sentinel"
 rust-version = "1.85"
 
 [workspace.dependencies]
-sntl = { path = "sntl", version = "0.1.1" }
-sntl-macros = { path = "sntl-macros", version = "0.1.1" }
+sntl = { path = "sntl", version = "0.1.0" }
+sntl-core = { path = "sntl-core", version = "0.1.0" }
+sntl-macros = { path = "sntl-macros", version = "0.1.0" }
+sntl-migrate = { path = "sntl-migrate", version = "0.1.0" }
 thiserror = "2"
 chrono = { version = "0.4", features = ["serde"] }
 uuid = { version = "1", features = ["v4", "serde"] }

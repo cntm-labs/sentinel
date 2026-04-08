@@ -5,6 +5,7 @@ pub mod expr;
 pub mod model;
 pub mod prelude;
 pub mod query;
+pub mod transaction;
 pub mod types;
 
 // Flat re-exports — clean public API
@@ -12,6 +13,7 @@ pub use error::{Error, Result};
 pub use expr::{Column, Expr, OrderExpr};
 pub use model::{Model, ModelColumn};
 pub use query::{DeleteQuery, InsertQuery, QueryBuilder, SelectQuery, UpdateQuery};
+pub use transaction::Transaction;
 pub use types::Value;
 
 // Re-export derive macros
