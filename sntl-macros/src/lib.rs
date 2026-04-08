@@ -1,7 +1,8 @@
-//! Sentinel Macros — derive(Model), derive(Partial), #[reducer].
+//! Sentinel Macros — derive(Model), derive(Partial), #[sentinel(relations)].
 
 mod model;
 mod partial;
+mod relation;
 
 use proc_macro::TokenStream;
 
@@ -27,4 +28,22 @@ pub fn derive_model(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(Partial, attributes(sentinel))]
 pub fn derive_partial(input: TokenStream) -> TokenStream {
     partial::derive_partial_impl(input.into()).into()
+}
+
+/// Declare relations on a model.
+///
+/// ```rust,ignore
+/// #[sentinel(relations)]
+/// impl User {
+///     pub fn posts() -> HasMany<Post> { HasMany::new("user_id") }
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn sentinel(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let attr_str = attr.to_string();
+    if attr_str.trim() == "relations" {
+        relation::expand_relations(item.into()).into()
+    } else {
+        panic!("unknown sentinel attribute: `{attr_str}` — expected `relations`");
+    }
 }
