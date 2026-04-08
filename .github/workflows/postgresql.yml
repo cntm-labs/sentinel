@@ -49,4 +49,4 @@ jobs:
         run: psql "$DATABASE_URL" -f tests/integration/setup.sql
 
       - name: Run all tests (including integration)
-        run: cargo test --workspace
+        run: cargo test --workspace -- --test-threads=1
