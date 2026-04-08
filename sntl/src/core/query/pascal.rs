@@ -55,4 +55,40 @@ impl ModelQuery {
     pub fn into_inner(self) -> SelectQuery {
         self.inner
     }
+
+    /// Execute and fetch all rows.
+    #[allow(non_snake_case)]
+    pub async fn FetchAll(
+        self,
+        conn: &mut driver::Connection,
+    ) -> crate::core::error::Result<Vec<driver::Row>> {
+        self.inner.fetch_all(conn).await
+    }
+
+    /// Execute and fetch exactly one row. Returns `Error::NotFound` if missing.
+    #[allow(non_snake_case)]
+    pub async fn FetchOne(
+        self,
+        conn: &mut driver::Connection,
+    ) -> crate::core::error::Result<driver::Row> {
+        self.inner.fetch_one(conn).await
+    }
+
+    /// Execute and fetch an optional row.
+    #[allow(non_snake_case)]
+    pub async fn FetchOptional(
+        self,
+        conn: &mut driver::Connection,
+    ) -> crate::core::error::Result<Option<driver::Row>> {
+        self.inner.fetch_optional(conn).await
+    }
+
+    /// Execute and return a streaming row iterator.
+    #[allow(non_snake_case)]
+    pub async fn FetchStream(
+        self,
+        conn: &mut driver::Connection,
+    ) -> crate::core::error::Result<driver::RowStream<'_>> {
+        self.inner.fetch_stream(conn).await
+    }
 }
