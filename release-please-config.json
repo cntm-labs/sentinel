@@ -7,9 +7,21 @@
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true
     },
+    "sntl-core": {
+      "release-type": "rust",
+      "component": "sntl-core",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true
+    },
     "sntl-macros": {
       "release-type": "rust",
       "component": "sntl-macros",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true
+    },
+    "sntl-migrate": {
+      "release-type": "rust",
+      "component": "sntl-migrate",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true
     },
@@ -24,7 +36,7 @@
   "linked-versions": [
     {
       "tag": "v",
-      "components": ["sntl", "sntl-macros", "sntl-cli"]
+      "components": ["sntl", "sntl-core", "sntl-macros", "sntl-migrate", "sntl-cli"]
     }
   ]
 }
