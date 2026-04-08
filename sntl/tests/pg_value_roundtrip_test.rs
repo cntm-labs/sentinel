@@ -15,7 +15,7 @@ async fn roundtrip_one(
     col: &str,
     value: Value,
 ) -> sntl::driver::Row {
-    pg_helpers::truncate(conn, "type_roundtrip").await;
+    pg_helpers::clean_tables(conn).await;
 
     let sql = format!("INSERT INTO \"type_roundtrip\" (\"{col}\") VALUES ($1) RETURNING *");
     let params: Vec<&(dyn sntl::driver::ToSql + Sync)> = vec![&value];

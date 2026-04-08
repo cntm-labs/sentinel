@@ -12,9 +12,15 @@ macro_rules! require_pg {
     };
 }
 
-/// Clean a table before a test (DELETE all rows).
-pub async fn truncate(conn: &mut sntl::driver::Connection, table: &str) {
-    conn.execute(&format!("TRUNCATE \"{table}\" CASCADE"), &[])
+/// Clean all test tables before a test.
+///
+/// Deletes in dependency order (posts → users) to respect foreign keys.
+/// Uses DELETE instead of TRUNCATE to avoid NoticeResponse from CASCADE
+/// which sentinel-driver does not yet handle.
+pub async fn clean_tables(conn: &mut sntl::driver::Connection) {
+    conn.execute("DELETE FROM \"posts\"", &[]).await.unwrap();
+    conn.execute("DELETE FROM \"users\"", &[]).await.unwrap();
+    conn.execute("DELETE FROM \"type_roundtrip\"", &[])
         .await
         .unwrap();
 }

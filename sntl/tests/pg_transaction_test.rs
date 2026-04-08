@@ -12,7 +12,7 @@ async fn transaction_commit_persists() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     // Insert inside a committed transaction
     let mut tx = Transaction::begin(&mut conn).await.unwrap();
@@ -40,7 +40,7 @@ async fn transaction_rollback_reverts() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     // Insert inside a rolled-back transaction
     let mut tx = Transaction::begin(&mut conn).await.unwrap();
@@ -68,7 +68,7 @@ async fn transaction_drop_without_commit_reverts() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     // Insert inside a transaction that is dropped (not committed)
     {
@@ -101,7 +101,7 @@ async fn transaction_query_builder_through_conn() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     // Use typed query builders through tx.conn()
     let mut tx = Transaction::begin(&mut conn).await.unwrap();
@@ -135,7 +135,7 @@ async fn transaction_with_isolation_level() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     let mut tx = Transaction::begin_with(&mut conn, sntl::driver::IsolationLevel::Serializable)
         .await

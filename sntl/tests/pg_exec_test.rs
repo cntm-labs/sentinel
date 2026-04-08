@@ -14,7 +14,7 @@ async fn insert_and_fetch_returning() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     let rows = InsertQuery::new("users")
         .column("name", "Alice")
@@ -34,7 +34,7 @@ async fn insert_execute_returns_row_count() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     let count = InsertQuery::new("users")
         .column("name", "Bob")
@@ -54,7 +54,7 @@ async fn select_fetch_all() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     // Insert two rows
     InsertQuery::new("users")
@@ -85,7 +85,7 @@ async fn select_fetch_one_with_where() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     InsertQuery::new("users")
         .column("name", "Charlie")
@@ -111,7 +111,7 @@ async fn select_fetch_optional_returns_none() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     let col = Column::new("users", "email");
     let row = SelectQuery::new("users")
@@ -130,7 +130,7 @@ async fn update_execute_modifies_rows() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     InsertQuery::new("users")
         .column("name", "Dave")
@@ -170,7 +170,7 @@ async fn delete_removes_rows() {
     let url = require_pg!();
     let config = sntl::driver::Config::parse(&url).unwrap();
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
-    pg_helpers::truncate(&mut conn, "users").await;
+    pg_helpers::clean_tables(&mut conn).await;
 
     InsertQuery::new("users")
         .column("name", "Eve")
