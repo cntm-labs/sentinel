@@ -11,6 +11,9 @@ pub use crate::core::query::{DeleteQuery, InsertQuery, QueryBuilder, SelectQuery
 pub use crate::core::transaction::Transaction;
 pub use crate::core::types::Value;
 
+// Relation types
+pub use crate::core::relation::{BelongsTo, HasMany, HasOne, Loaded, Unloaded};
+
 // Re-export derive macros
 pub use macros::Model as DeriveModel;
 pub use macros::Partial as DerivePartial;
