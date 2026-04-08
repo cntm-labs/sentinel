@@ -32,6 +32,6 @@ darling = "0.20"
 proc-macro2 = "1"
 proc-macro-error2 = "2"
 trybuild = "1"
-sentinel-driver = "0.1"
+sentinel-driver = "0.1.1"
 bytes = "1"
 cargo-husky = { version = "1", default-features = false, features = ["precommit-hook", "run-cargo-fmt", "run-cargo-clippy", "run-cargo-test"] }

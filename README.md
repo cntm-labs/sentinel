@@ -5,7 +5,10 @@
 **Compile-time guarded ORM for PostgreSQL — your data's guardian from compile to production.**
 
 [![CI](https://github.com/cntm-labs/sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/cntm-labs/sentinel/actions/workflows/ci.yml)
+[![PostgreSQL Integration](https://github.com/cntm-labs/sentinel/actions/workflows/postgresql.yml/badge.svg)](https://github.com/cntm-labs/sentinel/actions/workflows/postgresql.yml)
 [![codecov](https://codecov.io/gh/cntm-labs/sentinel/branch/main/graph/badge.svg)](https://codecov.io/gh/cntm-labs/sentinel)
+[![Security](https://github.com/cntm-labs/sentinel/actions/workflows/security.yml/badge.svg)](https://github.com/cntm-labs/sentinel/actions/workflows/security.yml)
+[![MSRV](https://img.shields.io/badge/rustc-1.85+-dea584?logo=rust&logoColor=white)](https://github.com/cntm-labs/sentinel/actions/workflows/ci.yml)
 
 [![crates.io sntl](https://img.shields.io/crates/v/sntl?label=sntl&color=fc8d62)](https://crates.io/crates/sntl)
 [![crates.io sntl-core](https://img.shields.io/crates/v/sntl-core?label=sntl-core&color=fc8d62)](https://crates.io/crates/sntl-core)
@@ -13,6 +16,11 @@
 [![crates.io sntl-migrate](https://img.shields.io/crates/v/sntl-migrate?label=sntl-migrate&color=fc8d62)](https://crates.io/crates/sntl-migrate)
 [![crates.io sntl-cli](https://img.shields.io/crates/v/sntl-cli?label=sntl-cli&color=fc8d62)](https://crates.io/crates/sntl-cli)
 [![docs.rs](https://img.shields.io/docsrs/sntl?label=docs.rs)](https://docs.rs/sntl)
+
+[![Rust](https://img.shields.io/badge/Rust-1.8k_LOC-dea584?logo=rust&logoColor=white)](sntl/)
+[![Tests](https://img.shields.io/badge/Tests-1.8k_LOC-89e051)](sntl/tests/)
+[![Config](https://img.shields.io/badge/Config-1k_LOC-89e051)](./)
+[![Total Lines](https://img.shields.io/badge/Total-4.5k+_LOC-blue)](./)
 
 [![Rust](https://img.shields.io/badge/Rust-dea584?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![Tokio](https://img.shields.io/badge/Tokio-dea584?logo=rust&logoColor=white)](https://tokio.rs/)
