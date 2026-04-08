@@ -84,6 +84,10 @@ impl driver::ToSql for Value {
         }
     }
 
+    fn is_null(&self) -> bool {
+        matches!(self, Value::Null)
+    }
+
     fn to_sql(&self, buf: &mut bytes::BytesMut) -> driver::Result<()> {
         match self {
             Value::Null => Ok(()),
