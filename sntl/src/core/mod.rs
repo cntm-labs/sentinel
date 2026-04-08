@@ -22,7 +22,9 @@ pub use macros::Partial as DerivePartial;
 
 // Re-export driver types
 pub use driver::Row;
+pub use driver::RowStream;
 pub use driver::ToSql;
 pub use driver::{
-    CancelToken, Config, Connection, IsolationLevel, Pool, SslMode, TransactionConfig,
+    CancelToken, Config, Connection, IsolationLevel, Pool, PooledConnection, SslMode,
+    TransactionConfig,
 };

@@ -44,6 +44,18 @@ impl SelectQuery {
         let (sql, binds) = self.build();
         Ok(conn.query_opt(&sql, &to_params(&binds)).await?)
     }
+
+    /// Execute this query and return a streaming row iterator.
+    ///
+    /// Unlike `fetch_all()`, this does not load all rows into memory.
+    /// The stream holds an exclusive borrow on the connection until dropped.
+    pub async fn fetch_stream(
+        self,
+        conn: &mut driver::Connection,
+    ) -> crate::core::error::Result<driver::RowStream<'_>> {
+        let (sql, binds) = self.build();
+        Ok(conn.query_stream(&sql, &to_params(&binds)).await?)
+    }
 }
 
 impl InsertQuery {

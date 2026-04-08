@@ -80,7 +80,15 @@ fn value_timestamp_to_sql() {
 fn value_null_to_sql() {
     let v = Value::Null;
     assert_eq!(v.oid(), Oid::TEXT); // default OID for NULL
+    assert!(v.is_null());
     let mut buf = bytes::BytesMut::new();
     v.to_sql(&mut buf).unwrap();
-    assert!(buf.is_empty()); // NULL writes nothing; caller handles -1 length
+    assert!(buf.is_empty()); // NULL writes nothing; driver sends -1 length via is_null()
+}
+
+#[test]
+fn value_non_null_is_not_null() {
+    assert!(!Value::Bool(true).is_null());
+    assert!(!Value::Int(0).is_null());
+    assert!(!Value::Text(String::new()).is_null());
 }

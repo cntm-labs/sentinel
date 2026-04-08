@@ -16,4 +16,4 @@ pub use macros::Model as DeriveModel;
 pub use macros::Partial as DerivePartial;
 
 // Re-export driver types
-pub use driver::{Config, Connection, Pool};
+pub use driver::{Config, Connection, Pool, PooledConnection};
