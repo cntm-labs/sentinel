@@ -29,4 +29,7 @@ pub use driver;
 pub use macros::Model;
 pub use macros::Partial;
 
+/// Attribute macro — `#[sentinel(relations)]`.
+pub use macros::sentinel;
+
 pub use core::error::{Error, Result};
