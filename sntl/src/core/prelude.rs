@@ -20,5 +20,5 @@ pub use crate::core::relation::{BelongsTo, HasMany, HasOne, Loaded, Unloaded};
 pub use macros::Model as DeriveModel;
 pub use macros::Partial as DerivePartial;
 
-// Re-export driver types
-pub use driver::{Config, Connection, Pool, PooledConnection};
+// Re-export driver types and traits
+pub use driver::{Config, Connection, FromSql, Pool, PooledConnection, ToSql};
