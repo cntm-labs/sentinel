@@ -165,3 +165,40 @@ fn value_macaddr() {
     let v = Value::MacAddr([0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF]);
     assert!(matches!(v, Value::MacAddr(m) if m == [0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF]));
 }
+
+// === Accessor methods ===
+
+#[test]
+fn value_is_methods() {
+    assert!(Value::Null.is_null());
+    assert!(Value::Bool(true).is_bool());
+    assert!(Value::Int(1).is_int());
+    assert!(Value::BigInt(1).is_bigint());
+    assert!(Value::Double(1.0).is_double());
+    assert!(Value::Text("x".into()).is_text());
+    assert!(Value::SmallInt(1).is_smallint());
+    assert!(Value::Float(1.0).is_float());
+    assert!(Value::Json(serde_json::json!(null)).is_json());
+    assert!(Value::Date(chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap()).is_date());
+    assert!(Value::Inet(Ipv4Addr::LOCALHOST.into()).is_inet());
+    assert!(Value::Array(vec![]).is_array());
+    assert!(!Value::Int(1).is_smallint());
+    assert!(!Value::SmallInt(1).is_int());
+}
+
+#[test]
+fn value_as_methods() {
+    assert_eq!(Value::SmallInt(42).as_smallint(), Some(42));
+    assert_eq!(Value::Int(1).as_smallint(), None);
+    assert_eq!(Value::Float(1.5).as_float(), Some(1.5));
+    assert_eq!(Value::Int(99).as_int(), Some(99));
+    assert_eq!(Value::BigInt(100).as_bigint(), Some(100));
+    assert_eq!(Value::Double(2.5).as_double(), Some(2.5));
+    assert_eq!(Value::Bool(true).as_bool(), Some(true));
+    assert_eq!(Value::Text("hi".into()).as_text(), Some("hi"));
+    assert!(Value::Json(serde_json::json!({"a": 1})).as_json().is_some());
+    assert_eq!(
+        Value::Date(chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap()).as_date(),
+        Some(chrono::NaiveDate::from_ymd_opt(2026, 1, 1).unwrap())
+    );
+}

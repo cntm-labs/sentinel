@@ -380,6 +380,225 @@ impl driver::ToSql for Value {
     }
 }
 
+// === Accessor methods ===
+
+impl Value {
+    pub fn is_null(&self) -> bool {
+        matches!(self, Value::Null)
+    }
+    pub fn is_bool(&self) -> bool {
+        matches!(self, Value::Bool(_))
+    }
+    pub fn is_int(&self) -> bool {
+        matches!(self, Value::Int(_))
+    }
+    pub fn is_bigint(&self) -> bool {
+        matches!(self, Value::BigInt(_))
+    }
+    pub fn is_double(&self) -> bool {
+        matches!(self, Value::Double(_))
+    }
+    pub fn is_text(&self) -> bool {
+        matches!(self, Value::Text(_))
+    }
+    pub fn is_uuid(&self) -> bool {
+        matches!(self, Value::Uuid(_))
+    }
+    pub fn is_timestamp(&self) -> bool {
+        matches!(self, Value::Timestamp(_))
+    }
+    pub fn is_bytes(&self) -> bool {
+        matches!(self, Value::Bytes(_))
+    }
+    pub fn is_smallint(&self) -> bool {
+        matches!(self, Value::SmallInt(_))
+    }
+    pub fn is_float(&self) -> bool {
+        matches!(self, Value::Float(_))
+    }
+    pub fn is_numeric(&self) -> bool {
+        matches!(self, Value::Numeric(_))
+    }
+    pub fn is_money(&self) -> bool {
+        matches!(self, Value::Money(_))
+    }
+    pub fn is_xml(&self) -> bool {
+        matches!(self, Value::Xml(_))
+    }
+    pub fn is_pglsn(&self) -> bool {
+        matches!(self, Value::PgLsn(_))
+    }
+    pub fn is_bit(&self) -> bool {
+        matches!(self, Value::Bit(_))
+    }
+    pub fn is_json(&self) -> bool {
+        matches!(self, Value::Json(_))
+    }
+    pub fn is_date(&self) -> bool {
+        matches!(self, Value::Date(_))
+    }
+    pub fn is_time(&self) -> bool {
+        matches!(self, Value::Time(_))
+    }
+    pub fn is_timestamp_naive(&self) -> bool {
+        matches!(self, Value::TimestampNaive(_))
+    }
+    pub fn is_inet(&self) -> bool {
+        matches!(self, Value::Inet(_))
+    }
+    pub fn is_cidr(&self) -> bool {
+        matches!(self, Value::Cidr(_))
+    }
+    pub fn is_macaddr(&self) -> bool {
+        matches!(self, Value::MacAddr(_))
+    }
+    pub fn is_interval(&self) -> bool {
+        matches!(self, Value::Interval(_))
+    }
+    pub fn is_point(&self) -> bool {
+        matches!(self, Value::Point(_))
+    }
+    pub fn is_line(&self) -> bool {
+        matches!(self, Value::Line(_))
+    }
+    pub fn is_line_segment(&self) -> bool {
+        matches!(self, Value::LineSegment(_))
+    }
+    pub fn is_box(&self) -> bool {
+        matches!(self, Value::Box(_))
+    }
+    pub fn is_circle(&self) -> bool {
+        matches!(self, Value::Circle(_))
+    }
+    pub fn is_array(&self) -> bool {
+        matches!(self, Value::Array(_))
+    }
+    pub fn is_custom(&self) -> bool {
+        matches!(self, Value::Custom(_))
+    }
+
+    pub fn as_bool(&self) -> Option<bool> {
+        match self {
+            Value::Bool(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_int(&self) -> Option<i32> {
+        match self {
+            Value::Int(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_bigint(&self) -> Option<i64> {
+        match self {
+            Value::BigInt(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_double(&self) -> Option<f64> {
+        match self {
+            Value::Double(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_text(&self) -> Option<&str> {
+        match self {
+            Value::Text(v) => Some(v),
+            _ => None,
+        }
+    }
+    pub fn as_uuid(&self) -> Option<Uuid> {
+        match self {
+            Value::Uuid(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_timestamp(&self) -> Option<DateTime<Utc>> {
+        match self {
+            Value::Timestamp(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_bytes(&self) -> Option<&[u8]> {
+        match self {
+            Value::Bytes(v) => Some(v),
+            _ => None,
+        }
+    }
+    pub fn as_smallint(&self) -> Option<i16> {
+        match self {
+            Value::SmallInt(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_float(&self) -> Option<f32> {
+        match self {
+            Value::Float(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_numeric(&self) -> Option<rust_decimal::Decimal> {
+        match self {
+            Value::Numeric(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_money(&self) -> Option<i64> {
+        match self {
+            Value::Money(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_json(&self) -> Option<&serde_json::Value> {
+        match self {
+            Value::Json(v) => Some(v),
+            _ => None,
+        }
+    }
+    pub fn as_date(&self) -> Option<NaiveDate> {
+        match self {
+            Value::Date(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_time(&self) -> Option<NaiveTime> {
+        match self {
+            Value::Time(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_timestamp_naive(&self) -> Option<NaiveDateTime> {
+        match self {
+            Value::TimestampNaive(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_inet(&self) -> Option<IpAddr> {
+        match self {
+            Value::Inet(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_interval(&self) -> Option<&driver::types::interval::PgInterval> {
+        match self {
+            Value::Interval(v) => Some(v),
+            _ => None,
+        }
+    }
+    pub fn as_point(&self) -> Option<driver::types::geometric::PgPoint> {
+        match self {
+            Value::Point(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_array(&self) -> Option<&[Value]> {
+        match self {
+            Value::Array(v) => Some(v),
+            _ => None,
+        }
+    }
+}
+
 // === Array helpers ===
 
 impl Value {
