@@ -1039,10 +1039,14 @@ fn value_array_all_null_errors() {
 
 #[test]
 fn value_tosql_is_null_trait_method() {
-    use sntl::driver::types::ToSql;
-    assert!(Value::Null.is_null());
-    assert!(!Value::Int(0).is_null());
-    assert!(!Value::SmallInt(0).is_null());
+    // Call is_null through trait object to exercise ToSql::is_null (not inherent method)
+    let null_val = Value::Null;
+    let int_val = Value::Int(0);
+    let small_val = Value::SmallInt(0);
+    let vals: Vec<&dyn sntl::driver::ToSql> = vec![&null_val, &int_val, &small_val];
+    assert!(vals[0].is_null());
+    assert!(!vals[1].is_null());
+    assert!(!vals[2].is_null());
 }
 
 // === Coverage: oid() for Bit variant (delegates to inner) ===
