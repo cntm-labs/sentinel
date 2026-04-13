@@ -33,3 +33,10 @@ pub use macros::Partial;
 pub use macros::sentinel;
 
 pub use core::error::{Error, Result};
+
+// Re-export driver traits for custom PG types
+pub use driver::{FromSql, ToSql};
+
+// Re-export key driver types for direct use
+pub use driver::{Config, Oid, Pool, PooledConnection};
+pub use driver::{ObservabilityConfig, QueryMetrics};
