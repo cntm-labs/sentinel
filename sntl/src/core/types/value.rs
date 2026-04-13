@@ -312,7 +312,26 @@ impl driver::ToSql for Value {
             Value::TsRange(v) => v.oid(),
             Value::TsTzRange(v) => v.oid(),
             Value::DateRange(v) => v.oid(),
-            Value::Array(elements) => Self::array_oid(elements).unwrap_or(driver::Oid::TEXT_ARRAY),
+            Value::Array(elements) => {
+                let elem_oid = elements
+                    .iter()
+                    .find(|v| !matches!(v, Value::Null))
+                    .map(|v| v.oid());
+                match elem_oid {
+                    Some(driver::Oid::BOOL) => driver::Oid::BOOL_ARRAY,
+                    Some(driver::Oid::INT2) => driver::Oid::INT2_ARRAY,
+                    Some(driver::Oid::INT4) => driver::Oid::INT4_ARRAY,
+                    Some(driver::Oid::INT8) => driver::Oid::INT8_ARRAY,
+                    Some(driver::Oid::FLOAT4) => driver::Oid::FLOAT4_ARRAY,
+                    Some(driver::Oid::FLOAT8) => driver::Oid::FLOAT8_ARRAY,
+                    Some(driver::Oid::TEXT | driver::Oid::VARCHAR) => driver::Oid::TEXT_ARRAY,
+                    Some(driver::Oid::UUID) => driver::Oid::UUID_ARRAY,
+                    Some(driver::Oid::NUMERIC) => driver::Oid::NUMERIC_ARRAY,
+                    Some(driver::Oid::INET) => driver::Oid::INET_ARRAY,
+                    Some(driver::Oid::INTERVAL) => driver::Oid::INTERVAL_ARRAY,
+                    _ => driver::Oid::TEXT_ARRAY,
+                }
+            }
             Value::Custom(v) => v.oid(),
         }
     }
@@ -344,8 +363,8 @@ impl driver::ToSql for Value {
             Value::Json(v) => {
                 // JSONB binary format: 1-byte version prefix (0x01) + JSON text
                 buf.put_u8(1);
-                let json_bytes =
-                    serde_json::to_vec(v).map_err(|e| driver::Error::Encode(e.to_string()))?;
+                // serde_json::to_vec on serde_json::Value is infallible
+                let json_bytes = serde_json::to_vec(v).expect("serde_json::Value serialization");
                 buf.put_slice(&json_bytes);
                 Ok(())
             }
@@ -602,28 +621,6 @@ impl Value {
 // === Array helpers ===
 
 impl Value {
-    fn array_oid(elements: &[Value]) -> Option<driver::Oid> {
-        let element_oid = elements
-            .iter()
-            .find(|v| !matches!(v, Value::Null))
-            .map(|v| v.oid())?;
-
-        Some(match element_oid {
-            driver::Oid::BOOL => driver::Oid::BOOL_ARRAY,
-            driver::Oid::INT2 => driver::Oid::INT2_ARRAY,
-            driver::Oid::INT4 => driver::Oid::INT4_ARRAY,
-            driver::Oid::INT8 => driver::Oid::INT8_ARRAY,
-            driver::Oid::FLOAT4 => driver::Oid::FLOAT4_ARRAY,
-            driver::Oid::FLOAT8 => driver::Oid::FLOAT8_ARRAY,
-            driver::Oid::TEXT | driver::Oid::VARCHAR => driver::Oid::TEXT_ARRAY,
-            driver::Oid::UUID => driver::Oid::UUID_ARRAY,
-            driver::Oid::NUMERIC => driver::Oid::NUMERIC_ARRAY,
-            driver::Oid::INET => driver::Oid::INET_ARRAY,
-            driver::Oid::INTERVAL => driver::Oid::INTERVAL_ARRAY,
-            _ => return None,
-        })
-    }
-
     fn encode_array(elements: &[Value], buf: &mut bytes::BytesMut) -> driver::Result<()> {
         use bytes::BufMut;
 
