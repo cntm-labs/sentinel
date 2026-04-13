@@ -602,16 +602,13 @@ impl Value {
 // === Array helpers ===
 
 impl Value {
-    fn array_oid(elements: &[Value]) -> driver::Result<driver::Oid> {
+    fn array_oid(elements: &[Value]) -> Option<driver::Oid> {
         let element_oid = elements
             .iter()
             .find(|v| !matches!(v, Value::Null))
-            .map(|v| v.oid())
-            .ok_or_else(|| {
-                driver::Error::Encode("empty or all-null array cannot determine element OID".into())
-            })?;
+            .map(|v| v.oid())?;
 
-        Ok(match element_oid {
+        Some(match element_oid {
             driver::Oid::BOOL => driver::Oid::BOOL_ARRAY,
             driver::Oid::INT2 => driver::Oid::INT2_ARRAY,
             driver::Oid::INT4 => driver::Oid::INT4_ARRAY,
@@ -623,12 +620,7 @@ impl Value {
             driver::Oid::NUMERIC => driver::Oid::NUMERIC_ARRAY,
             driver::Oid::INET => driver::Oid::INET_ARRAY,
             driver::Oid::INTERVAL => driver::Oid::INTERVAL_ARRAY,
-            _ => {
-                return Err(driver::Error::Encode(format!(
-                    "unsupported array element OID: {:?}",
-                    element_oid
-                )));
-            }
+            _ => return None,
         })
     }
 
