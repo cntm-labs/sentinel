@@ -14,7 +14,7 @@ pub struct ModelColumn {
 ///
 /// In Phase 2, `#[derive(Model)]` generates this automatically.
 /// For Phase 1, models implement this manually for testing.
-pub trait Model {
+pub trait Model: Sized {
     /// The PostgreSQL table name.
     const TABLE: &'static str;
 
@@ -23,6 +23,12 @@ pub trait Model {
 
     /// Returns column metadata for this model.
     fn columns() -> &'static [ModelColumn];
+
+    /// Decode a driver Row into this model instance.
+    fn from_row(row: &driver::Row) -> driver::Result<Self>;
+
+    /// Extract the primary key value from this model instance.
+    fn primary_key_value(&self) -> Value;
 
     /// Start a SELECT query for this model's table.
     fn find() -> SelectQuery {

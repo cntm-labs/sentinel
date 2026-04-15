@@ -13,6 +13,14 @@ impl Model for User {
     fn columns() -> &'static [ModelColumn] {
         &USER_COLUMNS
     }
+
+    fn from_row(_row: &sntl::core::Row) -> sntl::driver::Result<Self> {
+        Ok(User)
+    }
+
+    fn primary_key_value(&self) -> Value {
+        Value::from("stub")
+    }
 }
 
 static USER_COLUMNS: [ModelColumn; 4] = [

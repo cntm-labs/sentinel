@@ -14,6 +14,7 @@ pub use error::{Error, Result};
 pub use expr::{Column, Expr, OrderExpr};
 pub use model::{Model, ModelColumn};
 pub use query::{DeleteQuery, InsertQuery, ModelQuery, QueryBuilder, SelectQuery, UpdateQuery};
+pub use relation::{RelationStore, WithRelations};
 pub use transaction::Transaction;
 pub use types::Value;
 

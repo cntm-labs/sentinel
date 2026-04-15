@@ -1,0 +1,24 @@
+error[E0599]: no method named `posts` found for struct `sntl::core::WithRelations<User, (Unloaded,)>` in the current scope
+  --> tests/compile_fail/include_required.rs:36:18
+   |
+36 |     let _ = user.posts();
+   |                  ^^^^^ this is an associated function, not a method
+   |
+   = note: found the following associated functions; to be used as methods, functions must have a `self` parameter
+note: the candidate is defined in an impl for the type `User`
+  --> tests/compile_fail/include_required.rs:25:5
+   |
+25 |     pub fn posts() -> HasMany<Post> {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: items from traits can only be used if the trait is implemented and in scope
+note: `UserRelAccessors` defines an item `posts`, perhaps you need to implement it
+  --> tests/compile_fail/include_required.rs:23:1
+   |
+23 | #[sentinel(relations)]
+   | ^^^^^^^^^^^^^^^^^^^^^^
+   = note: this error originates in the attribute macro `sentinel` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: use associated function syntax instead
+   |
+36 -     let _ = user.posts();
+36 +     let _ = User::posts();
+   |

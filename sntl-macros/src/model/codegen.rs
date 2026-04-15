@@ -32,6 +32,22 @@ pub fn generate_model_impl(ir: &ModelIR) -> TokenStream {
 
     let num_columns = column_entries.len();
 
+    let pk_field_name = &pk_field.field_name;
+
+    let from_row_fields: Vec<TokenStream> = ir
+        .fields
+        .iter()
+        .map(|f| {
+            let field_name = &f.field_name;
+            if f.skip {
+                quote! { #field_name: std::default::Default::default() }
+            } else {
+                let col_name = &f.column_name;
+                quote! { #field_name: row.try_get_by_name(#col_name)? }
+            }
+        })
+        .collect();
+
     quote! {
         #[automatically_derived]
         impl sntl::core::Model for #name {
@@ -43,6 +59,16 @@ pub fn generate_model_impl(ir: &ModelIR) -> TokenStream {
                     #(#column_entries),*
                 ];
                 &COLUMNS
+            }
+
+            fn from_row(row: &sntl::core::Row) -> sntl::driver::Result<Self> {
+                Ok(Self {
+                    #(#from_row_fields,)*
+                })
+            }
+
+            fn primary_key_value(&self) -> sntl::core::Value {
+                self.#pk_field_name.clone().into()
             }
         }
     }
@@ -103,37 +129,6 @@ pub fn generate_new_struct(ir: &ModelIR) -> TokenStream {
     }
 }
 
-/// Generate `from_row()` method that decodes a driver Row into the model struct.
-pub fn generate_from_row(ir: &ModelIR) -> TokenStream {
-    let name = &ir.struct_name;
-
-    let field_extractions: Vec<TokenStream> = ir
-        .fields
-        .iter()
-        .map(|f| {
-            let field_name = &f.field_name;
-            if f.skip {
-                quote! { #field_name: std::default::Default::default() }
-            } else {
-                let col_name = &f.column_name;
-                quote! { #field_name: row.try_get_by_name(#col_name)? }
-            }
-        })
-        .collect();
-
-    quote! {
-        #[automatically_derived]
-        impl #name {
-            /// Decode a [`sntl::core::Row`] into this model.
-            pub fn from_row(row: &sntl::core::Row) -> sntl::driver::Result<Self> {
-                Ok(Self {
-                    #(#field_extractions,)*
-                })
-            }
-        }
-    }
-}
-
 /// Generate async execution methods: find_all, find_one, find_optional, create_exec, delete_by_id.
 pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
     let name = &ir.struct_name;
@@ -167,7 +162,7 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
             ) -> sntl::core::Result<Vec<Self>> {
                 let rows = conn.query(#select_sql, &[]).await?;
                 rows.into_iter()
-                    .map(|r| Self::from_row(&r).map_err(sntl::core::Error::from))
+                    .map(|r| <Self as sntl::core::Model>::from_row(&r).map_err(sntl::core::Error::from))
                     .collect()
             }
 
@@ -177,7 +172,7 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
                 id: &(dyn sntl::core::ToSql + Sync),
             ) -> sntl::core::Result<Self> {
                 let row = conn.query_one(#select_by_id_sql, &[id]).await?;
-                Self::from_row(&row).map_err(sntl::core::Error::from)
+                <Self as sntl::core::Model>::from_row(&row).map_err(sntl::core::Error::from)
             }
 
             /// Fetch one row by primary key. Returns None if not found.
@@ -187,7 +182,7 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
             ) -> sntl::core::Result<Option<Self>> {
                 match conn.query_opt(#select_by_id_sql, &[id]).await? {
                     Some(row) => Ok(Some(
-                        Self::from_row(&row).map_err(sntl::core::Error::from)?,
+                        <Self as sntl::core::Model>::from_row(&row).map_err(sntl::core::Error::from)?,
                     )),
                     None => Ok(None),
                 }
@@ -205,7 +200,7 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
                     .into_iter()
                     .next()
                     .ok_or(sntl::core::Error::NotFound)?;
-                Self::from_row(&row).map_err(sntl::core::Error::from)
+                <Self as sntl::core::Model>::from_row(&row).map_err(sntl::core::Error::from)
             }
 
             /// Delete a row by primary key. Returns the number of rows deleted.
