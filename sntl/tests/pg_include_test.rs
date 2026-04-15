@@ -66,16 +66,17 @@ async fn include_fetch_one_executes() {
     let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
     pg_helpers::clean_tables(&mut conn).await;
 
-    // Seed data
-    InsertQuery::new("users")
+    // Seed data — use RETURNING to get actual auto-generated ID
+    let user_rows = InsertQuery::new("users")
         .column("name", "Alice")
         .column("email", "alice@test.com")
-        .no_returning()
-        .execute(&mut conn)
+        .fetch_returning(&mut conn)
         .await
         .unwrap();
+    let user_id: i32 = user_rows[0].get(0);
+
     InsertQuery::new("posts")
-        .column("user_id", 1)
+        .column("user_id", user_id)
         .column("title", "Post 1")
         .column("published", true)
         .no_returning()
@@ -84,7 +85,7 @@ async fn include_fetch_one_executes() {
         .unwrap();
 
     // FetchOne with Include executes and returns WithRelations
-    let user = User::FindId(1)
+    let user = User::FindId(user_id)
         .Include(User::Posts())
         .FetchOne(&mut conn)
         .await
@@ -92,7 +93,7 @@ async fn include_fetch_one_executes() {
 
     // Model fields via Deref
     assert_eq!(user.name, "Alice");
-    assert_eq!(user.id, 1);
+    assert_eq!(user.id, user_id);
 
     // Relation data is stored as raw Vec<Row> — can verify it exists
     assert!(!user.relations().is_empty());
