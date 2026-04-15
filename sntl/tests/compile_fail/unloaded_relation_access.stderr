@@ -1,0 +1,29 @@
+error[E0277]: relation `FakePosts` was not included in the query
+  --> tests/compile_fail/unloaded_relation_access.rs:20:55
+   |
+20 |     let _ = RelationLoaded::<FakePosts>::get_relation(&wr);
+   |             ----------------------------------------- ^^^ call .Include() to load this relation before accessing it
+   |             |
+   |             required by a bound introduced by this call
+   |
+help: the trait `sntl::core::relation::RelationLoaded<FakePosts>` is not implemented for `sntl::core::WithRelations<FakeModel, (sntl::prelude::Unloaded,)>`
+      but it is implemented for `sntl::core::WithRelations<FakeModel, (sntl::prelude::Loaded,)>`
+  --> tests/compile_fail/unloaded_relation_access.rs:7:1
+   |
+ 7 | impl RelationLoaded<FakePosts> for WithRelations<FakeModel, (Loaded,)> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `sntl::prelude::Loaded`, found `sntl::prelude::Unloaded`
+
+error[E0277]: relation `FakePosts` was not included in the query
+  --> tests/compile_fail/unloaded_relation_access.rs:20:13
+   |
+20 |     let _ = RelationLoaded::<FakePosts>::get_relation(&wr);
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call .Include() to load this relation before accessing it
+   |
+help: the trait `sntl::core::relation::RelationLoaded<FakePosts>` is not implemented for `sntl::core::WithRelations<FakeModel, (sntl::prelude::Unloaded,)>`
+      but it is implemented for `sntl::core::WithRelations<FakeModel, (sntl::prelude::Loaded,)>`
+  --> tests/compile_fail/unloaded_relation_access.rs:7:1
+   |
+ 7 | impl RelationLoaded<FakePosts> for WithRelations<FakeModel, (Loaded,)> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for that trait implementation, expected `sntl::prelude::Loaded`, found `sntl::prelude::Unloaded`

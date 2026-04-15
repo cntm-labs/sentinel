@@ -3,7 +3,10 @@
 //! Defines `HasMany<T>`, `HasOne<T>`, `BelongsTo<T>` descriptors
 //! and `Loaded`/`Unloaded` state markers for type-state relations.
 
+use std::any::Any;
+use std::collections::HashMap;
 use std::marker::PhantomData;
+use std::ops::Deref;
 
 /// Marker: relation data has been loaded from the database.
 pub struct Loaded;
@@ -140,13 +143,13 @@ impl RelationSpec {
         }
     }
 
-    pub fn name(&self) -> &str {
+    pub fn name(&self) -> &'static str {
         self.name
     }
-    pub fn foreign_key(&self) -> &str {
+    pub fn foreign_key(&self) -> &'static str {
         self.foreign_key
     }
-    pub fn target_table(&self) -> &str {
+    pub fn target_table(&self) -> &'static str {
         self.target_table
     }
     pub fn kind(&self) -> RelationKind {
@@ -221,5 +224,175 @@ impl RelationSpec {
         }
 
         (sql, binds)
+    }
+}
+
+// ---------------------------------------------------------------------------
+// RelationStore — type-erased storage for loaded relation data
+// ---------------------------------------------------------------------------
+
+/// Type-erased storage for loaded relation data.
+///
+/// Keyed by relation name. Stores pre-decoded Rust values as `Box<dyn Any>`.
+/// Decode happens at Include execution time, not at accessor time.
+pub struct RelationStore {
+    data: HashMap<&'static str, Box<dyn Any + Send + Sync>>,
+}
+
+impl RelationStore {
+    pub fn new() -> Self {
+        Self {
+            data: HashMap::new(),
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
+    /// Store pre-decoded relation data.
+    pub fn insert_decoded<T: Any + Send + Sync>(&mut self, name: &'static str, data: T) {
+        self.data.insert(name, Box::new(data));
+    }
+
+    /// Retrieve typed relation data by name.
+    pub fn get<T: Any>(&self, name: &str) -> Option<&T> {
+        self.data.get(name)?.downcast_ref::<T>()
+    }
+}
+
+impl Default for RelationStore {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+// ---------------------------------------------------------------------------
+// WithRelations — model wrapper with type-state relation tracking
+// ---------------------------------------------------------------------------
+
+/// Wrapper that pairs a model with its loaded relation data.
+///
+/// `M` = model type, `State` = tuple of Loaded/Unloaded per relation.
+/// Deref to `M` for transparent field access.
+pub struct WithRelations<M, State = ()> {
+    model: M,
+    relations: RelationStore,
+    _state: PhantomData<State>,
+}
+
+impl<M, S> WithRelations<M, S> {
+    pub fn new(model: M, relations: RelationStore) -> Self {
+        Self {
+            model,
+            relations,
+            _state: PhantomData,
+        }
+    }
+
+    pub fn into_inner(self) -> M {
+        self.model
+    }
+
+    pub fn relations(&self) -> &RelationStore {
+        &self.relations
+    }
+}
+
+impl<M> WithRelations<M, ()> {
+    /// Create a bare WithRelations with no loaded relations.
+    pub fn bare(model: M) -> Self {
+        Self::new(model, RelationStore::new())
+    }
+}
+
+// ---------------------------------------------------------------------------
+// RelationLoaded — trait gating access to loaded relation data
+// ---------------------------------------------------------------------------
+
+/// Trait gating access to relation data. Only implemented when the relation
+/// is in `Loaded` state. Attempting to access an unloaded relation produces
+/// a compile error with a helpful diagnostic message.
+#[diagnostic::on_unimplemented(
+    message = "relation `{Rel}` was not included in the query",
+    label = "call .Include() to load this relation before accessing it"
+)]
+pub trait RelationLoaded<Rel> {
+    type Output: ?Sized;
+    fn get_relation(&self) -> &Self::Output;
+}
+
+// ---------------------------------------------------------------------------
+// ModelRelations — associates a model with its bare relation state
+// ---------------------------------------------------------------------------
+
+/// Associates a model with its default (all-unloaded) relation state.
+///
+/// Macro generates: `impl ModelRelations for User { type BareState = (Unloaded, Unloaded); }`
+pub trait ModelRelations {
+    type BareState;
+}
+
+// ---------------------------------------------------------------------------
+// IncludeTransition — compile-time state transitions for Include()
+// ---------------------------------------------------------------------------
+
+/// Trait for compile-time state transitions when including a relation.
+///
+/// `M` = model, `Current` = current state tuple, `Rel` = relation marker.
+/// Macro generates impls that flip the Rel's position from Unloaded → Loaded.
+pub trait IncludeTransition<M, Current, Rel> {
+    type Next;
+}
+
+// ---------------------------------------------------------------------------
+// RelationInclude — typed relation include marker
+// ---------------------------------------------------------------------------
+
+/// Typed relation include marker — carries both compile-time type info
+/// and runtime RelationSpec for query execution.
+pub struct RelationInclude<M, Rel> {
+    spec: RelationSpec,
+    _marker: PhantomData<(M, Rel)>,
+}
+
+impl<M, Rel> RelationInclude<M, Rel> {
+    pub fn new(spec: RelationSpec) -> Self {
+        Self {
+            spec,
+            _marker: PhantomData,
+        }
+    }
+
+    pub fn spec(&self) -> &RelationSpec {
+        &self.spec
+    }
+
+    pub fn into_spec(self) -> RelationSpec {
+        self.spec
+    }
+}
+
+// ---------------------------------------------------------------------------
+// RelationRows — batch-loaded relation row data for accessor decoding
+// ---------------------------------------------------------------------------
+
+/// Holds batch-loaded relation rows with parent PK for FK-based filtering.
+///
+/// Stored in `RelationStore` during `IncludeQuery::FetchAll()`.
+/// Macro-generated accessors extract matching rows using the FK column.
+pub struct RelationRows {
+    /// All rows returned by the batch relation query (shared across parents).
+    pub rows: std::sync::Arc<Vec<driver::Row>>,
+    /// The parent model's primary key value for FK filtering.
+    pub parent_pk: Value,
+    /// The FK column name in the relation rows.
+    pub foreign_key: &'static str,
+}
+
+impl<M, S> Deref for WithRelations<M, S> {
+    type Target = M;
+    fn deref(&self) -> &M {
+        &self.model
     }
 }

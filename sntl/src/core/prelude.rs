@@ -14,7 +14,7 @@ pub use crate::core::transaction::Transaction;
 pub use crate::core::types::Value;
 
 // Relation types
-pub use crate::core::relation::{BelongsTo, HasMany, HasOne, Loaded, Unloaded};
+pub use crate::core::relation::{BelongsTo, HasMany, HasOne, Loaded, Unloaded, WithRelations};
 
 // Re-export derive macros
 pub use macros::Model as DeriveModel;

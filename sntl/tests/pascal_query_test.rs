@@ -3,7 +3,7 @@ use sntl::core::query::ModelQuery;
 
 #[test]
 fn pascal_find_builds_select() {
-    let q = ModelQuery::from_table("users");
+    let q: ModelQuery = ModelQuery::from_table("users");
     let (sql, _) = q.Build();
     assert_eq!(sql, "SELECT \"users\".* FROM \"users\"");
 }
@@ -11,7 +11,7 @@ fn pascal_find_builds_select() {
 #[test]
 fn pascal_where_and_order() {
     let col = Column::new("users", "email");
-    let q = ModelQuery::from_table("users")
+    let q: ModelQuery = ModelQuery::from_table("users")
         .Where(col.eq("test@test.com"))
         .OrderBy(Column::new("users", "name").asc())
         .Limit(10);
@@ -24,7 +24,7 @@ fn pascal_where_and_order() {
 
 #[test]
 fn pascal_offset() {
-    let q = ModelQuery::from_table("users").Limit(10).Offset(20);
+    let q: ModelQuery = ModelQuery::from_table("users").Limit(10).Offset(20);
     let (sql, _) = q.Build();
     assert!(sql.contains("LIMIT 10"));
     assert!(sql.contains("OFFSET 20"));
