@@ -70,7 +70,7 @@ impl<M> ModelQuery<M> {
     #[allow(non_snake_case)]
     pub async fn FetchAll(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<Vec<driver::Row>> {
         self.inner.fetch_all(conn).await
     }
@@ -79,7 +79,7 @@ impl<M> ModelQuery<M> {
     #[allow(non_snake_case)]
     pub async fn FetchOne(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<driver::Row> {
         self.inner.fetch_one(conn).await
     }
@@ -88,7 +88,7 @@ impl<M> ModelQuery<M> {
     #[allow(non_snake_case)]
     pub async fn FetchOptional(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<Option<driver::Row>> {
         self.inner.fetch_optional(conn).await
     }

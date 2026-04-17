@@ -115,7 +115,7 @@ impl<M: Model, S> IncludeQuery<M, S> {
     #[allow(non_snake_case)]
     pub async fn FetchOne(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<WithRelations<M, S>> {
         let (select, includes) = self.into_parts();
         let row = select.fetch_one(conn).await?;
@@ -140,7 +140,7 @@ impl<M: Model, S> IncludeQuery<M, S> {
     #[allow(non_snake_case)]
     pub async fn FetchAll(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<Vec<WithRelations<M, S>>> {
         let (select, includes) = self.into_parts();
         let main_rows = select.fetch_all(conn).await?;

@@ -17,7 +17,7 @@ impl SelectQuery {
     /// Execute this query and fetch all rows.
     pub async fn fetch_all(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<Vec<driver::Row>> {
         let (sql, binds) = self.build();
         Ok(conn.query(&sql, &to_params(&binds)).await?)
@@ -28,7 +28,7 @@ impl SelectQuery {
     /// Returns `Error::NotFound` if no rows are returned.
     pub async fn fetch_one(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<driver::Row> {
         let (sql, binds) = self.build();
         conn.query_one(&sql, &to_params(&binds))
@@ -39,7 +39,7 @@ impl SelectQuery {
     /// Execute this query and fetch an optional row.
     pub async fn fetch_optional(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<Option<driver::Row>> {
         let (sql, binds) = self.build();
         Ok(conn.query_opt(&sql, &to_params(&binds)).await?)
@@ -62,14 +62,17 @@ impl InsertQuery {
     /// Execute this INSERT and return all rows via RETURNING clause.
     pub async fn fetch_returning(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<Vec<driver::Row>> {
         let (sql, binds) = self.build();
         Ok(conn.query(&sql, &to_params(&binds)).await?)
     }
 
     /// Execute this INSERT and return the number of rows affected.
-    pub async fn execute(self, conn: &mut driver::Connection) -> crate::core::error::Result<u64> {
+    pub async fn execute(
+        self,
+        conn: &mut (impl driver::GenericClient + Send),
+    ) -> crate::core::error::Result<u64> {
         let (sql, binds) = self.build();
         Ok(conn.execute(&sql, &to_params(&binds)).await?)
     }
@@ -79,14 +82,17 @@ impl super::UpdateQuery {
     /// Execute this UPDATE and return all rows via RETURNING clause.
     pub async fn fetch_returning(
         self,
-        conn: &mut driver::Connection,
+        conn: &mut (impl driver::GenericClient + Send),
     ) -> crate::core::error::Result<Vec<driver::Row>> {
         let (sql, binds) = self.build();
         Ok(conn.query(&sql, &to_params(&binds)).await?)
     }
 
     /// Execute this UPDATE and return the number of rows affected.
-    pub async fn execute(self, conn: &mut driver::Connection) -> crate::core::error::Result<u64> {
+    pub async fn execute(
+        self,
+        conn: &mut (impl driver::GenericClient + Send),
+    ) -> crate::core::error::Result<u64> {
         let (sql, binds) = self.build();
         Ok(conn.execute(&sql, &to_params(&binds)).await?)
     }
@@ -94,7 +100,10 @@ impl super::UpdateQuery {
 
 impl DeleteQuery {
     /// Execute this DELETE and return the number of rows affected.
-    pub async fn execute(self, conn: &mut driver::Connection) -> crate::core::error::Result<u64> {
+    pub async fn execute(
+        self,
+        conn: &mut (impl driver::GenericClient + Send),
+    ) -> crate::core::error::Result<u64> {
         let (sql, binds) = self.build();
         Ok(conn.execute(&sql, &to_params(&binds)).await?)
     }

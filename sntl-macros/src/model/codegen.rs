@@ -158,7 +158,7 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
         impl #name {
             /// Fetch all rows from this model's table.
             pub async fn find_all(
-                conn: &mut sntl::core::Connection,
+                conn: &mut (impl sntl::core::GenericClient + Send),
             ) -> sntl::core::Result<Vec<Self>> {
                 let rows = conn.query(#select_sql, &[]).await?;
                 rows.into_iter()
@@ -168,7 +168,7 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
 
             /// Fetch one row by primary key. Returns error if not found.
             pub async fn find_one(
-                conn: &mut sntl::core::Connection,
+                conn: &mut (impl sntl::core::GenericClient + Send),
                 id: &(dyn sntl::core::ToSql + Sync),
             ) -> sntl::core::Result<Self> {
                 let row = conn.query_one(#select_by_id_sql, &[id]).await?;
@@ -177,7 +177,7 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
 
             /// Fetch one row by primary key. Returns None if not found.
             pub async fn find_optional(
-                conn: &mut sntl::core::Connection,
+                conn: &mut (impl sntl::core::GenericClient + Send),
                 id: &(dyn sntl::core::ToSql + Sync),
             ) -> sntl::core::Result<Option<Self>> {
                 match conn.query_opt(#select_by_id_sql, &[id]).await? {
@@ -190,7 +190,7 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
 
             /// Insert a new row and return the created model (via RETURNING *).
             pub async fn create_exec(
-                conn: &mut sntl::core::Connection,
+                conn: &mut (impl sntl::core::GenericClient + Send),
                 new: #new_name,
             ) -> sntl::core::Result<Self> {
                 let q = sntl::core::InsertQuery::new(#table)
@@ -205,7 +205,7 @@ pub fn generate_execution_methods(ir: &ModelIR) -> TokenStream {
 
             /// Delete a row by primary key. Returns the number of rows deleted.
             pub async fn delete_by_id(
-                conn: &mut sntl::core::Connection,
+                conn: &mut (impl sntl::core::GenericClient + Send),
                 id: &(dyn sntl::core::ToSql + Sync),
             ) -> sntl::core::Result<u64> {
                 Ok(conn.execute(#delete_by_id_sql, &[id]).await?)
