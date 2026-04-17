@@ -6,6 +6,7 @@ mod include;
 mod insert;
 mod pascal;
 mod select;
+mod typed;
 mod update;
 
 pub use cursor::CursorQuery;
@@ -15,4 +16,5 @@ pub use include::IncludeQuery;
 pub use insert::InsertQuery;
 pub use pascal::ModelQuery;
 pub use select::SelectQuery;
+pub use typed::TypedQuery;
 pub use update::UpdateQuery;

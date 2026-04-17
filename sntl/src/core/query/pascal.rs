@@ -72,6 +72,12 @@ impl<M> ModelQuery<M> {
         super::CursorQuery::from_select(self.inner)
     }
 
+    /// Create a typed query that skips Prepare for fewer round-trips.
+    #[allow(non_snake_case)]
+    pub fn Typed(self) -> super::TypedQuery {
+        super::TypedQuery::from_select(self.inner)
+    }
+
     /// Execute and fetch all rows.
     #[allow(non_snake_case)]
     pub async fn FetchAll(
