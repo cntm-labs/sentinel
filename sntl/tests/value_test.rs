@@ -1148,3 +1148,120 @@ fn value_oid_range_variants() {
     })
     .oid();
 }
+
+// === v1.0.0 new variant tests ===
+
+#[test]
+fn value_macaddr8() {
+    let v = Value::MacAddr8(sntl::driver::types::network::PgMacAddr8([
+        1, 2, 3, 4, 5, 6, 7, 8,
+    ]));
+    assert!(v.is_macaddr8());
+    assert!(!v.is_macaddr());
+    assert!(matches!(v, Value::MacAddr8(_)));
+    assert_eq!(format!("{v}"), "01:02:03:04:05:06:07:08");
+}
+
+#[test]
+fn value_timetz() {
+    let v = Value::TimeTz(sntl::driver::types::timetz::PgTimeTz {
+        time: chrono::NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
+        offset_seconds: 0,
+    });
+    assert!(v.is_timetz());
+    assert!(matches!(v, Value::TimeTz(_)));
+    assert_eq!(
+        v.as_timetz().unwrap().time,
+        chrono::NaiveTime::from_hms_opt(12, 0, 0).unwrap()
+    );
+}
+
+#[test]
+fn value_ltree() {
+    let v = Value::LTree(sntl::driver::types::ltree::PgLTree("top.science".into()));
+    assert!(v.is_ltree());
+    assert!(matches!(v, Value::LTree(_)));
+    assert_eq!(v.as_ltree().unwrap().0, "top.science");
+    assert_eq!(format!("{v}"), "top.science");
+}
+
+#[test]
+fn value_lquery() {
+    let v = Value::LQuery(sntl::driver::types::ltree::PgLQuery("*.science.*".into()));
+    assert!(v.is_lquery());
+    assert!(matches!(v, Value::LQuery(_)));
+    assert_eq!(v.as_lquery().unwrap().0, "*.science.*");
+}
+
+#[test]
+fn value_cube() {
+    let v = Value::Cube(sntl::driver::types::cube::PgCube {
+        coordinates: vec![1.0, 2.0, 3.0],
+        is_point: true,
+    });
+    assert!(v.is_cube());
+    assert!(matches!(v, Value::Cube(_)));
+    assert_eq!(v.as_cube().unwrap().coordinates, vec![1.0, 2.0, 3.0]);
+}
+
+#[test]
+fn value_multirange_int4() {
+    let v = Value::Int4Multirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::INT4MULTIRANGE,
+        range_oid: sntl::driver::Oid::INT4RANGE,
+        element_oid: sntl::driver::Oid::INT4,
+    });
+    assert!(matches!(v, Value::Int4Multirange(_)));
+}
+
+#[test]
+fn value_new_variants_partial_eq() {
+    let a = Value::MacAddr8(sntl::driver::types::network::PgMacAddr8([
+        1, 2, 3, 4, 5, 6, 7, 8,
+    ]));
+    let b = Value::MacAddr8(sntl::driver::types::network::PgMacAddr8([
+        1, 2, 3, 4, 5, 6, 7, 8,
+    ]));
+    let c = Value::MacAddr8(sntl::driver::types::network::PgMacAddr8([0; 8]));
+    assert_eq!(a, b);
+    assert_ne!(a, c);
+
+    let t1 = Value::TimeTz(sntl::driver::types::timetz::PgTimeTz {
+        time: chrono::NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
+        offset_seconds: 0,
+    });
+    let t2 = Value::TimeTz(sntl::driver::types::timetz::PgTimeTz {
+        time: chrono::NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
+        offset_seconds: 0,
+    });
+    assert_eq!(t1, t2);
+
+    let l1 = Value::LTree(sntl::driver::types::ltree::PgLTree("a.b".into()));
+    let l2 = Value::LTree(sntl::driver::types::ltree::PgLTree("a.b".into()));
+    assert_eq!(l1, l2);
+}
+
+#[test]
+fn value_new_variants_debug() {
+    let v = Value::MacAddr8(sntl::driver::types::network::PgMacAddr8([
+        1, 2, 3, 4, 5, 6, 7, 8,
+    ]));
+    let dbg = format!("{v:?}");
+    assert!(dbg.contains("MacAddr8"));
+
+    let v = Value::TimeTz(sntl::driver::types::timetz::PgTimeTz {
+        time: chrono::NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
+        offset_seconds: 0,
+    });
+    assert!(format!("{v:?}").contains("TimeTz"));
+
+    let v = Value::LTree(sntl::driver::types::ltree::PgLTree("a.b".into()));
+    assert!(format!("{v:?}").contains("LTree"));
+
+    let v = Value::Cube(sntl::driver::types::cube::PgCube {
+        coordinates: vec![1.0],
+        is_point: true,
+    });
+    assert!(format!("{v:?}").contains("Cube"));
+}

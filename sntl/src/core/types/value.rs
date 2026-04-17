@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 /// A dynamically-typed SQL value used in query parameters.
 ///
-/// Covers all PostgreSQL types supported by sentinel-driver v0.1.1.
+/// Covers all PostgreSQL types supported by sentinel-driver v1.0.0.
 /// Complex driver types (PgInterval, PgPoint, etc.) are wrapped directly
 /// rather than re-inventing encoding.
 #[derive(Clone)]
@@ -36,12 +36,14 @@ pub enum Value {
     // === Temporal ===
     Date(NaiveDate),
     Time(NaiveTime),
+    TimeTz(driver::types::timetz::PgTimeTz),
     TimestampNaive(NaiveDateTime),
 
     // === Network ===
     Inet(IpAddr),
     Cidr(IpAddr),
     MacAddr([u8; 6]),
+    MacAddr8(driver::types::network::PgMacAddr8),
 
     // === Interval ===
     Interval(driver::types::interval::PgInterval),
@@ -53,6 +55,11 @@ pub enum Value {
     Box(driver::types::geometric::PgBox),
     Circle(driver::types::geometric::PgCircle),
 
+    // === Extension types ===
+    LTree(driver::types::ltree::PgLTree),
+    LQuery(driver::types::ltree::PgLQuery),
+    Cube(driver::types::cube::PgCube),
+
     // === Ranges ===
     Int4Range(driver::types::range::PgRange<i32>),
     Int8Range(driver::types::range::PgRange<i64>),
@@ -60,6 +67,14 @@ pub enum Value {
     TsRange(driver::types::range::PgRange<NaiveDateTime>),
     TsTzRange(driver::types::range::PgRange<DateTime<Utc>>),
     DateRange(driver::types::range::PgRange<NaiveDate>),
+
+    // === Multiranges (PG 14+) ===
+    Int4Multirange(driver::types::multirange::PgMultirange<i32>),
+    Int8Multirange(driver::types::multirange::PgMultirange<i64>),
+    NumMultirange(driver::types::multirange::PgMultirange<rust_decimal::Decimal>),
+    TsMultirange(driver::types::multirange::PgMultirange<NaiveDateTime>),
+    TsTzMultirange(driver::types::multirange::PgMultirange<DateTime<Utc>>),
+    DateMultirange(driver::types::multirange::PgMultirange<NaiveDate>),
 
     // === Collections ===
     Array(Vec<Value>),
@@ -91,22 +106,33 @@ impl fmt::Debug for Value {
             Value::Json(v) => f.debug_tuple("Json").field(v).finish(),
             Value::Date(v) => f.debug_tuple("Date").field(v).finish(),
             Value::Time(v) => f.debug_tuple("Time").field(v).finish(),
+            Value::TimeTz(v) => f.debug_tuple("TimeTz").field(v).finish(),
             Value::TimestampNaive(v) => f.debug_tuple("TimestampNaive").field(v).finish(),
             Value::Inet(v) => f.debug_tuple("Inet").field(v).finish(),
             Value::Cidr(v) => f.debug_tuple("Cidr").field(v).finish(),
             Value::MacAddr(v) => f.debug_tuple("MacAddr").field(v).finish(),
+            Value::MacAddr8(v) => f.debug_tuple("MacAddr8").field(v).finish(),
             Value::Interval(v) => f.debug_tuple("Interval").field(v).finish(),
             Value::Point(v) => f.debug_tuple("Point").field(v).finish(),
             Value::Line(v) => f.debug_tuple("Line").field(v).finish(),
             Value::LineSegment(v) => f.debug_tuple("LineSegment").field(v).finish(),
             Value::Box(v) => f.debug_tuple("Box").field(v).finish(),
             Value::Circle(v) => f.debug_tuple("Circle").field(v).finish(),
+            Value::LTree(v) => f.debug_tuple("LTree").field(v).finish(),
+            Value::LQuery(v) => f.debug_tuple("LQuery").field(v).finish(),
+            Value::Cube(v) => f.debug_tuple("Cube").field(v).finish(),
             Value::Int4Range(v) => f.debug_tuple("Int4Range").field(v).finish(),
             Value::Int8Range(v) => f.debug_tuple("Int8Range").field(v).finish(),
             Value::NumRange(v) => f.debug_tuple("NumRange").field(v).finish(),
             Value::TsRange(v) => f.debug_tuple("TsRange").field(v).finish(),
             Value::TsTzRange(v) => f.debug_tuple("TsTzRange").field(v).finish(),
             Value::DateRange(v) => f.debug_tuple("DateRange").field(v).finish(),
+            Value::Int4Multirange(v) => f.debug_tuple("Int4Multirange").field(v).finish(),
+            Value::Int8Multirange(v) => f.debug_tuple("Int8Multirange").field(v).finish(),
+            Value::NumMultirange(v) => f.debug_tuple("NumMultirange").field(v).finish(),
+            Value::TsMultirange(v) => f.debug_tuple("TsMultirange").field(v).finish(),
+            Value::TsTzMultirange(v) => f.debug_tuple("TsTzMultirange").field(v).finish(),
+            Value::DateMultirange(v) => f.debug_tuple("DateMultirange").field(v).finish(),
             Value::Array(v) => f.debug_tuple("Array").field(v).finish(),
             Value::Custom(_) => f.debug_tuple("Custom").field(&"<opaque>").finish(),
         }
@@ -136,22 +162,33 @@ impl PartialEq for Value {
             (Value::Json(a), Value::Json(b)) => a == b,
             (Value::Date(a), Value::Date(b)) => a == b,
             (Value::Time(a), Value::Time(b)) => a == b,
+            (Value::TimeTz(a), Value::TimeTz(b)) => a == b,
             (Value::TimestampNaive(a), Value::TimestampNaive(b)) => a == b,
             (Value::Inet(a), Value::Inet(b)) => a == b,
             (Value::Cidr(a), Value::Cidr(b)) => a == b,
             (Value::MacAddr(a), Value::MacAddr(b)) => a == b,
+            (Value::MacAddr8(a), Value::MacAddr8(b)) => a == b,
             (Value::Interval(a), Value::Interval(b)) => a == b,
             (Value::Point(a), Value::Point(b)) => a == b,
             (Value::Line(a), Value::Line(b)) => a == b,
             (Value::LineSegment(a), Value::LineSegment(b)) => a == b,
             (Value::Box(a), Value::Box(b)) => a == b,
             (Value::Circle(a), Value::Circle(b)) => a == b,
+            (Value::LTree(a), Value::LTree(b)) => a == b,
+            (Value::LQuery(a), Value::LQuery(b)) => a == b,
+            (Value::Cube(a), Value::Cube(b)) => a == b,
             (Value::Int4Range(a), Value::Int4Range(b)) => a == b,
             (Value::Int8Range(a), Value::Int8Range(b)) => a == b,
             (Value::NumRange(a), Value::NumRange(b)) => a == b,
             (Value::TsRange(a), Value::TsRange(b)) => a == b,
             (Value::TsTzRange(a), Value::TsTzRange(b)) => a == b,
             (Value::DateRange(a), Value::DateRange(b)) => a == b,
+            (Value::Int4Multirange(a), Value::Int4Multirange(b)) => a == b,
+            (Value::Int8Multirange(a), Value::Int8Multirange(b)) => a == b,
+            (Value::NumMultirange(a), Value::NumMultirange(b)) => a == b,
+            (Value::TsMultirange(a), Value::TsMultirange(b)) => a == b,
+            (Value::TsTzMultirange(a), Value::TsTzMultirange(b)) => a == b,
+            (Value::DateMultirange(a), Value::DateMultirange(b)) => a == b,
             (Value::Array(a), Value::Array(b)) => a == b,
             (Value::Custom(_), Value::Custom(_)) => false,
             _ => false,
@@ -296,22 +333,33 @@ impl driver::ToSql for Value {
             Value::Json(_) => driver::Oid::JSONB,
             Value::Date(_) => driver::Oid::DATE,
             Value::Time(_) => driver::Oid::TIME,
+            Value::TimeTz(v) => v.oid(),
             Value::TimestampNaive(_) => driver::Oid::TIMESTAMP,
             Value::Inet(_) => driver::Oid::INET,
             Value::Cidr(_) => driver::Oid::CIDR,
             Value::MacAddr(_) => driver::Oid::MACADDR,
+            Value::MacAddr8(v) => v.oid(),
             Value::Interval(v) => v.oid(),
             Value::Point(v) => v.oid(),
             Value::Line(v) => v.oid(),
             Value::LineSegment(v) => v.oid(),
             Value::Box(v) => v.oid(),
             Value::Circle(v) => v.oid(),
+            Value::LTree(v) => v.oid(),
+            Value::LQuery(v) => v.oid(),
+            Value::Cube(v) => v.oid(),
             Value::Int4Range(v) => v.oid(),
             Value::Int8Range(v) => v.oid(),
             Value::NumRange(v) => v.oid(),
             Value::TsRange(v) => v.oid(),
             Value::TsTzRange(v) => v.oid(),
             Value::DateRange(v) => v.oid(),
+            Value::Int4Multirange(v) => v.oid(),
+            Value::Int8Multirange(v) => v.oid(),
+            Value::NumMultirange(v) => v.oid(),
+            Value::TsMultirange(v) => v.oid(),
+            Value::TsTzMultirange(v) => v.oid(),
+            Value::DateMultirange(v) => v.oid(),
             Value::Array(elements) => {
                 let elem_oid = elements
                     .iter()
@@ -329,6 +377,13 @@ impl driver::ToSql for Value {
                     Some(driver::Oid::NUMERIC) => driver::Oid::NUMERIC_ARRAY,
                     Some(driver::Oid::INET) => driver::Oid::INET_ARRAY,
                     Some(driver::Oid::INTERVAL) => driver::Oid::INTERVAL_ARRAY,
+                    Some(driver::Oid::JSONB) => driver::Oid::JSONB_ARRAY,
+                    Some(driver::Oid::TIMESTAMP) => driver::Oid::TIMESTAMP_ARRAY,
+                    Some(driver::Oid::TIMESTAMPTZ) => driver::Oid::TIMESTAMPTZ_ARRAY,
+                    Some(driver::Oid::DATE) => driver::Oid::DATE_ARRAY,
+                    Some(driver::Oid::TIME) => driver::Oid::TIME_ARRAY,
+                    Some(driver::Oid::BYTEA) => driver::Oid::BYTEA_ARRAY,
+                    Some(driver::Oid::MONEY) => driver::Oid::MONEY_ARRAY,
                     _ => driver::Oid::TEXT_ARRAY,
                 }
             }
@@ -370,6 +425,7 @@ impl driver::ToSql for Value {
             }
             Value::Date(v) => v.to_sql(buf),
             Value::Time(v) => v.to_sql(buf),
+            Value::TimeTz(v) => v.to_sql(buf),
             Value::TimestampNaive(v) => v.to_sql(buf),
             Value::Inet(v) => v.to_sql(buf),
             Value::Cidr(v) => {
@@ -381,18 +437,28 @@ impl driver::ToSql for Value {
                 .to_sql(buf)
             }
             Value::MacAddr(v) => driver::types::network::PgMacAddr(*v).to_sql(buf),
+            Value::MacAddr8(v) => v.to_sql(buf),
             Value::Interval(v) => v.to_sql(buf),
             Value::Point(v) => v.to_sql(buf),
             Value::Line(v) => v.to_sql(buf),
             Value::LineSegment(v) => v.to_sql(buf),
             Value::Box(v) => v.to_sql(buf),
             Value::Circle(v) => v.to_sql(buf),
+            Value::LTree(v) => v.to_sql(buf),
+            Value::LQuery(v) => v.to_sql(buf),
+            Value::Cube(v) => v.to_sql(buf),
             Value::Int4Range(v) => v.to_sql(buf),
             Value::Int8Range(v) => v.to_sql(buf),
             Value::NumRange(v) => v.to_sql(buf),
             Value::TsRange(v) => v.to_sql(buf),
             Value::TsTzRange(v) => v.to_sql(buf),
             Value::DateRange(v) => v.to_sql(buf),
+            Value::Int4Multirange(v) => v.to_sql(buf),
+            Value::Int8Multirange(v) => v.to_sql(buf),
+            Value::NumMultirange(v) => v.to_sql(buf),
+            Value::TsMultirange(v) => v.to_sql(buf),
+            Value::TsTzMultirange(v) => v.to_sql(buf),
+            Value::DateMultirange(v) => v.to_sql(buf),
             Value::Array(elements) => Self::encode_array(elements, buf),
             Value::Custom(v) => v.to_sql(buf),
         }
@@ -459,6 +525,9 @@ impl Value {
     pub fn is_time(&self) -> bool {
         matches!(self, Value::Time(_))
     }
+    pub fn is_timetz(&self) -> bool {
+        matches!(self, Value::TimeTz(_))
+    }
     pub fn is_timestamp_naive(&self) -> bool {
         matches!(self, Value::TimestampNaive(_))
     }
@@ -470,6 +539,9 @@ impl Value {
     }
     pub fn is_macaddr(&self) -> bool {
         matches!(self, Value::MacAddr(_))
+    }
+    pub fn is_macaddr8(&self) -> bool {
+        matches!(self, Value::MacAddr8(_))
     }
     pub fn is_interval(&self) -> bool {
         matches!(self, Value::Interval(_))
@@ -488,6 +560,15 @@ impl Value {
     }
     pub fn is_circle(&self) -> bool {
         matches!(self, Value::Circle(_))
+    }
+    pub fn is_ltree(&self) -> bool {
+        matches!(self, Value::LTree(_))
+    }
+    pub fn is_lquery(&self) -> bool {
+        matches!(self, Value::LQuery(_))
+    }
+    pub fn is_cube(&self) -> bool {
+        matches!(self, Value::Cube(_))
     }
     pub fn is_array(&self) -> bool {
         matches!(self, Value::Array(_))
@@ -610,6 +691,36 @@ impl Value {
             _ => None,
         }
     }
+    pub fn as_timetz(&self) -> Option<driver::types::timetz::PgTimeTz> {
+        match self {
+            Value::TimeTz(v) => Some(*v),
+            _ => None,
+        }
+    }
+    pub fn as_macaddr8(&self) -> Option<&driver::types::network::PgMacAddr8> {
+        match self {
+            Value::MacAddr8(v) => Some(v),
+            _ => None,
+        }
+    }
+    pub fn as_ltree(&self) -> Option<&driver::types::ltree::PgLTree> {
+        match self {
+            Value::LTree(v) => Some(v),
+            _ => None,
+        }
+    }
+    pub fn as_lquery(&self) -> Option<&driver::types::ltree::PgLQuery> {
+        match self {
+            Value::LQuery(v) => Some(v),
+            _ => None,
+        }
+    }
+    pub fn as_cube(&self) -> Option<&driver::types::cube::PgCube> {
+        match self {
+            Value::Cube(v) => Some(v),
+            _ => None,
+        }
+    }
     pub fn as_array(&self) -> Option<&[Value]> {
         match self {
             Value::Array(v) => Some(v),
@@ -697,6 +808,7 @@ impl fmt::Display for Value {
             Value::Json(v) => write!(f, "{v}"),
             Value::Date(v) => write!(f, "{v}"),
             Value::Time(v) => write!(f, "{v}"),
+            Value::TimeTz(v) => write!(f, "{:?}", v),
             Value::TimestampNaive(v) => write!(f, "{v}"),
             Value::Inet(v) => write!(f, "{v}"),
             Value::Cidr(v) => write!(f, "{v}"),
@@ -704,6 +816,11 @@ impl fmt::Display for Value {
                 f,
                 "{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
                 m[0], m[1], m[2], m[3], m[4], m[5]
+            ),
+            Value::MacAddr8(m) => write!(
+                f,
+                "{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
+                m.0[0], m.0[1], m.0[2], m.0[3], m.0[4], m.0[5], m.0[6], m.0[7]
             ),
             Value::Interval(v) => write!(f, "{v:?}"),
             Value::Point(v) => write!(f, "({},{})", v.x, v.y),
@@ -721,12 +838,21 @@ impl fmt::Display for Value {
                 v.upper_right.x, v.upper_right.y, v.lower_left.x, v.lower_left.y
             ),
             Value::Circle(v) => write!(f, "<({},{}),{}>", v.center.x, v.center.y, v.radius),
+            Value::LTree(v) => write!(f, "{v}"),
+            Value::LQuery(v) => write!(f, "{v}"),
+            Value::Cube(v) => write!(f, "{v}"),
             Value::Int4Range(v) => write!(f, "{v:?}"),
             Value::Int8Range(v) => write!(f, "{v:?}"),
             Value::NumRange(v) => write!(f, "{v:?}"),
             Value::TsRange(v) => write!(f, "{v:?}"),
             Value::TsTzRange(v) => write!(f, "{v:?}"),
             Value::DateRange(v) => write!(f, "{v:?}"),
+            Value::Int4Multirange(v) => write!(f, "{v:?}"),
+            Value::Int8Multirange(v) => write!(f, "{v:?}"),
+            Value::NumMultirange(v) => write!(f, "{v:?}"),
+            Value::TsMultirange(v) => write!(f, "{v:?}"),
+            Value::TsTzMultirange(v) => write!(f, "{v:?}"),
+            Value::DateMultirange(v) => write!(f, "{v:?}"),
             Value::Array(elements) => {
                 write!(f, "{{")?;
                 for (i, e) in elements.iter().enumerate() {
