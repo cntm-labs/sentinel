@@ -12,7 +12,7 @@ categories = ["database", "asynchronous"]
 
 [dependencies]
 macros = { package = "sntl-macros", path = "../sntl-macros", version = "0.1.0" }
-driver = { package = "sentinel-driver", version = "0.1.1", features = ["with-rust-decimal"] }
+driver = { package = "sentinel-driver", version = "1.0.0", features = ["with-rust-decimal"] }
 serde_json.workspace = true
 rust_decimal.workspace = true
 thiserror.workspace = true
