@@ -1,3 +1,4 @@
+mod cursor;
 mod delete;
 mod dynamic;
 mod exec;
@@ -7,6 +8,7 @@ mod pascal;
 mod select;
 mod update;
 
+pub use cursor::CursorQuery;
 pub use delete::DeleteQuery;
 pub use dynamic::QueryBuilder;
 pub use include::IncludeQuery;

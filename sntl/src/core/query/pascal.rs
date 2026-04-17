@@ -66,6 +66,12 @@ impl<M> ModelQuery<M> {
         self.inner
     }
 
+    /// Create a cursor query for Portal-based incremental fetching.
+    #[allow(non_snake_case)]
+    pub fn Cursor(self) -> super::CursorQuery {
+        super::CursorQuery::from_select(self.inner)
+    }
+
     /// Execute and fetch all rows.
     #[allow(non_snake_case)]
     pub async fn FetchAll(
