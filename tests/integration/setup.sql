@@ -66,6 +66,9 @@ CREATE TABLE type_roundtrip (
     lseg_col        LSEG,
     box_col         BOX,
     circle_col      CIRCLE,
+    -- v1.0.0 new types
+    macaddr8_col    MACADDR8,
+    timetz_col      TIMETZ,
     -- ranges
     int4range_col   INT4RANGE,
     int8range_col   INT8RANGE,

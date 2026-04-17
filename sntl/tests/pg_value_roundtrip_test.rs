@@ -312,3 +312,41 @@ async fn roundtrip_money() {
     let val: PgMoney = row.get_by_name("money_col");
     assert_eq!(val.0, 12345);
 }
+
+// === v1.0.0 new type roundtrips ===
+
+#[tokio::test]
+async fn roundtrip_macaddr8() {
+    let url = require_pg!();
+    let config = sntl::driver::Config::parse(&url).unwrap();
+    let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
+
+    use sntl::driver::types::network::PgMacAddr8;
+    let row = roundtrip_one(
+        &mut conn,
+        "macaddr8_col",
+        Value::MacAddr8(PgMacAddr8([1, 2, 3, 4, 5, 6, 7, 8])),
+    )
+    .await;
+    let val: PgMacAddr8 = row.get_by_name("macaddr8_col");
+    assert_eq!(val.0, [1, 2, 3, 4, 5, 6, 7, 8]);
+}
+
+#[tokio::test]
+async fn roundtrip_timetz() {
+    let url = require_pg!();
+    let config = sntl::driver::Config::parse(&url).unwrap();
+    let mut conn = sntl::driver::Connection::connect(config).await.unwrap();
+
+    use sntl::driver::types::timetz::PgTimeTz;
+    let timetz = PgTimeTz {
+        time: chrono::NaiveTime::from_hms_opt(14, 30, 0).unwrap(),
+        offset_seconds: 0,
+    };
+    let row = roundtrip_one(&mut conn, "timetz_col", Value::TimeTz(timetz)).await;
+    let val: PgTimeTz = row.get_by_name("timetz_col");
+    assert_eq!(
+        val.time,
+        chrono::NaiveTime::from_hms_opt(14, 30, 0).unwrap()
+    );
+}
