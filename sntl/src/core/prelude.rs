@@ -22,3 +22,9 @@ pub use macros::Partial as DerivePartial;
 
 // Re-export driver types and traits
 pub use driver::{Config, Connection, FromSql, Pool, PooledConnection, ToSql};
+
+// Re-export v1.0.0 driver types
+pub use driver::PoolMetrics;
+pub use driver::{ChannelBinding, GenericClient, LoadBalanceHosts, TargetSessionAttrs};
+pub use driver::{Notification, Portal, SimpleQueryMessage, SimpleQueryRow};
+pub use driver::{PgAdvisoryLock, PgAdvisoryLockGuard};

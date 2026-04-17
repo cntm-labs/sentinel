@@ -31,3 +31,26 @@ fn reexports_driver_derives_and_traits() {
     fn _assert_tosql<T: sntl::ToSql>() {}
     fn _assert_fromsql<T: sntl::FromSql>() {}
 }
+
+#[test]
+fn v1_types_accessible() {
+    // GenericClient trait is accessible
+    fn _assert_generic_client<T: sntl::driver::GenericClient>() {}
+
+    // Config enums
+    let _ = sntl::core::LoadBalanceHosts::Disable;
+    let _ = sntl::core::TargetSessionAttrs::Any;
+    let _ = sntl::core::ChannelBinding::Prefer;
+
+    // Protocol types
+    let _ = std::mem::size_of::<sntl::core::Portal>();
+    let _ = std::mem::size_of::<sntl::core::Notification>();
+    let _ = std::mem::size_of::<sntl::core::SimpleQueryRow>();
+    let _ = std::mem::size_of::<sntl::core::SimpleQueryMessage>();
+
+    // Observability
+    let _ = std::mem::size_of::<sntl::core::PoolMetrics>();
+
+    // Advisory locks
+    let _ = std::mem::size_of::<sntl::core::PgAdvisoryLock>();
+}

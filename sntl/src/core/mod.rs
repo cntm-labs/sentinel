@@ -30,3 +30,10 @@ pub use driver::{
     CancelToken, Config, Connection, IsolationLevel, Pool, PooledConnection, SslMode,
     TransactionConfig,
 };
+
+// Re-export v1.0.0 driver types
+pub use driver::{BinaryCopyDecoder, BinaryCopyEncoder, TextCopyDecoder, TextCopyEncoder};
+pub use driver::{ChannelBinding, GenericClient, LoadBalanceHosts, TargetSessionAttrs};
+pub use driver::{FromSql, PoolMetrics};
+pub use driver::{Notification, Portal, SimpleQueryMessage, SimpleQueryRow};
+pub use driver::{PgAdvisoryLock, PgAdvisoryLockGuard};
