@@ -1,4 +1,4 @@
-use sntl::{Model, sentinel};
+use sntl::Model;
 
 #[derive(Model)]
 #[sentinel(table = "users")]
