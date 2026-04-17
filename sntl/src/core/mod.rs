@@ -1,5 +1,6 @@
 //! Sentinel Core — Model trait, QueryBuilder, types, and connection abstraction.
 
+pub mod copy;
 pub mod error;
 pub mod expr;
 pub mod model;
