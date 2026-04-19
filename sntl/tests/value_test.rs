@@ -1264,4 +1264,360 @@ fn value_new_variants_debug() {
         is_point: true,
     });
     assert!(format!("{v:?}").contains("Cube"));
+
+    // multirange debug
+    let v = Value::Int4Multirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::INT4MULTIRANGE,
+        range_oid: sntl::driver::Oid::INT4RANGE,
+        element_oid: sntl::driver::Oid::INT4,
+    });
+    assert!(format!("{v:?}").contains("Int4Multirange"));
+
+    let v = Value::Int8Multirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::INT8MULTIRANGE,
+        range_oid: sntl::driver::Oid::INT8RANGE,
+        element_oid: sntl::driver::Oid::INT8,
+    });
+    assert!(format!("{v:?}").contains("Int8Multirange"));
+
+    let v = Value::NumMultirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::NUMMULTIRANGE,
+        range_oid: sntl::driver::Oid::NUMRANGE,
+        element_oid: sntl::driver::Oid::NUMERIC,
+    });
+    assert!(format!("{v:?}").contains("NumMultirange"));
+
+    let v = Value::TsMultirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::TSMULTIRANGE,
+        range_oid: sntl::driver::Oid::TSRANGE,
+        element_oid: sntl::driver::Oid::TIMESTAMP,
+    });
+    assert!(format!("{v:?}").contains("TsMultirange"));
+
+    let v = Value::TsTzMultirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::TSTZMULTIRANGE,
+        range_oid: sntl::driver::Oid::TSTZRANGE,
+        element_oid: sntl::driver::Oid::TIMESTAMPTZ,
+    });
+    assert!(format!("{v:?}").contains("TsTzMultirange"));
+
+    let v = Value::DateMultirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::DATEMULTIRANGE,
+        range_oid: sntl::driver::Oid::DATERANGE,
+        element_oid: sntl::driver::Oid::DATE,
+    });
+    assert!(format!("{v:?}").contains("DateMultirange"));
+
+    // LQuery debug
+    let v = Value::LQuery(sntl::driver::types::ltree::PgLQuery("*.x".into()));
+    assert!(format!("{v:?}").contains("LQuery"));
+}
+
+#[test]
+fn value_new_variants_tosql_and_oid() {
+    use sntl::driver::ToSql;
+
+    // TimeTz
+    let v = Value::TimeTz(sntl::driver::types::timetz::PgTimeTz {
+        time: chrono::NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
+        offset_seconds: 0,
+    });
+    assert_eq!(v.oid(), sntl::driver::Oid::TIMETZ);
+    let mut buf = bytes::BytesMut::new();
+    v.to_sql(&mut buf).unwrap();
+
+    // MacAddr8
+    let v = Value::MacAddr8(sntl::driver::types::network::PgMacAddr8([
+        1, 2, 3, 4, 5, 6, 7, 8,
+    ]));
+    assert_eq!(v.oid(), sntl::driver::Oid::MACADDR8);
+    let mut buf = bytes::BytesMut::new();
+    v.to_sql(&mut buf).unwrap();
+
+    // LTree
+    let v = Value::LTree(sntl::driver::types::ltree::PgLTree("a.b".into()));
+    let _ = v.oid();
+    let mut buf = bytes::BytesMut::new();
+    v.to_sql(&mut buf).unwrap();
+
+    // LQuery
+    let v = Value::LQuery(sntl::driver::types::ltree::PgLQuery("*.x".into()));
+    let _ = v.oid();
+    let mut buf = bytes::BytesMut::new();
+    v.to_sql(&mut buf).unwrap();
+
+    // Cube
+    let v = Value::Cube(sntl::driver::types::cube::PgCube {
+        coordinates: vec![1.0, 2.0],
+        is_point: true,
+    });
+    let _ = v.oid();
+    let mut buf = bytes::BytesMut::new();
+    v.to_sql(&mut buf).unwrap();
+
+    // All multirange oid + tosql
+    let mr = Value::Int4Multirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::INT4MULTIRANGE,
+        range_oid: sntl::driver::Oid::INT4RANGE,
+        element_oid: sntl::driver::Oid::INT4,
+    });
+    assert_eq!(mr.oid(), sntl::driver::Oid::INT4MULTIRANGE);
+    let mut buf = bytes::BytesMut::new();
+    mr.to_sql(&mut buf).unwrap();
+
+    let mr = Value::Int8Multirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::INT8MULTIRANGE,
+        range_oid: sntl::driver::Oid::INT8RANGE,
+        element_oid: sntl::driver::Oid::INT8,
+    });
+    assert_eq!(mr.oid(), sntl::driver::Oid::INT8MULTIRANGE);
+    let mut buf = bytes::BytesMut::new();
+    mr.to_sql(&mut buf).unwrap();
+
+    let mr = Value::NumMultirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::NUMMULTIRANGE,
+        range_oid: sntl::driver::Oid::NUMRANGE,
+        element_oid: sntl::driver::Oid::NUMERIC,
+    });
+    assert_eq!(mr.oid(), sntl::driver::Oid::NUMMULTIRANGE);
+    let mut buf = bytes::BytesMut::new();
+    mr.to_sql(&mut buf).unwrap();
+
+    let mr = Value::TsMultirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::TSMULTIRANGE,
+        range_oid: sntl::driver::Oid::TSRANGE,
+        element_oid: sntl::driver::Oid::TIMESTAMP,
+    });
+    assert_eq!(mr.oid(), sntl::driver::Oid::TSMULTIRANGE);
+    let mut buf = bytes::BytesMut::new();
+    mr.to_sql(&mut buf).unwrap();
+
+    let mr = Value::TsTzMultirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::TSTZMULTIRANGE,
+        range_oid: sntl::driver::Oid::TSTZRANGE,
+        element_oid: sntl::driver::Oid::TIMESTAMPTZ,
+    });
+    assert_eq!(mr.oid(), sntl::driver::Oid::TSTZMULTIRANGE);
+    let mut buf = bytes::BytesMut::new();
+    mr.to_sql(&mut buf).unwrap();
+
+    let mr = Value::DateMultirange(sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::DATEMULTIRANGE,
+        range_oid: sntl::driver::Oid::DATERANGE,
+        element_oid: sntl::driver::Oid::DATE,
+    });
+    assert_eq!(mr.oid(), sntl::driver::Oid::DATEMULTIRANGE);
+    let mut buf = bytes::BytesMut::new();
+    mr.to_sql(&mut buf).unwrap();
+}
+
+#[test]
+fn value_new_variants_display() {
+    // TimeTz display
+    let v = Value::TimeTz(sntl::driver::types::timetz::PgTimeTz {
+        time: chrono::NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
+        offset_seconds: 0,
+    });
+    let _ = format!("{v}");
+
+    // LQuery display
+    let v = Value::LQuery(sntl::driver::types::ltree::PgLQuery("*.x".into()));
+    assert_eq!(format!("{v}"), "*.x");
+
+    // Cube display
+    let v = Value::Cube(sntl::driver::types::cube::PgCube {
+        coordinates: vec![1.0],
+        is_point: true,
+    });
+    let _ = format!("{v}");
+
+    // Multirange display
+    for mr in [
+        Value::Int4Multirange(sntl::driver::types::multirange::PgMultirange {
+            ranges: vec![],
+            multirange_oid: sntl::driver::Oid::INT4MULTIRANGE,
+            range_oid: sntl::driver::Oid::INT4RANGE,
+            element_oid: sntl::driver::Oid::INT4,
+        }),
+        Value::Int8Multirange(sntl::driver::types::multirange::PgMultirange {
+            ranges: vec![],
+            multirange_oid: sntl::driver::Oid::INT8MULTIRANGE,
+            range_oid: sntl::driver::Oid::INT8RANGE,
+            element_oid: sntl::driver::Oid::INT8,
+        }),
+    ] {
+        let _ = format!("{mr}");
+    }
+
+    let _ = format!(
+        "{}",
+        Value::NumMultirange(sntl::driver::types::multirange::PgMultirange {
+            ranges: vec![],
+            multirange_oid: sntl::driver::Oid::NUMMULTIRANGE,
+            range_oid: sntl::driver::Oid::NUMRANGE,
+            element_oid: sntl::driver::Oid::NUMERIC,
+        })
+    );
+    let _ = format!(
+        "{}",
+        Value::TsMultirange(sntl::driver::types::multirange::PgMultirange {
+            ranges: vec![],
+            multirange_oid: sntl::driver::Oid::TSMULTIRANGE,
+            range_oid: sntl::driver::Oid::TSRANGE,
+            element_oid: sntl::driver::Oid::TIMESTAMP,
+        })
+    );
+    let _ = format!(
+        "{}",
+        Value::TsTzMultirange(sntl::driver::types::multirange::PgMultirange {
+            ranges: vec![],
+            multirange_oid: sntl::driver::Oid::TSTZMULTIRANGE,
+            range_oid: sntl::driver::Oid::TSTZRANGE,
+            element_oid: sntl::driver::Oid::TIMESTAMPTZ,
+        })
+    );
+    let _ = format!(
+        "{}",
+        Value::DateMultirange(sntl::driver::types::multirange::PgMultirange {
+            ranges: vec![],
+            multirange_oid: sntl::driver::Oid::DATEMULTIRANGE,
+            range_oid: sntl::driver::Oid::DATERANGE,
+            element_oid: sntl::driver::Oid::DATE,
+        })
+    );
+}
+
+#[test]
+fn value_new_variants_partial_eq_extended() {
+    // LQuery
+    let a = Value::LQuery(sntl::driver::types::ltree::PgLQuery("*.x".into()));
+    let b = Value::LQuery(sntl::driver::types::ltree::PgLQuery("*.x".into()));
+    assert_eq!(a, b);
+
+    // Cube
+    let a = Value::Cube(sntl::driver::types::cube::PgCube {
+        coordinates: vec![1.0],
+        is_point: true,
+    });
+    let b = Value::Cube(sntl::driver::types::cube::PgCube {
+        coordinates: vec![1.0],
+        is_point: true,
+    });
+    assert_eq!(a, b);
+
+    // Multiranges
+    let mk = || sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::INT4MULTIRANGE,
+        range_oid: sntl::driver::Oid::INT4RANGE,
+        element_oid: sntl::driver::Oid::INT4,
+    };
+    assert_eq!(Value::Int4Multirange(mk()), Value::Int4Multirange(mk()));
+
+    let mk8 = || sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::INT8MULTIRANGE,
+        range_oid: sntl::driver::Oid::INT8RANGE,
+        element_oid: sntl::driver::Oid::INT8,
+    };
+    assert_eq!(Value::Int8Multirange(mk8()), Value::Int8Multirange(mk8()));
+
+    let mkn = || sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::NUMMULTIRANGE,
+        range_oid: sntl::driver::Oid::NUMRANGE,
+        element_oid: sntl::driver::Oid::NUMERIC,
+    };
+    assert_eq!(Value::NumMultirange(mkn()), Value::NumMultirange(mkn()));
+
+    let mkt = || sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::TSMULTIRANGE,
+        range_oid: sntl::driver::Oid::TSRANGE,
+        element_oid: sntl::driver::Oid::TIMESTAMP,
+    };
+    assert_eq!(Value::TsMultirange(mkt()), Value::TsMultirange(mkt()));
+
+    let mktz = || sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::TSTZMULTIRANGE,
+        range_oid: sntl::driver::Oid::TSTZRANGE,
+        element_oid: sntl::driver::Oid::TIMESTAMPTZ,
+    };
+    assert_eq!(Value::TsTzMultirange(mktz()), Value::TsTzMultirange(mktz()));
+
+    let mkd = || sntl::driver::types::multirange::PgMultirange {
+        ranges: vec![],
+        multirange_oid: sntl::driver::Oid::DATEMULTIRANGE,
+        range_oid: sntl::driver::Oid::DATERANGE,
+        element_oid: sntl::driver::Oid::DATE,
+    };
+    assert_eq!(Value::DateMultirange(mkd()), Value::DateMultirange(mkd()));
+}
+
+#[test]
+fn value_new_variants_as_methods() {
+    // as_timetz None branch
+    assert!(Value::Null.as_timetz().is_none());
+
+    // as_macaddr8
+    let v = Value::MacAddr8(sntl::driver::types::network::PgMacAddr8([1; 8]));
+    assert!(v.as_macaddr8().is_some());
+    assert!(Value::Null.as_macaddr8().is_none());
+
+    // as_ltree None
+    assert!(Value::Null.as_ltree().is_none());
+
+    // as_lquery None
+    assert!(Value::Null.as_lquery().is_none());
+
+    // as_cube None
+    assert!(Value::Null.as_cube().is_none());
+}
+
+#[test]
+fn value_array_oid_new_types() {
+    use sntl::driver::ToSql;
+
+    // JSONB array
+    let v = Value::Array(vec![Value::Json(serde_json::json!({"a": 1}))]);
+    assert_eq!(v.oid(), sntl::driver::Oid::JSONB_ARRAY);
+
+    // TIMESTAMP array
+    let v = Value::Array(vec![
+        Value::TimestampNaive(chrono::NaiveDateTime::default()),
+    ]);
+    assert_eq!(v.oid(), sntl::driver::Oid::TIMESTAMP_ARRAY);
+
+    // TIMESTAMPTZ array
+    let v = Value::Array(vec![Value::Timestamp(chrono::Utc::now())]);
+    assert_eq!(v.oid(), sntl::driver::Oid::TIMESTAMPTZ_ARRAY);
+
+    // DATE array
+    let v = Value::Array(vec![Value::Date(chrono::NaiveDate::default())]);
+    assert_eq!(v.oid(), sntl::driver::Oid::DATE_ARRAY);
+
+    // TIME array
+    let v = Value::Array(vec![Value::Time(chrono::NaiveTime::default())]);
+    assert_eq!(v.oid(), sntl::driver::Oid::TIME_ARRAY);
+
+    // BYTEA array
+    let v = Value::Array(vec![Value::Bytes(vec![1, 2, 3])]);
+    assert_eq!(v.oid(), sntl::driver::Oid::BYTEA_ARRAY);
+
+    // MONEY array
+    let v = Value::Array(vec![Value::Money(100)]);
+    assert_eq!(v.oid(), sntl::driver::Oid::MONEY_ARRAY);
 }
