@@ -1,5 +1,7 @@
-//! Sentinel Macros — derive(Model), derive(Partial), #[sentinel(relations)].
+//! Sentinel Macros — derive(Model), derive(Partial), #[sentinel(relations)],
+//! derive(FromRow), and the sntl::query!() family.
 
+mod fromrow;
 mod model;
 mod partial;
 mod relation;
@@ -28,6 +30,14 @@ pub fn derive_model(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(Partial, attributes(sentinel))]
 pub fn derive_partial(input: TokenStream) -> TokenStream {
     partial::derive_partial_impl(input.into()).into()
+}
+
+/// Derive `FromRow` for ad-hoc structs returned by `sntl::query_as!`.
+///
+/// Each named field is filled in by `row.try_get_by_name::<FieldType>("field")`.
+#[proc_macro_derive(FromRow, attributes(sentinel))]
+pub fn derive_fromrow(input: TokenStream) -> TokenStream {
+    fromrow::derive_fromrow_impl(input.into()).into()
 }
 
 /// Declare relations on a model.

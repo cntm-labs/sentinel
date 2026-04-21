@@ -25,7 +25,8 @@ pub mod prelude {
 /// PostgreSQL wire protocol driver.
 pub use driver;
 
-/// Derive macros — `#[derive(Model)]`, `#[derive(Partial)]`.
+/// Derive macros — `#[derive(Model)]`, `#[derive(Partial)]`, `#[derive(FromRow)]`.
+pub use macros::FromRow;
 pub use macros::Model;
 pub use macros::Partial;
 
