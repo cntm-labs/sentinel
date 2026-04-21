@@ -64,6 +64,20 @@ pub fn query_scalar(input: TokenStream) -> TokenStream {
     query::typed::expand_scalar(input.into()).into()
 }
 
+/// `sntl::query_file!("queries/foo.sql", params…)` — load SQL from disk.
+#[proc_macro]
+#[proc_macro_error2::proc_macro_error]
+pub fn query_file(input: TokenStream) -> TokenStream {
+    query::file::expand(input.into()).into()
+}
+
+/// `sntl::query_file_as!(Target, "queries/foo.sql", params…)`.
+#[proc_macro]
+#[proc_macro_error2::proc_macro_error]
+pub fn query_file_as(input: TokenStream) -> TokenStream {
+    query::file::expand_as(input.into()).into()
+}
+
 /// Declare relations on a model.
 ///
 /// ```rust,ignore
