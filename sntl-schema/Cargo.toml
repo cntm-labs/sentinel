@@ -19,6 +19,12 @@ sqlparser.workspace = true
 sha2.workspace = true
 hex.workspace = true
 walkdir.workspace = true
+sentinel-driver = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
 
 [dev-dependencies]
 tempfile.workspace = true
+
+[features]
+default = ["online"]
+online = ["dep:sentinel-driver", "dep:tokio"]
