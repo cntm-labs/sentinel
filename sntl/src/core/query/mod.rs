@@ -4,6 +4,7 @@ mod dynamic;
 mod exec;
 mod include;
 mod insert;
+pub mod macro_support;
 mod pascal;
 mod select;
 mod typed;

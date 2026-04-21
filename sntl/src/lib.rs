@@ -40,3 +40,9 @@ pub use driver::{FromSql, ToSql};
 // Re-export key driver types for direct use
 pub use driver::{Config, Oid, Pool, PooledConnection};
 pub use driver::{ObservabilityConfig, QueryMetrics};
+
+/// Internal API used by `sntl::query!` family macros. Not covered by semver.
+#[doc(hidden)]
+pub mod __macro_support {
+    pub use crate::core::query::macro_support::*;
+}
