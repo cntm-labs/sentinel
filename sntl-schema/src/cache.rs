@@ -175,12 +175,11 @@ impl Cache {
                     path: p.clone(),
                     source,
                 })?;
-                let ce: CacheEntry = serde_json::from_str(&text).map_err(|source| {
-                    Error::JsonParse {
+                let ce: CacheEntry =
+                    serde_json::from_str(&text).map_err(|source| Error::JsonParse {
                         path: p.clone(),
                         source,
-                    }
-                })?;
+                    })?;
                 out.push(ce);
             }
         }

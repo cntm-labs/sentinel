@@ -1,5 +1,5 @@
-use sntl_schema::parser::{parse_statement, ParsedStatement};
-use sntl_schema::scope::{build_scope, JoinKind};
+use sntl_schema::parser::{ParsedStatement, parse_statement};
+use sntl_schema::scope::{JoinKind, build_scope};
 
 fn as_select(stmt: ParsedStatement) -> sqlparser::ast::Query {
     match stmt {

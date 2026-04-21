@@ -1,4 +1,4 @@
-use sntl_schema::parser::{parse_statement, ParsedStatement};
+use sntl_schema::parser::{ParsedStatement, parse_statement};
 
 #[test]
 fn parses_simple_select() {

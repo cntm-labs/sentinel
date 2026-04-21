@@ -29,7 +29,9 @@ pub enum Error {
     #[error("SQL parse error: {0}")]
     SqlParse(String),
 
-    #[error("cache format version {found} is newer than supported {supported}; upgrade sntl-macros")]
+    #[error(
+        "cache format version {found} is newer than supported {supported}; upgrade sntl-macros"
+    )]
     CacheVersionTooNew { found: u32, supported: u32 },
 
     #[error("cache miss: query not found at {path}")]

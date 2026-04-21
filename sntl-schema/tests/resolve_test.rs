@@ -1,5 +1,5 @@
 use sntl_schema::cache::CacheEntry;
-use sntl_schema::resolve::{resolve_offline, ResolveInput};
+use sntl_schema::resolve::{ResolveInput, resolve_offline};
 use sntl_schema::schema::{Column, PgTypeRef, Schema, Table};
 
 fn schema_with_users() -> Schema {

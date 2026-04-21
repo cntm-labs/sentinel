@@ -25,7 +25,10 @@ url = "postgres://localhost/app_dev"
     .unwrap();
 
     let cfg = Config::load_from(&path).unwrap();
-    assert_eq!(cfg.database.url.as_deref(), Some("postgres://localhost/app_dev"));
+    assert_eq!(
+        cfg.database.url.as_deref(),
+        Some("postgres://localhost/app_dev")
+    );
     assert_eq!(cfg.offline.enabled, OfflineMode::Off);
 }
 

@@ -1,6 +1,6 @@
-use sntl_schema::nullable::{infer_expr_nullability, ExprContext};
-use sntl_schema::scope::{JoinKind, Scope, TableRef};
+use sntl_schema::nullable::{ExprContext, infer_expr_nullability};
 use sntl_schema::schema::{Column, PgTypeRef, Schema, Table};
+use sntl_schema::scope::{JoinKind, Scope, TableRef};
 
 fn simple_schema() -> Schema {
     Schema {

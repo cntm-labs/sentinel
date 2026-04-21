@@ -114,11 +114,7 @@ fn resolve_identifier(parts: &[Ident], ctx: &ExprContext) -> NullabilityInfo {
                 .iter()
                 .filter(|t| ctx.schema.find_column(&t.table_name, column).is_some())
                 .collect();
-            if hits.len() == 1 {
-                Some(hits[0])
-            } else {
-                None
-            }
+            if hits.len() == 1 { Some(hits[0]) } else { None }
         }
     };
 
@@ -183,7 +179,9 @@ fn infer_function_nullability(func: &Function, ctx: &ExprContext) -> Nullability
 
     match name.as_str() {
         "coalesce" => {
-            let any_non_null = args.iter().any(|a| !infer_expr_nullability(a, ctx).nullable);
+            let any_non_null = args
+                .iter()
+                .any(|a| !infer_expr_nullability(a, ctx).nullable);
             NullabilityInfo {
                 nullable: !any_non_null,
                 confidence: Confidence::Medium,
