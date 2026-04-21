@@ -78,6 +78,21 @@ pub fn query_file_as(input: TokenStream) -> TokenStream {
     query::file::expand_as(input.into()).into()
 }
 
+/// `sntl::query_unchecked!("SQL", params…)` — escape hatch that skips the
+/// `.sentinel/` cache and runs through the driver's untyped `query` path.
+#[proc_macro]
+#[proc_macro_error2::proc_macro_error]
+pub fn query_unchecked(input: TokenStream) -> TokenStream {
+    query::unchecked::expand(input.into()).into()
+}
+
+/// `sntl::query_as_unchecked!(Target, "SQL", params…)`.
+#[proc_macro]
+#[proc_macro_error2::proc_macro_error]
+pub fn query_as_unchecked(input: TokenStream) -> TokenStream {
+    query::unchecked::expand_as(input.into()).into()
+}
+
 /// Declare relations on a model.
 ///
 /// ```rust,ignore

@@ -31,7 +31,9 @@ pub use macros::Model;
 pub use macros::Partial;
 
 /// Compile-time-validated `query!()` family.
-pub use macros::{query, query_as, query_file, query_file_as, query_scalar};
+pub use macros::{
+    query, query_as, query_as_unchecked, query_file, query_file_as, query_scalar, query_unchecked,
+};
 
 /// Attribute macro — `#[sentinel(relations)]`.
 pub use macros::sentinel;
