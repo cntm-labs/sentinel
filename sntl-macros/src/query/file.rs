@@ -4,8 +4,8 @@
 //! and forwards to `query!` / `query_as!` via re-expansion, so the same
 //! cache-validation path runs.
 
-use proc_macro2::{Span, TokenStream};
 use proc_macro_error2::abort;
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
 use std::path::PathBuf;
 use syn::parse::{Parse, ParseStream};
@@ -36,9 +36,11 @@ impl Parse for QueryFileArgs {
                     let content;
                     syn::bracketed!(content in input);
                     overrides_nullable =
-                        syn::punctuated::Punctuated::<Ident, Token![,]>::parse_terminated(&content)?
-                            .into_iter()
-                            .collect();
+                        syn::punctuated::Punctuated::<Ident, Token![,]>::parse_terminated(
+                            &content,
+                        )?
+                        .into_iter()
+                        .collect();
                     continue;
                 }
                 if key == "non_null" {
@@ -47,9 +49,11 @@ impl Parse for QueryFileArgs {
                     let content;
                     syn::bracketed!(content in input);
                     overrides_non_null =
-                        syn::punctuated::Punctuated::<Ident, Token![,]>::parse_terminated(&content)?
-                            .into_iter()
-                            .collect();
+                        syn::punctuated::Punctuated::<Ident, Token![,]>::parse_terminated(
+                            &content,
+                        )?
+                        .into_iter()
+                        .collect();
                     continue;
                 }
             }
@@ -86,7 +90,12 @@ fn load_sql_from(file: &LitStr) -> String {
     let path = base.join(&rel);
     match std::fs::read_to_string(&path) {
         Ok(s) => s,
-        Err(e) => abort!(file.span(), "cannot read SQL file {}: {}", path.display(), e),
+        Err(e) => abort!(
+            file.span(),
+            "cannot read SQL file {}: {}",
+            path.display(),
+            e
+        ),
     }
 }
 

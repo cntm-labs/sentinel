@@ -4,8 +4,8 @@
 //! `query`/`execute` path. Use as an escape hatch when you can't or don't
 //! want to commit cache state for a particular SQL string.
 
-use proc_macro2::TokenStream;
 use proc_macro_error2::abort;
+use proc_macro2::TokenStream;
 use quote::quote;
 use syn::parse::{Parse, ParseStream};
 use syn::{Expr, LitStr, Path, Token};

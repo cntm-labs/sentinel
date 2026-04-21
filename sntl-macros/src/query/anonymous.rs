@@ -4,12 +4,12 @@
 //! along with a `FromRow` impl, and returns a `QueryExecution` over it.
 
 use crate::query::args::{idents_to_strings, parse_query_args};
-use crate::query::codegen::{build_handle, build_params, rust_type_for_column, CodegenInput};
+use crate::query::codegen::{CodegenInput, build_handle, build_params, rust_type_for_column};
 use crate::query::lookup::{load_schema, lookup_entry};
-use proc_macro2::{Span, TokenStream};
 use proc_macro_error2::abort;
+use proc_macro2::{Span, TokenStream};
 use quote::{format_ident, quote};
-use sntl_schema::resolve::{resolve_offline, ResolveInput};
+use sntl_schema::resolve::{ResolveInput, resolve_offline};
 
 pub fn expand(ts: TokenStream) -> TokenStream {
     let span = Span::call_site();

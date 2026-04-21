@@ -7,6 +7,8 @@
 //! ```
 
 fn main() {
-    let sql = std::env::args().nth(1).expect("usage: compute_hash '<sql>'");
+    let sql = std::env::args()
+        .nth(1)
+        .expect("usage: compute_hash '<sql>'");
     println!("{}", sntl_schema::normalize::hash_sql(&sql));
 }

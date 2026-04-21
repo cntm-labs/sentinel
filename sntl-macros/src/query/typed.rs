@@ -2,12 +2,12 @@
 //! and `sntl::query_scalar!("SELECT one_col FROM …", params…)`.
 
 use crate::query::args::{idents_to_strings, parse_query_args, parse_query_as_args};
-use crate::query::codegen::{build_handle, build_params, rust_type_for_column, CodegenInput};
+use crate::query::codegen::{CodegenInput, build_handle, build_params, rust_type_for_column};
 use crate::query::lookup::{load_schema, lookup_entry};
-use proc_macro2::{Span, TokenStream};
 use proc_macro_error2::abort;
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use sntl_schema::resolve::{resolve_offline, ResolveInput};
+use sntl_schema::resolve::{ResolveInput, resolve_offline};
 
 pub fn expand_as(ts: TokenStream) -> TokenStream {
     let span = Span::call_site();

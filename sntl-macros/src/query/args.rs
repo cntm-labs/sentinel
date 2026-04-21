@@ -6,8 +6,8 @@
 //! query_as!(Path, "SQL", expr, …)
 //! ```
 
-use proc_macro2::TokenStream;
 use proc_macro_error2::abort;
+use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::{Expr, Ident, LitStr, Path, Token};

@@ -1,7 +1,7 @@
 //! Workspace-root discovery + cache reads for proc-macro-time SQL validation.
 
-use proc_macro2::Span;
 use proc_macro_error2::abort;
+use proc_macro2::Span;
 use sntl_schema::cache::{Cache, CacheEntry};
 use sntl_schema::normalize::hash_sql;
 use sntl_schema::schema::Schema;

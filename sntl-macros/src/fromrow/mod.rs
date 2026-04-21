@@ -1,7 +1,7 @@
 mod codegen;
 
 use proc_macro2::TokenStream;
-use syn::{parse2, DeriveInput};
+use syn::{DeriveInput, parse2};
 
 pub fn derive_fromrow_impl(input: TokenStream) -> TokenStream {
     let parsed: DeriveInput = match parse2(input) {

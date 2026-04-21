@@ -6,10 +6,10 @@
 //! `encode_params` so the runtime layer is just a thin batch-builder.
 
 use crate::query::lookup::{load_schema, lookup_entry};
-use proc_macro2::{Span, TokenStream};
 use proc_macro_error2::abort;
+use proc_macro2::{Span, TokenStream};
 use quote::quote;
-use sntl_schema::resolve::{resolve_offline, ResolveInput};
+use sntl_schema::resolve::{ResolveInput, resolve_offline};
 use syn::parse::{Parse, ParseStream};
 use syn::{Expr, Ident, LitStr, Path, Token};
 
@@ -38,7 +38,11 @@ impl Parse for PipelineArgs {
             let sql: LitStr = input.parse()?;
 
             let target = if input.peek(Ident)
-                && input.fork().parse::<Ident>().map(|i| i == "using").unwrap_or(false)
+                && input
+                    .fork()
+                    .parse::<Ident>()
+                    .map(|i| i == "using")
+                    .unwrap_or(false)
             {
                 let _: Ident = input.parse()?;
                 Some(input.parse::<Path>()?)
@@ -104,7 +108,7 @@ pub fn expand(ts: TokenStream) -> TokenStream {
         spec_items.push(quote! {
             ::sntl::__macro_support::PipelineQuerySpec {
                 sql: #lit_sql,
-                param_oids: &[ #( ::sntl::Oid::from(#oids) ),* ],
+                param_oids: ::std::vec![ #( ::sntl::Oid::from(#oids) ),* ],
                 encoded_params: ::sntl::__macro_support::encode_params(
                     &[ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ]
                 )?,
