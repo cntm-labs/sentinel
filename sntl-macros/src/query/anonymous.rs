@@ -52,7 +52,6 @@ pub fn expand(ts: TokenStream) -> TokenStream {
     let codegen_input = CodegenInput {
         sql: &sql,
         params: &resolved.params,
-        columns: &resolved.columns,
         param_exprs: &args.params,
     };
     let handle = build_handle(&codegen_input);

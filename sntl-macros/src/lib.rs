@@ -49,6 +49,21 @@ pub fn query(input: TokenStream) -> TokenStream {
     query::anonymous::expand(input.into()).into()
 }
 
+/// `sntl::query_as!(Target, "SQL", params…)` — like `query!` but loads each
+/// row into the user-supplied `Target: FromRow`.
+#[proc_macro]
+#[proc_macro_error2::proc_macro_error]
+pub fn query_as(input: TokenStream) -> TokenStream {
+    query::typed::expand_as(input.into()).into()
+}
+
+/// `sntl::query_scalar!("SQL", params…)` — single-column projection.
+#[proc_macro]
+#[proc_macro_error2::proc_macro_error]
+pub fn query_scalar(input: TokenStream) -> TokenStream {
+    query::typed::expand_scalar(input.into()).into()
+}
+
 /// Declare relations on a model.
 ///
 /// ```rust,ignore

@@ -8,7 +8,6 @@ use syn::Expr;
 pub struct CodegenInput<'a> {
     pub sql: &'a str,
     pub params: &'a [ParamInfo],
-    pub columns: &'a [ColumnInfo],
     pub param_exprs: &'a [Expr],
 }
 
