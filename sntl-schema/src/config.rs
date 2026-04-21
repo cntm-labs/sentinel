@@ -18,17 +18,12 @@ pub struct DatabaseConfig {
     pub url: Option<String>,
 }
 
-#[derive(Debug, Clone, Deserialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum OfflineMode {
     On,
+    #[default]
     Off,
-}
-
-impl Default for OfflineMode {
-    fn default() -> Self {
-        OfflineMode::Off
-    }
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]

@@ -40,7 +40,7 @@ pub fn infer_expr_nullability(expr: &Expr, ctx: &ExprContext) -> NullabilityInfo
         Expr::Cast { expr, .. } => infer_expr_nullability(expr, ctx),
 
         // Column reference
-        Expr::Identifier(ident) => resolve_identifier(&[ident.clone()], ctx),
+        Expr::Identifier(ident) => resolve_identifier(std::slice::from_ref(ident), ctx),
         Expr::CompoundIdentifier(parts) => resolve_identifier(parts, ctx),
 
         // IS NULL / IS NOT NULL → boolean non-null
