@@ -25,5 +25,5 @@ pub mod scope;
 #[cfg(feature = "online")]
 pub mod introspect;
 
-// `pub use error::{Error, Result};` is added in Task 3 once those types exist.
+pub use error::{Error, Result};
 
