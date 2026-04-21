@@ -93,6 +93,15 @@ pub fn query_as_unchecked(input: TokenStream) -> TokenStream {
     query::unchecked::expand_as(input.into()).into()
 }
 
+/// `sntl::query_pipeline!(conn, name1: "SQL"; name2: "SQL" using Target, p1, p2; …)`.
+///
+/// Sends every entry in a single PipelineBatch round-trip.
+#[proc_macro]
+#[proc_macro_error2::proc_macro_error]
+pub fn query_pipeline(input: TokenStream) -> TokenStream {
+    query::pipeline::expand(input.into()).into()
+}
+
 /// Declare relations on a model.
 ///
 /// ```rust,ignore
