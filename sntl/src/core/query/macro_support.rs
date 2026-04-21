@@ -17,17 +17,17 @@ pub trait FromRow: Sized {
     fn from_row(row: &Row) -> Result<Self>;
 }
 
-/// Bundle of the SQL text and the OIDs the macro inferred from `.sentinel/`.
+/// SQL text + the OIDs the macro inferred from `.sentinel/`.
 ///
-/// `query_typed` lets us send a single Parse+Bind+Describe+Execute round-trip
-/// per call without a separate Prepare step.
+/// Held by value (owned `Vec<Oid>`) so the execution struct is movable
+/// across `.fetch_one(conn).await` chains without dangling references.
 pub struct TypedQueryHandle<'sql> {
     pub sql: &'sql str,
-    pub param_oids: &'sql [Oid],
+    pub param_oids: Vec<Oid>,
 }
 
 impl<'sql> TypedQueryHandle<'sql> {
-    pub fn new(sql: &'sql str, param_oids: &'sql [Oid]) -> Self {
+    pub fn new(sql: &'sql str, param_oids: Vec<Oid>) -> Self {
         Self { sql, param_oids }
     }
 
@@ -48,16 +48,17 @@ impl<'sql> TypedQueryHandle<'sql> {
     }
 }
 
-/// Carries an inferred column-bound type `T` alongside the typed handle so the
-/// macro can call the right driver method without exposing details.
-pub struct QueryExecution<'q, T> {
-    handle: TypedQueryHandle<'q>,
-    params: &'q [&'q (dyn ToSql + Sync)],
+/// Bundles the typed handle with `Vec<&dyn ToSql>` of parameter borrows so
+/// the macro can return an expression that survives an `.await` chain. The
+/// borrows live as long as the caller's local bindings.
+pub struct QueryExecution<'a, T> {
+    handle: TypedQueryHandle<'a>,
+    params: Vec<&'a (dyn ToSql + Sync)>,
     _t: PhantomData<T>,
 }
 
-impl<'q, T: FromRow> QueryExecution<'q, T> {
-    pub fn new(handle: TypedQueryHandle<'q>, params: &'q [&'q (dyn ToSql + Sync)]) -> Self {
+impl<'a, T: FromRow> QueryExecution<'a, T> {
+    pub fn new(handle: TypedQueryHandle<'a>, params: Vec<&'a (dyn ToSql + Sync)>) -> Self {
         Self {
             handle,
             params,
@@ -66,13 +67,13 @@ impl<'q, T: FromRow> QueryExecution<'q, T> {
     }
 
     pub async fn fetch_one(self, conn: &mut Connection) -> Result<T> {
-        let pairs = self.handle.pair_with(self.params);
+        let pairs = self.handle.pair_with(&self.params);
         let row = conn.query_typed_one(self.handle.sql, &pairs).await?;
         T::from_row(&row)
     }
 
     pub async fn fetch_optional(self, conn: &mut Connection) -> Result<Option<T>> {
-        let pairs = self.handle.pair_with(self.params);
+        let pairs = self.handle.pair_with(&self.params);
         match conn.query_typed_opt(self.handle.sql, &pairs).await? {
             Some(row) => Ok(Some(T::from_row(&row)?)),
             None => Ok(None),
@@ -80,26 +81,26 @@ impl<'q, T: FromRow> QueryExecution<'q, T> {
     }
 
     pub async fn fetch_all(self, conn: &mut Connection) -> Result<Vec<T>> {
-        let pairs = self.handle.pair_with(self.params);
+        let pairs = self.handle.pair_with(&self.params);
         let rows = conn.query_typed(self.handle.sql, &pairs).await?;
         rows.iter().map(T::from_row).collect()
     }
 
     pub async fn execute(self, conn: &mut Connection) -> Result<u64> {
-        let pairs = self.handle.pair_with(self.params);
+        let pairs = self.handle.pair_with(&self.params);
         Ok(conn.execute_typed(self.handle.sql, &pairs).await?)
     }
 }
 
 /// Single-column scalar wrapper. The macro generates a tiny `__SntlScalar`
 /// FromRow type and routes through this so the user never sees a wrapper.
-pub struct ScalarExecution<'q, T, S> {
-    inner: QueryExecution<'q, S>,
+pub struct ScalarExecution<'a, T, S> {
+    inner: QueryExecution<'a, S>,
     extract: fn(S) -> T,
 }
 
-impl<'q, T, S: FromRow> ScalarExecution<'q, T, S> {
-    pub fn new(inner: QueryExecution<'q, S>, extract: fn(S) -> T) -> Self {
+impl<'a, T, S: FromRow> ScalarExecution<'a, T, S> {
+    pub fn new(inner: QueryExecution<'a, S>, extract: fn(S) -> T) -> Self {
         Self { inner, extract }
     }
 
@@ -123,14 +124,14 @@ impl<'q, T, S: FromRow> ScalarExecution<'q, T, S> {
 
 /// Unchecked execution path: ordinary `query`/`execute` without the macro's
 /// pre-resolved OIDs. Used by `query_unchecked!` and friends.
-pub struct UncheckedExecution<'q, T> {
-    pub sql: &'q str,
-    pub params: &'q [&'q (dyn ToSql + Sync)],
+pub struct UncheckedExecution<'a, T> {
+    pub sql: &'a str,
+    pub params: Vec<&'a (dyn ToSql + Sync)>,
     _t: PhantomData<T>,
 }
 
-impl<'q, T: FromRow> UncheckedExecution<'q, T> {
-    pub fn new(sql: &'q str, params: &'q [&'q (dyn ToSql + Sync)]) -> Self {
+impl<'a, T: FromRow> UncheckedExecution<'a, T> {
+    pub fn new(sql: &'a str, params: Vec<&'a (dyn ToSql + Sync)>) -> Self {
         Self {
             sql,
             params,
@@ -139,24 +140,24 @@ impl<'q, T: FromRow> UncheckedExecution<'q, T> {
     }
 
     pub async fn fetch_one(self, conn: &mut Connection) -> Result<T> {
-        let row = conn.query_one(self.sql, self.params).await?;
+        let row = conn.query_one(self.sql, &self.params).await?;
         T::from_row(&row)
     }
 
     pub async fn fetch_optional(self, conn: &mut Connection) -> Result<Option<T>> {
-        match conn.query_opt(self.sql, self.params).await? {
+        match conn.query_opt(self.sql, &self.params).await? {
             Some(row) => Ok(Some(T::from_row(&row)?)),
             None => Ok(None),
         }
     }
 
     pub async fn fetch_all(self, conn: &mut Connection) -> Result<Vec<T>> {
-        let rows = conn.query(self.sql, self.params).await?;
+        let rows = conn.query(self.sql, &self.params).await?;
         rows.iter().map(T::from_row).collect()
     }
 
     pub async fn execute(self, conn: &mut Connection) -> Result<u64> {
-        Ok(conn.execute(self.sql, self.params).await?)
+        Ok(conn.execute(self.sql, &self.params).await?)
     }
 }
 
@@ -166,7 +167,7 @@ impl<'q, T: FromRow> UncheckedExecution<'q, T> {
 /// the driver's `PipelineBatch`.
 pub struct PipelineQuerySpec<'q> {
     pub sql: &'q str,
-    pub param_oids: &'q [Oid],
+    pub param_oids: Vec<Oid>,
     pub encoded_params: Vec<Option<Vec<u8>>>,
 }
 

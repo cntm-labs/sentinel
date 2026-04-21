@@ -1,0 +1,11 @@
+error: query not found in cache (.sentinel/queries/dc15e1d063acd.json): cache miss: query not found at $WORKSPACE/.sentinel/queries/dc15e1d063acd.json
+
+         = help: run `sntl prepare` with DB connection, then commit .sentinel/
+         = help: or use `sntl::query_unchecked!` to skip validation temporarily
+
+ --> tests/expand/query/cache_miss.rs:5:13
+  |
+5 |     let _ = sntl::query!("SELECT no_such_query_ever");
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the macro `sntl::query` (in Nightly builds, run with -Z macro-backtrace for more info)

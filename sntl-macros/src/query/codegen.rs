@@ -11,23 +11,26 @@ pub struct CodegenInput<'a> {
     pub param_exprs: &'a [Expr],
 }
 
-/// Build the `TypedQueryHandle::new(sql, &[oids])` expression.
+/// Build the `TypedQueryHandle::new(sql, vec![oids])` expression. The `Vec`
+/// is owned so the resulting `QueryExecution` can move across `.await`.
 pub fn build_handle(input: &CodegenInput) -> TokenStream {
     let sql = input.sql;
     let oids = input.params.iter().map(|p| p.oid);
     quote! {
         ::sntl::__macro_support::TypedQueryHandle::new(
             #sql,
-            &[ #( ::sntl::Oid::from(#oids) ),* ],
+            ::std::vec![ #( ::sntl::Oid::from(#oids) ),* ],
         )
     }
 }
 
-/// Borrow each user-supplied expression as `&(dyn driver::ToSql + Sync)`.
+/// Borrow each user-supplied expression as `&(dyn driver::ToSql + Sync)` and
+/// collect the borrows into an owned `Vec` (the borrows still tie to caller
+/// scope; the `Vec` holds the references so the execution struct can move).
 pub fn build_params(input: &CodegenInput) -> TokenStream {
     let exprs = input.param_exprs;
     quote! {
-        &[ #( &(#exprs) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ]
+        ::std::vec![ #( &(#exprs) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ]
     }
 }
 

@@ -1,0 +1,25 @@
+version = 1
+postgres_version = "16.2"
+
+[[tables]]
+name = "users"
+schema = "public"
+
+  [[tables.columns]]
+  name = "id"
+  pg_type = "uuid"
+  oid = 2950
+  nullable = false
+  primary_key = true
+
+  [[tables.columns]]
+  name = "email"
+  pg_type = "text"
+  oid = 25
+  nullable = false
+
+  [[tables.columns]]
+  name = "deleted_at"
+  pg_type = "timestamptz"
+  oid = 1184
+  nullable = true

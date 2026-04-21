@@ -53,7 +53,7 @@ pub fn expand(ts: TokenStream) -> TokenStream {
     quote! {
         ::sntl::__macro_support::UncheckedExecution::<_>::new(
             #sql,
-            &[ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ],
+            ::std::vec![ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ],
         )
     }
 }
@@ -69,7 +69,7 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
     quote! {
         ::sntl::__macro_support::UncheckedExecution::<#target>::new(
             #sql,
-            &[ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ],
+            ::std::vec![ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ],
         )
     }
 }
