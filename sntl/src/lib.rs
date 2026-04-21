@@ -30,6 +30,9 @@ pub use macros::FromRow;
 pub use macros::Model;
 pub use macros::Partial;
 
+/// Compile-time-validated `query!()` family.
+pub use macros::query;
+
 /// Attribute macro — `#[sentinel(relations)]`.
 pub use macros::sentinel;
 

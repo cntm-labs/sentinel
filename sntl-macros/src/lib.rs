@@ -4,6 +4,7 @@
 mod fromrow;
 mod model;
 mod partial;
+mod query;
 mod relation;
 
 use proc_macro::TokenStream;
@@ -38,6 +39,14 @@ pub fn derive_partial(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(FromRow, attributes(sentinel))]
 pub fn derive_fromrow(input: TokenStream) -> TokenStream {
     fromrow::derive_fromrow_impl(input.into()).into()
+}
+
+/// `sntl::query!("SQL", params…)` — compile-time-validated query that returns
+/// an anonymous record (a private struct with one field per output column).
+#[proc_macro]
+#[proc_macro_error2::proc_macro_error]
+pub fn query(input: TokenStream) -> TokenStream {
+    query::anonymous::expand(input.into()).into()
 }
 
 /// Declare relations on a model.
