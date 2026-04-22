@@ -2,9 +2,9 @@ use sntl::FromRow;
 
 #[derive(FromRow)]
 pub struct Summary {
-    pub id: uuid::Uuid,
+    pub id: i32,
     pub email: String,
-    pub deleted_at: Option<chrono::DateTime<chrono::Utc>>,
+    pub created_at: chrono::DateTime<chrono::Utc>,
 }
 
 fn main() {
