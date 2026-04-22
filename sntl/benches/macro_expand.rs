@@ -2,7 +2,7 @@
 //! per-call hot path that lives in plain Rust is `hash_sql`; the rest
 //! (lookup + resolve) does I/O and is benched separately.
 
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 
 fn bench_hash_short(c: &mut Criterion) {
     c.bench_function("hash_sql_short", |b| {

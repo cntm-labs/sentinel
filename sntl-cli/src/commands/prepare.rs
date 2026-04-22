@@ -1,7 +1,7 @@
 //! `sntl prepare` — scan workspace, pull schema, write `.sentinel/` cache.
 
 use crate::{scan, ui};
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use sntl_schema::cache::{Cache, SourceLocation};
 use sntl_schema::config::Config;
 use std::path::PathBuf;

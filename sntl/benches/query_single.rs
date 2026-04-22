@@ -3,7 +3,7 @@
 //! work is tracked as a v0.3 follow-up so the bench harness compiles and
 //! runs in CI today even without a database.
 
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 
 fn bench_placeholder(c: &mut Criterion) {
     c.bench_function("noop", |b| b.iter(|| 1 + 1));

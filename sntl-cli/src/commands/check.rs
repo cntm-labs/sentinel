@@ -35,7 +35,11 @@ pub async fn run(workspace: Option<PathBuf>) -> Result<()> {
     for d in &found {
         let h = sntl_schema::normalize::hash_sql(&d.sql);
         if cache.read_entry(&h).is_err() {
-            ui::err(&format!("missing cache for {}:{}", d.file.display(), d.line));
+            ui::err(&format!(
+                "missing cache for {}:{}",
+                d.file.display(),
+                d.line
+            ));
             missing += 1;
         }
     }
