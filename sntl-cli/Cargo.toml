@@ -4,11 +4,22 @@ version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "CLI tool for Sentinel ORM — migrations, codegen, and schema management"
+description = "Sentinel ORM CLI — prepare, check, doctor"
 readme = "../README.md"
-keywords = ["orm", "postgresql", "cli", "migration", "codegen"]
+keywords = ["orm", "postgresql", "cli"]
 categories = ["database", "command-line-utilities"]
+
+[[bin]]
+name = "sntl"
+path = "src/main.rs"
 
 [dependencies]
 sntl.workspace = true
+sntl-schema.workspace = true
 tokio.workspace = true
+clap.workspace = true
+indicatif.workspace = true
+colored.workspace = true
+walkdir.workspace = true
+anyhow.workspace = true
+regex.workspace = true
