@@ -24,3 +24,13 @@ bytes.workspace = true
 [dev-dependencies]
 cargo-husky.workspace = true
 trybuild.workspace = true
+sntl-schema.workspace = true
+criterion = "0.5"
+
+[[bench]]
+name = "macro_expand"
+harness = false
+
+[[bench]]
+name = "query_single"
+harness = false
