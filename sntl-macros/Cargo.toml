@@ -18,6 +18,7 @@ quote.workspace = true
 darling.workspace = true
 proc-macro2.workspace = true
 proc-macro-error2.workspace = true
+sntl-schema.workspace = true
 
 [dev-dependencies]
 sntl.workspace = true
@@ -25,3 +26,7 @@ trybuild.workspace = true
 uuid.workspace = true
 chrono.workspace = true
 sentinel-driver.workspace = true
+tempfile.workspace = true
+
+[features]
+trybuild_fixtures = []

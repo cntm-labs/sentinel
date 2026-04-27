@@ -68,6 +68,62 @@ async fn main() -> Result<(), sntl::core::Error> {
 }
 ```
 
+## Compile-time SQL validation
+
+Sentinel ships an sqlx-style `query!()` family that pulls types from a checked-in
+`.sentinel/` cache. The schema and per-query metadata are produced by `sntl prepare`
+against a live PostgreSQL, then committed alongside the code so CI builds work
+offline.
+
+```rust
+use sntl::driver::Connection;
+
+async fn examples(conn: &mut Connection) -> sntl::Result<()> {
+    // Anonymous record — one struct field per output column.
+    let row = sntl::query!("SELECT id, email FROM users WHERE id = $1", 42i32)
+        .fetch_one(conn)
+        .await?;
+    let _: i32 = row.id;
+
+    // Typed dispatch — your struct must impl FromRow.
+    #[derive(sntl::FromRow)]
+    struct User { id: i32, email: String }
+    let user = sntl::query_as!(User, "SELECT id, email FROM users WHERE id = $1", 42i32)
+        .fetch_one(conn)
+        .await?;
+
+    // Single-column projection.
+    let count: i64 = sntl::query_scalar!("SELECT COUNT(*) FROM users")
+        .fetch_one(conn)
+        .await?;
+
+    // Pipelined batch — single network round-trip for N queries.
+    let _results = sntl::query_pipeline!(
+        conn,
+        a: "SELECT id FROM users WHERE id = $1", 1i32;
+        b: "SELECT id FROM users WHERE id = $1", 2i32;
+    ).await?;
+    Ok(())
+}
+```
+
+Bypass the cache temporarily with `sntl::query_unchecked!` / `query_as_unchecked!`,
+or load SQL from disk with `sntl::query_file!` / `query_file_as!`.
+
+The companion CLI provides:
+
+```sh
+sntl prepare   # scan workspace, pull schema, write .sentinel/
+sntl check     # validate cache vs current source (CI-friendly)
+sntl doctor    # diagnose config, DB, and cache health
+```
+
+Compared to sqlx: the offline cache is the source of truth (no DATABASE_URL required
+at compile time); pipelined batches are first-class; nullable inference can be
+overridden per-call with `nullable = [...]` / `non_null = [...]`.
+
+See `docs/migration-from-sqlx.md` for a side-by-side migration guide.
+
 ## Features
 
 - **Compile-time guards** — N+1, over-fetching, and unsafe relation access caught before runtime
@@ -83,15 +139,17 @@ async fn main() -> Result<(), sntl::core::Error> {
 
 ```
 sentinel/
-├── sntl           # Main crate — models, queries, transactions, types (cargo add sntl)
-├── sntl-macros    # Proc macros — derive(Model), derive(Partial)
+├── sntl           # Main crate — models, queries, transactions, types, query! family
+├── sntl-macros    # Proc macros — derive(Model), derive(Partial), derive(FromRow), query!()
+├── sntl-schema    # Shared SQL parsing, nullability, and .sentinel/ cache I/O
+├── sntl-cli       # CLI binary — `sntl prepare`, `sntl check`, `sntl doctor`
 ├── sntl-core      # Core traits extraction (planned)
-├── sntl-migrate   # Schema diff & migration generation (planned)
-└── sntl-cli       # CLI binary — sentinel command (planned)
+└── sntl-migrate   # Schema diff & migration generation (planned)
 ```
 
-> `sntl` is the only crate with implementation today. The others are published on crates.io
-> as name reservations and will be extracted/implemented in future releases.
+> `sntl`, `sntl-macros`, `sntl-schema`, and `sntl-cli` are implemented today.
+> `sntl-core` and `sntl-migrate` are published on crates.io as name reservations
+> and will be filled in in future releases.
 
 ## Development
 

@@ -1,6 +1,43 @@
-//! Sentinel CLI — command-line tool.
-//! Phase 1: Stub binary, implementation in later phase.
+//! `sntl` CLI — `prepare`, `check`, `doctor`.
 
-fn main() {
-    println!("sntl-cli: not yet implemented");
+use clap::{Parser, Subcommand};
+
+mod commands;
+mod scan;
+mod ui;
+
+#[derive(Parser)]
+#[command(name = "sntl", version, about = "Sentinel ORM CLI")]
+struct Cli {
+    #[arg(long, global = true, help = "Workspace root (default: auto-detect)")]
+    workspace: Option<std::path::PathBuf>,
+    #[arg(long, global = true, help = "Override DATABASE_URL from sentinel.toml")]
+    database_url: Option<String>,
+    #[command(subcommand)]
+    cmd: Command,
+}
+
+#[derive(Subcommand)]
+enum Command {
+    /// Scan workspace and cache query metadata in .sentinel/
+    Prepare {
+        #[arg(long, help = "Do not write anything; exit 1 if stale")]
+        check: bool,
+    },
+    /// Validate existing .sentinel/ cache
+    Check,
+    /// Diagnose config, DB, and cache health
+    Doctor,
+}
+
+#[tokio::main(flavor = "current_thread")]
+async fn main() -> anyhow::Result<()> {
+    let cli = Cli::parse();
+    match cli.cmd {
+        Command::Prepare { check } => {
+            commands::prepare::run(cli.workspace, cli.database_url, check).await
+        }
+        Command::Check => commands::check::run(cli.workspace).await,
+        Command::Doctor => commands::doctor::run(cli.workspace, cli.database_url).await,
+    }
 }

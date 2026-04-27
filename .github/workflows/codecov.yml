@@ -22,7 +22,7 @@ jobs:
       - name: Generate coverage
         run: >-
           cargo llvm-cov --workspace
-          --ignore-filename-regex '(sntl-cli/|sntl-core/|sntl-migrate/|sntl-macros/|query/exec\.rs|query/pascal\.rs|query/include\.rs|query/cursor\.rs|query/typed\.rs|transaction\.rs)'
+          --ignore-filename-regex '(sntl-cli/|sntl-core/|sntl-migrate/|sntl-macros/|sntl-schema/|query/exec\.rs|query/pascal\.rs|query/include\.rs|query/cursor\.rs|query/typed\.rs|query/macro_support\.rs|transaction\.rs)'
           --lcov --output-path lcov.info
           --fail-under-lines 100
       - name: Upload to Codecov

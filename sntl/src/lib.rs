@@ -25,9 +25,16 @@ pub mod prelude {
 /// PostgreSQL wire protocol driver.
 pub use driver;
 
-/// Derive macros — `#[derive(Model)]`, `#[derive(Partial)]`.
+/// Derive macros — `#[derive(Model)]`, `#[derive(Partial)]`, `#[derive(FromRow)]`.
+pub use macros::FromRow;
 pub use macros::Model;
 pub use macros::Partial;
+
+/// Compile-time-validated `query!()` family.
+pub use macros::{
+    query, query_as, query_as_unchecked, query_file, query_file_as, query_pipeline, query_scalar,
+    query_unchecked,
+};
 
 /// Attribute macro — `#[sentinel(relations)]`.
 pub use macros::sentinel;
@@ -40,3 +47,9 @@ pub use driver::{FromSql, ToSql};
 // Re-export key driver types for direct use
 pub use driver::{Config, Oid, Pool, PooledConnection};
 pub use driver::{ObservabilityConfig, QueryMetrics};
+
+/// Internal API used by `sntl::query!` family macros. Not covered by semver.
+#[doc(hidden)]
+pub mod __macro_support {
+    pub use crate::core::query::macro_support::*;
+}

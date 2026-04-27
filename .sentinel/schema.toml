@@ -1,0 +1,82 @@
+version = 1
+postgres_version = "16.2"
+
+# Mirrors tests/integration/setup.sql so the live-PG integration test in
+# sntl/tests/macro_query_test.rs and the trybuild fixtures share one schema.
+
+[[tables]]
+name = "users"
+schema = "public"
+
+  [[tables.columns]]
+  name = "id"
+  pg_type = "int4"
+  oid = 23
+  nullable = false
+  primary_key = true
+
+  [[tables.columns]]
+  name = "name"
+  pg_type = "text"
+  oid = 25
+  nullable = false
+
+  [[tables.columns]]
+  name = "email"
+  pg_type = "text"
+  oid = 25
+  nullable = false
+  unique = true
+
+  [[tables.columns]]
+  name = "active"
+  pg_type = "bool"
+  oid = 16
+  nullable = false
+
+  [[tables.columns]]
+  name = "created_at"
+  pg_type = "timestamptz"
+  oid = 1184
+  nullable = false
+
+[[tables]]
+name = "posts"
+schema = "public"
+
+  [[tables.columns]]
+  name = "id"
+  pg_type = "int4"
+  oid = 23
+  nullable = false
+  primary_key = true
+
+  [[tables.columns]]
+  name = "user_id"
+  pg_type = "int4"
+  oid = 23
+  nullable = false
+
+  [[tables.columns]]
+  name = "title"
+  pg_type = "text"
+  oid = 25
+  nullable = false
+
+  [[tables.columns]]
+  name = "body"
+  pg_type = "text"
+  oid = 25
+  nullable = false
+
+  [[tables.columns]]
+  name = "published"
+  pg_type = "bool"
+  oid = 16
+  nullable = false
+
+  [[tables.columns]]
+  name = "created_at"
+  pg_type = "timestamptz"
+  oid = 1184
+  nullable = false
