@@ -40,12 +40,25 @@ pub struct ColumnInfo {
     pub nullable: bool,
     #[serde(default)]
     pub origin: Option<ColumnOrigin>,
+    /// `Some` for array columns. Backward-compatible default = `None` so
+    /// caches written before this field existed still deserialize.
+    #[serde(default)]
+    pub element_type: Option<ElementTypeRef>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ColumnOrigin {
     pub table: String,
     pub column: String,
+}
+
+/// Element-type info for array columns. Populated by `sntl prepare` from
+/// `pg_catalog.pg_type`; the macro consults it to choose between `Vec<T>`
+/// and `Vec<Option<T>>` at proc-macro time.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ElementTypeRef {
+    pub pg_type: String,
+    pub oid: u32,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

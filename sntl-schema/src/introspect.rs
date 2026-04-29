@@ -180,6 +180,7 @@ pub async fn prepare_query(
             oid: c.type_oid,
             nullable: true, // refined by the offline analyzer; the server can't tell us at prepare time
             origin: None,
+            element_type: None, // populated in Task 10's batched pg_type lookup
         })
         .collect();
 
