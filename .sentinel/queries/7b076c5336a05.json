@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "sql_hash": "7b076c5336a05",
+  "sql_normalized": "SELECT tags FROM users",
+  "params": [],
+  "columns": [
+    {
+      "name": "tags",
+      "pg_type": "_text",
+      "oid": 1009,
+      "nullable": false,
+      "element_type": { "pg_type": "text", "oid": 25 }
+    }
+  ],
+  "query_kind": "Select",
+  "has_returning": false
+}
