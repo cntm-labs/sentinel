@@ -6,10 +6,55 @@
 //! - [`pull_schema`]: query `information_schema` + `pg_catalog` to materialise a [`Schema`].
 //! - [`prepare_query`]: PARSE a SQL statement to capture parameter OIDs and result columns.
 
-use crate::cache::{CacheEntry, ColumnInfo, ParamInfo, QueryKind, SourceLocation};
+use crate::cache::{CacheEntry, ColumnInfo, ElementTypeRef, ParamInfo, QueryKind, SourceLocation};
 use crate::error::{Error, Result};
 use crate::normalize::{hash_sql, normalize_sql};
 use crate::schema::{Column, PgTypeRef, Schema, Table};
+use std::collections::HashMap;
+
+/// Look up element types for a batch of OIDs in one round-trip. Returns an
+/// empty map if `oids` is empty or none of the OIDs is an array type
+/// (`pg_type.typelem = 0`).
+async fn fetch_element_types(
+    client: &mut sentinel_driver::Connection,
+    oids: &[u32],
+) -> Result<HashMap<u32, ElementTypeRef>> {
+    if oids.is_empty() {
+        return Ok(HashMap::new());
+    }
+    let oids_i32: Vec<i32> = oids.iter().map(|o| *o as i32).collect();
+    let rows = client
+        .query(
+            "SELECT t.oid::int4 AS array_oid, e.oid::int4 AS elem_oid, e.typname \
+             FROM pg_catalog.pg_type t \
+             JOIN pg_catalog.pg_type e ON e.oid = t.typelem \
+             WHERE t.oid = ANY($1) AND t.typelem <> 0",
+            &[&oids_i32],
+        )
+        .await
+        .map_err(|e| Error::Introspect(format!("element-type lookup: {e}")))?;
+
+    let mut out = HashMap::new();
+    for row in rows {
+        let array_oid: i32 = row
+            .try_get(0)
+            .map_err(|e| Error::Introspect(format!("decode array_oid: {e}")))?;
+        let elem_oid: i32 = row
+            .try_get(1)
+            .map_err(|e| Error::Introspect(format!("decode elem_oid: {e}")))?;
+        let pg_type: String = row
+            .try_get(2)
+            .map_err(|e| Error::Introspect(format!("decode typname: {e}")))?;
+        out.insert(
+            array_oid as u32,
+            ElementTypeRef {
+                pg_type,
+                oid: elem_oid as u32,
+            },
+        );
+    }
+    Ok(out)
+}
 
 pub async fn pull_schema(conn_str: &str) -> Result<Schema> {
     let config = sentinel_driver::Config::parse(conn_str)
@@ -169,7 +214,7 @@ pub async fn prepare_query(
         })
         .collect();
 
-    let columns: Vec<ColumnInfo> = stmt
+    let mut columns: Vec<ColumnInfo> = stmt
         .columns()
         .map(<[_]>::to_vec)
         .unwrap_or_default()
@@ -180,9 +225,18 @@ pub async fn prepare_query(
             oid: c.type_oid,
             nullable: true, // refined by the offline analyzer; the server can't tell us at prepare time
             origin: None,
-            element_type: None, // populated in Task 10's batched pg_type lookup
+            element_type: None,
         })
         .collect();
+
+    // Patch in element types for any columns whose oid is an array oid.
+    let array_oids: Vec<u32> = columns.iter().map(|c| c.oid).collect();
+    let elements = fetch_element_types(&mut client, &array_oids).await?;
+    for col in columns.iter_mut() {
+        if let Some(et) = elements.get(&col.oid) {
+            col.element_type = Some(et.clone());
+        }
+    }
 
     let normalized = normalize_sql(sql);
     let hash = hash_sql(sql);
