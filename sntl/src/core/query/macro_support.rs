@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 
 use crate::core::error::Result;
 use driver::pipeline::QueryResult;
-use driver::{Connection, Oid, Row, ToSql};
+use driver::{Connection, FromSql, Oid, Row, ToSql};
 
 /// Trait implemented by types that can be constructed from a Sentinel row.
 ///
@@ -208,3 +208,41 @@ pub fn encode_params(params: &[&(dyn ToSql + Sync)]) -> Result<Vec<Option<Vec<u8
     }
     Ok(out)
 }
+
+// ── Tuple FromRow blanket impls ──────────────────────────────────────────────
+//
+// Mirrors sqlx's `from_row.rs` — positional `try_get(idx)` for arity 1-16.
+// Lets `query_as!((i32, String), …)` work without a wrapper struct.
+
+macro_rules! impl_from_row_tuple {
+    ($($ty:ident at $idx:tt),+ $(,)?) => {
+        impl<$($ty),+> FromRow for ($($ty,)+)
+        where
+            $($ty: FromSql),+
+        {
+            fn from_row(row: &Row) -> Result<Self> {
+                Ok(($(
+                    row.try_get::<$ty>($idx)
+                        .map_err(crate::Error::Driver)?,
+                )+))
+            }
+        }
+    };
+}
+
+impl_from_row_tuple!(T0 at 0);
+impl_from_row_tuple!(T0 at 0, T1 at 1);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6, T7 at 7);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6, T7 at 7, T8 at 8);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6, T7 at 7, T8 at 8, T9 at 9);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6, T7 at 7, T8 at 8, T9 at 9, T10 at 10);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6, T7 at 7, T8 at 8, T9 at 9, T10 at 10, T11 at 11);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6, T7 at 7, T8 at 8, T9 at 9, T10 at 10, T11 at 11, T12 at 12);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6, T7 at 7, T8 at 8, T9 at 9, T10 at 10, T11 at 11, T12 at 12, T13 at 13);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6, T7 at 7, T8 at 8, T9 at 9, T10 at 10, T11 at 11, T12 at 12, T13 at 13, T14 at 14);
+impl_from_row_tuple!(T0 at 0, T1 at 1, T2 at 2, T3 at 3, T4 at 4, T5 at 5, T6 at 6, T7 at 7, T8 at 8, T9 at 9, T10 at 10, T11 at 11, T12 at 12, T13 at 13, T14 at 14, T15 at 15);
