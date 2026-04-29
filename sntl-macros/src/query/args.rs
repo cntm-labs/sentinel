@@ -2,7 +2,12 @@
 //!
 //! Grammar:
 //! ```text
-//! query!("SQL", expr, expr, … [, nullable = [a, b]] [, non_null = [c]])
+//! query!(
+//!     "SQL", expr, expr, …
+//!     [, nullable = [a, b]]
+//!     [, non_null = [c]]
+//!     [, non_null_elements = [tags]]
+//! )
 //! query_as!(Path, "SQL", expr, …)
 //! ```
 
@@ -17,6 +22,7 @@ pub struct QueryArgs {
     pub params: Vec<Expr>,
     pub overrides_nullable: Vec<Ident>,
     pub overrides_non_null: Vec<Ident>,
+    pub overrides_non_null_elements: Vec<Ident>,
 }
 
 pub struct QueryAsArgs {
@@ -30,6 +36,7 @@ impl Parse for QueryArgs {
         let mut params = Vec::new();
         let mut overrides_nullable = Vec::new();
         let mut overrides_non_null = Vec::new();
+        let mut overrides_non_null_elements = Vec::new();
         while input.parse::<Token![,]>().is_ok() {
             if input.is_empty() {
                 break;
@@ -50,6 +57,13 @@ impl Parse for QueryArgs {
                         overrides_non_null = parse_ident_list(input)?.into_iter().collect();
                         continue;
                     }
+                    "non_null_elements" => {
+                        let _key: Ident = input.parse()?;
+                        input.parse::<Token![=]>()?;
+                        overrides_non_null_elements =
+                            parse_ident_list(input)?.into_iter().collect();
+                        continue;
+                    }
                     _ => {}
                 }
             }
@@ -60,6 +74,7 @@ impl Parse for QueryArgs {
             params,
             overrides_nullable,
             overrides_non_null,
+            overrides_non_null_elements,
         })
     }
 }

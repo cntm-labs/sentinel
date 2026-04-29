@@ -18,13 +18,14 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
 
     let nullable = idents_to_strings(&args.query.overrides_nullable);
     let non_null = idents_to_strings(&args.query.overrides_non_null);
+    let non_null_elements = idents_to_strings(&args.query.overrides_non_null_elements);
     let resolved = match resolve_offline(ResolveInput {
         sql: &sql,
         cache_entry: &entry,
         schema: &schema,
         overrides_nullable: &nullable,
         overrides_non_null: &non_null,
-        overrides_non_null_elements: &[], // wired up in Task 12
+        overrides_non_null_elements: &non_null_elements,
         strict: true,
     }) {
         Ok(r) => r,
@@ -64,13 +65,14 @@ pub fn expand_scalar(ts: TokenStream) -> TokenStream {
 
     let nullable = idents_to_strings(&args.overrides_nullable);
     let non_null = idents_to_strings(&args.overrides_non_null);
+    let non_null_elements = idents_to_strings(&args.overrides_non_null_elements);
     let resolved = match resolve_offline(ResolveInput {
         sql: &sql,
         cache_entry: &entry,
         schema: &schema,
         overrides_nullable: &nullable,
         overrides_non_null: &non_null,
-        overrides_non_null_elements: &[], // wired up in Task 12
+        overrides_non_null_elements: &non_null_elements,
         strict: true,
     }) {
         Ok(r) => r,

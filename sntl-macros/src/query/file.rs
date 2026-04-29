@@ -16,6 +16,7 @@ pub struct QueryFileArgs {
     pub params: Vec<Expr>,
     pub overrides_nullable: Vec<Ident>,
     pub overrides_non_null: Vec<Ident>,
+    pub overrides_non_null_elements: Vec<Ident>,
 }
 
 impl Parse for QueryFileArgs {
@@ -24,6 +25,7 @@ impl Parse for QueryFileArgs {
         let mut params = Vec::new();
         let mut overrides_nullable = Vec::new();
         let mut overrides_non_null = Vec::new();
+        let mut overrides_non_null_elements = Vec::new();
         while input.parse::<Token![,]>().is_ok() {
             if input.is_empty() {
                 break;
@@ -56,6 +58,19 @@ impl Parse for QueryFileArgs {
                         .collect();
                     continue;
                 }
+                if key == "non_null_elements" {
+                    let _: Ident = input.parse()?;
+                    input.parse::<Token![=]>()?;
+                    let content;
+                    syn::bracketed!(content in input);
+                    overrides_non_null_elements =
+                        syn::punctuated::Punctuated::<Ident, Token![,]>::parse_terminated(
+                            &content,
+                        )?
+                        .into_iter()
+                        .collect();
+                    continue;
+                }
             }
             params.push(input.parse::<Expr>()?);
         }
@@ -64,6 +79,7 @@ impl Parse for QueryFileArgs {
             params,
             overrides_nullable,
             overrides_non_null,
+            overrides_non_null_elements,
         })
     }
 }
@@ -110,12 +126,14 @@ pub fn expand(ts: TokenStream) -> TokenStream {
     let params = args.params;
     let nullable = args.overrides_nullable;
     let non_null = args.overrides_non_null;
+    let non_null_elements = args.overrides_non_null_elements;
     quote! {
         ::sntl::query!(
             #lit_sql,
             #(#params,)*
             nullable = [#(#nullable),*],
-            non_null = [#(#non_null),*]
+            non_null = [#(#non_null),*],
+            non_null_elements = [#(#non_null_elements),*]
         )
     }
 }
@@ -131,6 +149,7 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
     let params = args.inner.params;
     let nullable = args.inner.overrides_nullable;
     let non_null = args.inner.overrides_non_null;
+    let non_null_elements = args.inner.overrides_non_null_elements;
     let target = args.target;
     quote! {
         ::sntl::query_as!(
@@ -138,7 +157,8 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
             #lit_sql,
             #(#params,)*
             nullable = [#(#nullable),*],
-            non_null = [#(#non_null),*]
+            non_null = [#(#non_null),*],
+            non_null_elements = [#(#non_null_elements),*]
         )
     }
 }
