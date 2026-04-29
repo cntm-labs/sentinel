@@ -38,13 +38,13 @@ pub fn expand(ts: TokenStream) -> TokenStream {
 
     let field_defs = resolved.columns.iter().map(|c| {
         let name = format_ident!("{}", c.name);
-        let ty = rust_type_for_column(c);
+        let ty = rust_type_for_column(c, &resolved.non_null_elements);
         quote! { pub #name: #ty }
     });
     let field_getters = resolved.columns.iter().map(|c| {
         let name = format_ident!("{}", c.name);
         let name_str = &c.name;
-        let ty = rust_type_for_column(c);
+        let ty = rust_type_for_column(c, &resolved.non_null_elements);
         quote! {
             #name: row.try_get_by_name::<#ty>(#name_str)
                 .map_err(|e| ::sntl::Error::Driver(e))?

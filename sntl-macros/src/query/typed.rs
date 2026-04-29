@@ -87,7 +87,7 @@ pub fn expand_scalar(ts: TokenStream) -> TokenStream {
         );
     }
     let col = &resolved.columns[0];
-    let ty = rust_type_for_column(col);
+    let ty = rust_type_for_column(col, &resolved.non_null_elements);
     let col_name = &col.name;
 
     let codegen = CodegenInput {
