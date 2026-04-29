@@ -14,6 +14,7 @@ pub struct ResolveInput<'a> {
     pub strict: bool,
 }
 
+#[derive(Debug)]
 pub struct ResolvedQuery {
     pub params: Vec<ParamInfo>,
     pub columns: Vec<ColumnInfo>,
