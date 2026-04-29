@@ -60,6 +60,7 @@ fn resolves_simple_select_from_cache_entry() {
                     table: "users".into(),
                     column: "id".into(),
                 }),
+                element_type: None,
             },
             sntl_schema::cache::ColumnInfo {
                 name: "email".into(),
@@ -70,6 +71,7 @@ fn resolves_simple_select_from_cache_entry() {
                     table: "users".into(),
                     column: "email".into(),
                 }),
+                element_type: None,
             },
         ],
         query_kind: sntl_schema::cache::QueryKind::Select,
@@ -82,6 +84,7 @@ fn resolves_simple_select_from_cache_entry() {
         schema: &schema,
         overrides_nullable: &[],
         overrides_non_null: &[],
+        overrides_non_null_elements: &[],
         strict: true,
     };
     let r = resolve_offline(input).unwrap();
@@ -103,6 +106,7 @@ fn override_nullable_is_applied() {
             oid: 2950,
             nullable: false,
             origin: None,
+            element_type: None,
         }],
         query_kind: sntl_schema::cache::QueryKind::Select,
         has_returning: false,
@@ -114,6 +118,7 @@ fn override_nullable_is_applied() {
         schema: &schema,
         overrides_nullable: &["id".to_string()],
         overrides_non_null: &[],
+        overrides_non_null_elements: &[],
         strict: true,
     };
     let r = resolve_offline(input).unwrap();
