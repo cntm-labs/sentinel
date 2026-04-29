@@ -24,6 +24,7 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
         schema: &schema,
         overrides_nullable: &nullable,
         overrides_non_null: &non_null,
+        overrides_non_null_elements: &[], // wired up in Task 12
         strict: true,
     }) {
         Ok(r) => r,
@@ -69,6 +70,7 @@ pub fn expand_scalar(ts: TokenStream) -> TokenStream {
         schema: &schema,
         overrides_nullable: &nullable,
         overrides_non_null: &non_null,
+        overrides_non_null_elements: &[], // wired up in Task 12
         strict: true,
     }) {
         Ok(r) => r,
