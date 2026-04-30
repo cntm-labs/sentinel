@@ -1,0 +1,5 @@
+error: query_as! tuple arity mismatch: tuple expects 2 columns, SELECT returns 1 (id)
+ --> tests/expand/query/tuple_arity_bad.rs:5:9
+  |
+5 |         (i32, String),
+  |         ^^^^^^^^^^^^^
