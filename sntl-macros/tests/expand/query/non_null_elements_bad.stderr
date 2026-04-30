@@ -1,0 +1,12 @@
+error: configuration error: override `non_null_elements` references `id` which is not an array column
+ --> tests/expand/query/non_null_elements_bad.rs:3:13
+  |
+3 |       let _ = sntl::query!(
+  |  _____________^
+4 | |         "SELECT id FROM users WHERE id = $1",
+5 | |         1i32,
+6 | |         non_null_elements = [id]
+7 | |     );
+  | |_____^
+  |
+  = note: this error originates in the macro `sntl::query` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -14,7 +14,8 @@ CREATE TABLE users (
     name        TEXT NOT NULL,
     email       TEXT NOT NULL UNIQUE,
     active      BOOLEAN NOT NULL DEFAULT true,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    tags        TEXT[]
 );
 
 -- Relation target for Phase 4

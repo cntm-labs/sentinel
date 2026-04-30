@@ -96,6 +96,7 @@ pub fn expand(ts: TokenStream) -> TokenStream {
             schema: &schema,
             overrides_nullable: &[],
             overrides_non_null: &[],
+            overrides_non_null_elements: &[],
             strict: true,
         }) {
             Ok(r) => r,

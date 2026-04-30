@@ -20,12 +20,14 @@ pub fn expand(ts: TokenStream) -> TokenStream {
 
     let nullable = idents_to_strings(&args.overrides_nullable);
     let non_null = idents_to_strings(&args.overrides_non_null);
+    let non_null_elements = idents_to_strings(&args.overrides_non_null_elements);
     let resolved = match resolve_offline(ResolveInput {
         sql: &sql,
         cache_entry: &entry,
         schema: &schema,
         overrides_nullable: &nullable,
         overrides_non_null: &non_null,
+        overrides_non_null_elements: &non_null_elements,
         strict: true,
     }) {
         Ok(r) => r,
@@ -36,13 +38,13 @@ pub fn expand(ts: TokenStream) -> TokenStream {
 
     let field_defs = resolved.columns.iter().map(|c| {
         let name = format_ident!("{}", c.name);
-        let ty = rust_type_for_column(c);
+        let ty = rust_type_for_column(c, &resolved.non_null_elements);
         quote! { pub #name: #ty }
     });
     let field_getters = resolved.columns.iter().map(|c| {
         let name = format_ident!("{}", c.name);
         let name_str = &c.name;
-        let ty = rust_type_for_column(c);
+        let ty = rust_type_for_column(c, &resolved.non_null_elements);
         quote! {
             #name: row.try_get_by_name::<#ty>(#name_str)
                 .map_err(|e| ::sntl::Error::Driver(e))?

@@ -40,6 +40,12 @@ schema = "public"
   oid = 1184
   nullable = false
 
+  [[tables.columns]]
+  name = "tags"
+  pg_type = "_text"
+  oid = 1009
+  nullable = false
+
 [[tables]]
 name = "posts"
 schema = "public"

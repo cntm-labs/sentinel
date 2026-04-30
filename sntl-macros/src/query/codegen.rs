@@ -34,12 +34,30 @@ pub fn build_params(input: &CodegenInput) -> TokenStream {
     }
 }
 
-pub fn rust_type_for_column(c: &ColumnInfo) -> TokenStream {
-    let base = rust_type_for_pg_oid(c.oid, &c.pg_type);
-    if c.nullable {
-        quote! { ::std::option::Option<#base> }
+/// Choose the Rust type for an output column. Covers all 8 rows of the
+/// column-nullable × element-nullable matrix (see design doc §3).
+pub fn rust_type_for_column(c: &ColumnInfo, non_null_elements: &[String]) -> TokenStream {
+    if let Some(elem) = &c.element_type {
+        let element_non_null = non_null_elements.iter().any(|n| n == &c.name);
+        let elem_ty = rust_type_for_pg_oid(elem.oid, &elem.pg_type);
+        let inner = if element_non_null {
+            quote! { #elem_ty }
+        } else {
+            quote! { ::std::option::Option<#elem_ty> }
+        };
+        let array_ty = quote! { ::std::vec::Vec<#inner> };
+        if c.nullable {
+            quote! { ::std::option::Option<#array_ty> }
+        } else {
+            array_ty
+        }
     } else {
-        base
+        let base = rust_type_for_pg_oid(c.oid, &c.pg_type);
+        if c.nullable {
+            quote! { ::std::option::Option<#base> }
+        } else {
+            base
+        }
     }
 }
 

@@ -2,7 +2,12 @@
 //!
 //! Grammar:
 //! ```text
-//! query!("SQL", expr, expr, … [, nullable = [a, b]] [, non_null = [c]])
+//! query!(
+//!     "SQL", expr, expr, …
+//!     [, nullable = [a, b]]
+//!     [, non_null = [c]]
+//!     [, non_null_elements = [tags]]
+//! )
 //! query_as!(Path, "SQL", expr, …)
 //! ```
 
@@ -10,17 +15,21 @@ use proc_macro_error2::abort;
 use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{Expr, Ident, LitStr, Path, Token};
+use syn::{Expr, Ident, LitStr, Token, Type};
 
 pub struct QueryArgs {
     pub sql: LitStr,
     pub params: Vec<Expr>,
     pub overrides_nullable: Vec<Ident>,
     pub overrides_non_null: Vec<Ident>,
+    pub overrides_non_null_elements: Vec<Ident>,
 }
 
 pub struct QueryAsArgs {
-    pub target: Path,
+    /// Accepts either a path (e.g. `User`, `crate::models::User`) or a tuple
+    /// (e.g. `(i32, String)`) so `query_as!((i32,), …)` works without a
+    /// wrapper struct.
+    pub target: Type,
     pub query: QueryArgs,
 }
 
@@ -30,6 +39,7 @@ impl Parse for QueryArgs {
         let mut params = Vec::new();
         let mut overrides_nullable = Vec::new();
         let mut overrides_non_null = Vec::new();
+        let mut overrides_non_null_elements = Vec::new();
         while input.parse::<Token![,]>().is_ok() {
             if input.is_empty() {
                 break;
@@ -50,6 +60,13 @@ impl Parse for QueryArgs {
                         overrides_non_null = parse_ident_list(input)?.into_iter().collect();
                         continue;
                     }
+                    "non_null_elements" => {
+                        let _key: Ident = input.parse()?;
+                        input.parse::<Token![=]>()?;
+                        overrides_non_null_elements =
+                            parse_ident_list(input)?.into_iter().collect();
+                        continue;
+                    }
                     _ => {}
                 }
             }
@@ -60,6 +77,7 @@ impl Parse for QueryArgs {
             params,
             overrides_nullable,
             overrides_non_null,
+            overrides_non_null_elements,
         })
     }
 }
@@ -72,7 +90,7 @@ fn parse_ident_list(input: ParseStream) -> syn::Result<Punctuated<Ident, Token![
 
 impl Parse for QueryAsArgs {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let target: Path = input.parse()?;
+        let target: Type = input.parse()?;
         input.parse::<Token![,]>()?;
         let query: QueryArgs = input.parse()?;
         Ok(QueryAsArgs { target, query })

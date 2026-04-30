@@ -18,12 +18,14 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
 
     let nullable = idents_to_strings(&args.query.overrides_nullable);
     let non_null = idents_to_strings(&args.query.overrides_non_null);
+    let non_null_elements = idents_to_strings(&args.query.overrides_non_null_elements);
     let resolved = match resolve_offline(ResolveInput {
         sql: &sql,
         cache_entry: &entry,
         schema: &schema,
         overrides_nullable: &nullable,
         overrides_non_null: &non_null,
+        overrides_non_null_elements: &non_null_elements,
         strict: true,
     }) {
         Ok(r) => r,
@@ -31,6 +33,29 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
     };
 
     let target = &args.target;
+
+    // Tuple targets: cross-check arity against the SELECT column count
+    // before we hit the QueryExecution generic instantiation.
+    if let syn::Type::Tuple(tup) = target {
+        let actual = tup.elems.len();
+        let expected = resolved.columns.len();
+        if actual != expected {
+            let cols = resolved
+                .columns
+                .iter()
+                .map(|c| c.name.as_str())
+                .collect::<Vec<_>>()
+                .join(", ");
+            abort!(
+                tup,
+                "query_as! tuple arity mismatch: tuple expects {} columns, SELECT returns {} ({})",
+                actual,
+                expected,
+                cols
+            );
+        }
+    }
+
     let codegen = CodegenInput {
         sql: &sql,
         params: &resolved.params,
@@ -63,12 +88,14 @@ pub fn expand_scalar(ts: TokenStream) -> TokenStream {
 
     let nullable = idents_to_strings(&args.overrides_nullable);
     let non_null = idents_to_strings(&args.overrides_non_null);
+    let non_null_elements = idents_to_strings(&args.overrides_non_null_elements);
     let resolved = match resolve_offline(ResolveInput {
         sql: &sql,
         cache_entry: &entry,
         schema: &schema,
         overrides_nullable: &nullable,
         overrides_non_null: &non_null,
+        overrides_non_null_elements: &non_null_elements,
         strict: true,
     }) {
         Ok(r) => r,
@@ -83,7 +110,7 @@ pub fn expand_scalar(ts: TokenStream) -> TokenStream {
         );
     }
     let col = &resolved.columns[0];
-    let ty = rust_type_for_column(col);
+    let ty = rust_type_for_column(col, &resolved.non_null_elements);
     let col_name = &col.name;
 
     let codegen = CodegenInput {

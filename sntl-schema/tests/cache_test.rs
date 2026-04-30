@@ -21,6 +21,7 @@ fn sample_entry() -> CacheEntry {
                 table: "users".into(),
                 column: "id".into(),
             }),
+            element_type: None,
         }],
         query_kind: QueryKind::Select,
         has_returning: false,

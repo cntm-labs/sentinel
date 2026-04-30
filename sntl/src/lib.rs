@@ -48,6 +48,11 @@ pub use driver::{FromSql, ToSql};
 pub use driver::{Config, Oid, Pool, PooledConnection};
 pub use driver::{ObservabilityConfig, QueryMetrics};
 
+/// PostgreSQL extension types re-exported from the driver.
+pub mod types {
+    pub use driver::types::{cube, hstore, ltree};
+}
+
 /// Internal API used by `sntl::query!` family macros. Not covered by semver.
 #[doc(hidden)]
 pub mod __macro_support {
