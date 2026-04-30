@@ -1,7 +1,7 @@
 //! Compile-only test that asserts the re-exports resolve.
 
-use sntl::types::{cube::PgCube, ltree::PgLTree};
 use sntl::FromSql;
+use sntl::types::{cube::PgCube, ltree::PgLTree};
 
 #[test]
 fn hstore_module_resolves() {
