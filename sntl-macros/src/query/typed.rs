@@ -33,6 +33,29 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
     };
 
     let target = &args.target;
+
+    // Tuple targets: cross-check arity against the SELECT column count
+    // before we hit the QueryExecution generic instantiation.
+    if let syn::Type::Tuple(tup) = target {
+        let actual = tup.elems.len();
+        let expected = resolved.columns.len();
+        if actual != expected {
+            let cols = resolved
+                .columns
+                .iter()
+                .map(|c| c.name.as_str())
+                .collect::<Vec<_>>()
+                .join(", ");
+            abort!(
+                tup,
+                "query_as! tuple arity mismatch: tuple expects {} columns, SELECT returns {} ({})",
+                actual,
+                expected,
+                cols
+            );
+        }
+    }
+
     let codegen = CodegenInput {
         sql: &sql,
         params: &resolved.params,

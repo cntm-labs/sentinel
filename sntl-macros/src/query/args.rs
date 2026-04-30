@@ -15,7 +15,7 @@ use proc_macro_error2::abort;
 use proc_macro2::TokenStream;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{Expr, Ident, LitStr, Path, Token};
+use syn::{Expr, Ident, LitStr, Token, Type};
 
 pub struct QueryArgs {
     pub sql: LitStr,
@@ -26,7 +26,10 @@ pub struct QueryArgs {
 }
 
 pub struct QueryAsArgs {
-    pub target: Path,
+    /// Accepts either a path (e.g. `User`, `crate::models::User`) or a tuple
+    /// (e.g. `(i32, String)`) so `query_as!((i32,), …)` works without a
+    /// wrapper struct.
+    pub target: Type,
     pub query: QueryArgs,
 }
 
@@ -87,7 +90,7 @@ fn parse_ident_list(input: ParseStream) -> syn::Result<Punctuated<Ident, Token![
 
 impl Parse for QueryAsArgs {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let target: Path = input.parse()?;
+        let target: Type = input.parse()?;
         input.parse::<Token![,]>()?;
         let query: QueryArgs = input.parse()?;
         Ok(QueryAsArgs { target, query })
