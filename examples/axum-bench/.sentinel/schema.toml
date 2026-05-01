@@ -1,0 +1,19 @@
+version = 1
+postgres_version = "16"
+
+[[tables]]
+name = "world"
+schema = "public"
+
+  [[tables.columns]]
+  name = "id"
+  pg_type = "int4"
+  oid = 23
+  nullable = false
+  primary_key = true
+
+  [[tables.columns]]
+  name = "randomnumber"
+  pg_type = "int4"
+  oid = 23
+  nullable = false
