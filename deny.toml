@@ -31,9 +31,6 @@ allow = [
     "0BSD",
     "Zlib",
     "CDLA-Permissive-2.0",
-    # Mozilla Public License 2.0 — file-level copyleft, allowed for the
-    # `colored` terminal-styling crate used by sntl-cli.
-    "MPL-2.0",
 ]
 confidence-threshold = 0.8
 

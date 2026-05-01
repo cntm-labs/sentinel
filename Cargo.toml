@@ -45,7 +45,7 @@ hex = "0.4"
 walkdir = "2"
 clap = { version = "4", features = ["derive"] }
 indicatif = "0.17"
-colored = "2"
+owo-colors = "4"
 anyhow = "1"
 tempfile = "3"
 regex = "1"
