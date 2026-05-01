@@ -1,7 +1,7 @@
-//! Indicatif progress + colored ✓/⚠/✗ helpers.
+//! Indicatif progress + ✓/⚠/✗ helpers coloured via `owo-colors` (MIT).
 
-use colored::Colorize;
 use indicatif::{ProgressBar, ProgressStyle};
+use owo_colors::OwoColorize;
 
 pub fn progress(total: u64, label: &str) -> ProgressBar {
     let pb = ProgressBar::new(total);
