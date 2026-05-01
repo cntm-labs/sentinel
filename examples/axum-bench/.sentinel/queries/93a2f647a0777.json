@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "sql_hash": "93a2f647a0777",
+  "sql_normalized": "UPDATE world SET randomnumber = $2 WHERE id = $1",
+  "params": [
+    {"index": 1, "pg_type": "int4", "oid": 23},
+    {"index": 2, "pg_type": "int4", "oid": 23}
+  ],
+  "columns": [],
+  "query_kind": "Update",
+  "has_returning": false
+}

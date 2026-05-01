@@ -24,3 +24,6 @@ lcov.info
 
 # Environment
 .env
+# Benchmark example targets
+examples/*/target/
+examples/*/Cargo.lock
