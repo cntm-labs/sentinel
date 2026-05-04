@@ -19,6 +19,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
+    /// Scaffold sentinel.toml + .sentinel/ in the workspace root
+    Init {
+        #[arg(long, help = "Overwrite sentinel.toml if it already exists")]
+        force: bool,
+    },
     /// Scan workspace and cache query metadata in .sentinel/
     Prepare {
         #[arg(long, help = "Do not write anything; exit 1 if stale")]
@@ -34,6 +39,7 @@ enum Command {
 async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     match cli.cmd {
+        Command::Init { force } => commands::init::run(cli.workspace, force),
         Command::Prepare { check } => {
             commands::prepare::run(cli.workspace, cli.database_url, check).await
         }
