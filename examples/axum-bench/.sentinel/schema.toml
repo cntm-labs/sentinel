@@ -17,3 +17,20 @@ schema = "public"
   pg_type = "int4"
   oid = 23
   nullable = false
+
+[[tables]]
+name = "fortune"
+schema = "public"
+
+  [[tables.columns]]
+  name = "id"
+  pg_type = "int4"
+  oid = 23
+  nullable = false
+  primary_key = true
+
+  [[tables.columns]]
+  name = "message"
+  pg_type = "varchar"
+  oid = 1043
+  nullable = false

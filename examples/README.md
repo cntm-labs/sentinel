@@ -1,101 +1,135 @@
-# TechEmpower-style microbench: Sentinel vs sqlx
+# TechEmpower-spec benchmark: Sentinel vs a baseline driver
 
-Two minimal `axum` apps that implement the TechEmpower **/db**, **/queries**,
-and **/updates** endpoints over the same `world(id, randomNumber)` schema.
+Two minimal `axum` apps that implement **all six** TechEmpower test types
+over the same `world(id, randomNumber)` + `fortune(id, message)` schema.
 
 ## Layout
 
 ```
 examples/
 ├── axum-bench/        # sntl + sentinel-driver (port 3000)
-├── axum-sqlx-bench/   # sqlx (port 3001)
+├── axum-sqlx-bench/   # baseline (port 3001)
 └── README.md          # this file
 ```
 
 Both apps:
+
 - Use `axum 0.7` with no extra middleware
 - Pool size 16
-- Use the **TechEmpower pattern**: one connection per request, sequential
-  queries on it (avoids pool-acquire contention that the spawn-per-query
-  pattern triggers)
+- Implement six TechEmpower endpoints: `/json`, `/plaintext`, `/db`,
+  `/queries?queries=N`, `/updates?queries=N`, `/fortunes`
+- Use the TechEmpower convention for multi-query endpoints: one
+  connection per request, sequential queries on it
+- Schema mirrors `toolset/databases/postgres/create-postgres.sql` from
+  the archived TechEmpower repo, including the Japanese UTF-8 fortune
+  row
 
 ## Quick run
 
 ```bash
-# 1. Start a benchmark Postgres
-podman run -d --name bench-pg --rm \
+# 1. Start a benchmark Postgres (max_connections lifted so 2 servers ×
+#    16 connections each don't hit the default 100 cap).
+podman run -d --name tfb-bench-pg --rm \
     -e POSTGRES_USER=bench -e POSTGRES_PASSWORD=bench -e POSTGRES_DB=bench \
-    -p 5434:5432 postgres:16-alpine
+    -p 5436:5432 postgres:16-alpine -c max_connections=300
 
-# 2. Seed the world table (10000 rows)
-podman exec -i bench-pg psql -U bench -d bench < axum-bench/sql/setup.sql
+# 2. Seed the world + fortune tables
+podman exec -i tfb-bench-pg psql -U bench -d bench < axum-bench/sql/setup.sql
 
-# 3. Build both
+# 3. Build both (the baseline app needs a live DB at compile time
+#    because its query macros are compile-time validated against the
+#    schema in the live database — sntl validates against the
+#    committed .sentinel/ cache instead).
 (cd axum-bench && cargo build --release)
 (cd axum-sqlx-bench && \
-    DATABASE_URL=postgres://bench:bench@localhost:5434/bench \
+    DATABASE_URL=postgres://bench:bench@localhost:5436/bench \
     cargo build --release)
 
-# 4. Start both servers (separate terminals)
-DATABASE_URL=postgres://bench:bench@localhost:5434/bench \
+# 4. Start both servers in two terminals
+DATABASE_URL=postgres://bench:bench@localhost:5436/bench \
     ./axum-bench/target/release/axum-bench         # listens on :3000
-DATABASE_URL=postgres://bench:bench@localhost:5434/bench \
+DATABASE_URL=postgres://bench:bench@localhost:5436/bench \
     ./axum-sqlx-bench/target/release/axum-sqlx-bench   # listens on :3001
 
-# 5. Benchmark with oha (cargo install oha)
-oha -n 30000 -c 64 --no-tui http://localhost:3000/db
-oha -n 5000 -c 64 --no-tui http://localhost:3000/queries?queries=20
-oha -n 3000 -c 64 --no-tui http://localhost:3000/updates?queries=20
+# 5. Smoke-test
+curl -s http://localhost:3000/db
+curl -s http://localhost:3001/db
 
-# Compare with sqlx baseline on :3001 the same way.
+# 6. Drive load with oha (cargo install oha --locked)
+oha -c 256 -z 5s --no-tui http://localhost:3000/db
+oha -c 256 -z 5s --no-tui http://localhost:3001/db
 
-# 6. Tear down
-podman rm -f bench-pg
+# 7. Cleanup
+pkill -f release/axum && podman rm -f tfb-bench-pg
 ```
 
-## Headline results (local, AMD64, single PG container)
+## Verified numbers (2026-05-06, single-machine median of 3 runs)
 
-`oha -n N -c 64`. Higher = better. All endpoints use 1-conn-per-request,
-sequential queries — the TechEmpower convention.
+Hardware: Linux 6.19.14-zen1-1-zen `x86_64`. Methodology: `oha -c 256 -z 5s`,
+3 runs per cell, **median** reported (not best, not first). Fresh PG +
+fresh server processes between phases; PG `max_connections=300` so
+neither server can starve the other on the connection limit.
 
-| Endpoint | Sentinel r/s | sqlx r/s | Sentinel vs sqlx |
+Same 16-connection pool both sides. Numbers in **req/s, higher is better**.
+
+| Endpoint | sntl | Baseline | sntl vs Baseline |
 |---|---:|---:|---:|
-| `/db` | 117,561 | 88,489 | **+33 %** |
-| `/queries?queries=1` | 93,954 | 76,666 | **+23 %** |
-| `/queries?queries=5` | 35,655 | 13,808 | **+158 %** |
-| `/queries?queries=10` | 18,611 | 7,733 | **+141 %** |
-| `/queries?queries=20` | 9,872 | 3,489 | **+183 %** |
-| `/updates?queries=5` | 1,145 | 293 | **+291 %** |
-| `/updates?queries=20` | 291 | 72 | **+304 %** |
+| `/json` | 1,344,303 | 1,383,474 | -3 % (axum/hyper-bound, no DB) |
+| `/plaintext` | 1,368,388 | 1,367,285 | tied |
+| `/db` | 148,309 | 75,025 | **+98 %** |
+| `/fortunes` | 108,810 | 73,221 | **+49 %** |
+| `/queries?queries=1` | 125,311 | 75,014 | **+67 %** |
+| `/queries?queries=5` | 48,606 | 30,017 | **+62 %** |
+| `/queries?queries=10` | 32,896 | 17,096 | **+92 %** |
+| `/queries?queries=20` | 17,532 | 9,952 | **+76 %** |
+| `/updates?queries=5` | 8,037 | 336 | **+2,295 %** |
+| `/updates?queries=20` | 8,357 | 122 | **+6,778 %** |
 
-## Why Sentinel wins (and where it can lose)
+### Reading the numbers
 
-**Wins:**
-- `query_typed_*` skips the standalone `Parse` round-trip. The macro emits
-  the parameter OIDs inline so each request is one Parse+Bind+Describe+Execute
-  message instead of two round-trips.
-- Driver's 2-tier statement cache (HashMap + LRU 256) keeps the Parse cost
-  amortised on top of that.
-- The advantage **compounds with N**: at `N=1` Sentinel is +23 %; at `N=20`
-  it's +183 %. Each query in the request saves the Parse round-trip.
-- For `/updates` the gap widens further (+304 % at N=20) because each
-  request issues two statements — both benefit from the skip.
+- **/json, /plaintext** — no database. Both apps tied at ≈1.37 M req/s
+  because axum + hyper is the bottleneck. Sentinel doesn't try to win
+  here; the equality is the relevant fact.
+- **/db, /queries, /fortunes** — single-statement reads where Sentinel
+  wins consistently. The macro emits a `query_typed_*` call per request
+  that skips the standalone Parse round-trip; under load the savings
+  compound across both pool turnover and TCP round-trips.
+- **/updates** — the baseline collapses to ≈100–340 req/s under c=256.
+  sentinel-driver's pool sustains 8 k req/s on the same workload. The
+  most likely cause is the baseline's pool acquire serialising harder
+  under heavy write load + Postgres row-level locks; sentinel-driver's
+  pool absorbs the contention more gracefully. The behaviour reproduces
+  across fresh runs and is documented as a follow-up driver
+  investigation in the roadmap.
 
-**Where the spawn-per-query anti-pattern bites:**
-- An earlier draft of these handlers spawned one task per query and
-  `pool.acquire()`-ed inside each spawn. That triggers heavy pool-acquire
-  contention. Under that pattern Sentinel **lost** /queries to sqlx because
-  the sentinel-driver pool's acquire fairness is less optimised than
-  sqlx-postgres's. The current handlers use the TechEmpower-correct pattern;
-  pool-acquire optimisation is on the v0.3 roadmap.
+### What this is and isn't
 
-## Caveats
+This benchmark is **TechEmpower-spec compliant** in the source/schema
+sense — same six endpoints, same `world` and `fortune` schema, same
+load shape. It is **not** an official TechEmpower run because the
+upstream `TechEmpower/FrameworkBenchmarks` repo was archived
+2026-03-24 (read-only). The code under `examples/` is structured so it
+can be lifted directly into `frameworks/Rust/sntl/` if a TFB successor
+emerges.
 
-- One-machine benchmark with the load generator and PG sharing CPU.
-  TechEmpower runs the load generator on a separate physical box; expect
-  absolute numbers to shift, but the *relative* ranking should hold.
-- Both apps use `axum::serve` defaults; no h2/h2c, no keep-alive tuning.
-- The `world` schema is hand-seeded with `random()`; TechEmpower mandates
-  10 000 rows but doesn't pin the values.
-- Update path uses two statements (SELECT then UPDATE) instead of a single
-  `UPDATE ... RETURNING`. TechEmpower allows either.
+Differences from a real TFB run:
+
+- Workload generator is `oha` (Rust, native HTTP/1.1) rather than
+  `wrk` with the official Lua scripts. Equivalent for non-pipelined
+  endpoints; `/plaintext` numbers under TFB use HTTP/1.1 pipelining
+  (16 reqs per TCP round-trip) which oha doesn't issue.
+- Single-machine — load generator and PG share CPU with the servers.
+  TFB runs them on separate hardware. Absolute numbers will shift on
+  a separate-machine setup; relative ranking should hold.
+- 5-second runs × 3 medians, not 15-second steady state.
+
+For relative comparison between Sentinel and the baseline on the same
+machine with controlled methodology, this is defensible.
+
+## Prior numbers (PR #14, c=64, single shot)
+
+The earlier benchmark in PR #14 used `oha -c 64 -n N` (single shot, no
+median). The headline numbers there were directionally correct on
+`/db` and `/updates` but overstated `/queries` scaling — single-shot
+runs at low concurrency varied considerably. The numbers above
+supersede them.
