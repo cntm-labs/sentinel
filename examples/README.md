@@ -1,4 +1,4 @@
-# TechEmpower-spec benchmark: Sentinel vs sqlx
+# TechEmpower-spec benchmark: Sentinel vs a baseline driver
 
 Two minimal `axum` apps that implement **all six** TechEmpower test types
 over the same `world(id, randomNumber)` + `fortune(id, message)` schema.
@@ -8,7 +8,7 @@ over the same `world(id, randomNumber)` + `fortune(id, message)` schema.
 ```
 examples/
 ├── axum-bench/        # sntl + sentinel-driver (port 3000)
-├── axum-sqlx-bench/   # sqlx (port 3001)
+├── axum-sqlx-bench/   # baseline (port 3001)
 └── README.md          # this file
 ```
 
@@ -36,7 +36,10 @@ podman run -d --name tfb-bench-pg --rm \
 # 2. Seed the world + fortune tables
 podman exec -i tfb-bench-pg psql -U bench -d bench < axum-bench/sql/setup.sql
 
-# 3. Build both (sqlx needs a live DB at compile time)
+# 3. Build both (the baseline app needs a live DB at compile time
+#    because its query macros are compile-time validated against the
+#    schema in the live database — sntl validates against the
+#    committed .sentinel/ cache instead).
 (cd axum-bench && cargo build --release)
 (cd axum-sqlx-bench && \
     DATABASE_URL=postgres://bench:bench@localhost:5436/bench \
@@ -69,7 +72,7 @@ neither server can starve the other on the connection limit.
 
 Same 16-connection pool both sides. Numbers in **req/s, higher is better**.
 
-| Endpoint | sntl | sqlx | sntl vs sqlx |
+| Endpoint | sntl | Baseline | sntl vs Baseline |
 |---|---:|---:|---:|
 | `/json` | 1,344,303 | 1,383,474 | -3 % (axum/hyper-bound, no DB) |
 | `/plaintext` | 1,368,388 | 1,367,285 | tied |
@@ -91,11 +94,11 @@ Same 16-connection pool both sides. Numbers in **req/s, higher is better**.
   wins consistently. The macro emits a `query_typed_*` call per request
   that skips the standalone Parse round-trip; under load the savings
   compound across both pool turnover and TCP round-trips.
-- **/updates** — sqlx falls off a cliff at ≈100–340 req/s under c=256.
+- **/updates** — the baseline collapses to ≈100–340 req/s under c=256.
   sentinel-driver's pool sustains 8 k req/s on the same workload. The
-  most likely cause is sqlx's pool acquire serialising harder under
-  heavy write load + Postgres row-level locks; sentinel-driver's pool
-  absorbs the contention more gracefully. The behaviour reproduces
+  most likely cause is the baseline's pool acquire serialising harder
+  under heavy write load + Postgres row-level locks; sentinel-driver's
+  pool absorbs the contention more gracefully. The behaviour reproduces
   across fresh runs and is documented as a follow-up driver
   investigation in the roadmap.
 
@@ -120,8 +123,8 @@ Differences from a real TFB run:
   a separate-machine setup; relative ranking should hold.
 - 5-second runs × 3 medians, not 15-second steady state.
 
-For relative comparison between Sentinel and sqlx on the same machine
-with controlled methodology, this is defensible.
+For relative comparison between Sentinel and the baseline on the same
+machine with controlled methodology, this is defensible.
 
 ## Prior numbers (PR #14, c=64, single shot)
 
