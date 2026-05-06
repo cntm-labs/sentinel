@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "sql_hash": "ea592aaabe154",
+  "sql_normalized": "SELECT id, message FROM fortune",
+  "params": [],
+  "columns": [
+    {"name": "id", "pg_type": "int4", "oid": 23, "nullable": false, "origin": {"table": "fortune", "column": "id"}},
+    {"name": "message", "pg_type": "varchar", "oid": 1043, "nullable": false, "origin": {"table": "fortune", "column": "message"}}
+  ],
+  "query_kind": "Select",
+  "has_returning": false
+}
