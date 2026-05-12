@@ -3,12 +3,12 @@ use std::path::{Path, PathBuf};
 use sentinel_driver::advisory_lock::PgAdvisoryLock;
 use sentinel_driver::{Connection, Pool};
 
+use crate::SNTL_MIGRATE_LOCK_ID;
 use crate::checksum::sha256_of_sql;
 use crate::discover::discover;
 use crate::error::{Error, Result};
 use crate::migration::{Migration, TxMode, Version};
 use crate::tracking;
-use crate::SNTL_MIGRATE_LOCK_ID;
 
 /// Result of a single `Migrator::run` invocation.
 #[derive(Debug, Default)]

@@ -53,7 +53,10 @@ fn rejects_malformed_folder() {
     let dir = tempdir().unwrap();
     touch(dir.path(), "migrations/not_a_version/up.sql", "");
     let err = discover(&dir.path().join("migrations")).unwrap_err();
-    assert!(matches!(err, sntl_migrate::error::Error::InvalidName { .. }));
+    assert!(matches!(
+        err,
+        sntl_migrate::error::Error::InvalidName { .. }
+    ));
 }
 
 #[test]
