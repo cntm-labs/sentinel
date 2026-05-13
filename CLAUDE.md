@@ -25,11 +25,13 @@ sentinel/
 │       ├── pg_transaction_test.rs # Integration: Transaction guard commit/rollback
 │       ├── pg_value_roundtrip_test.rs # Integration: Value encode→PG→decode roundtrip
 │       └── *.rs          #   unit tests (SQL generation, derive macros, etc.)
-├── sntl-macros/         # REAL CODE — proc macros: derive(Model), derive(Partial)
+├── sntl-macros/         # REAL CODE — proc macros: derive(Model), derive(Partial), migrate!()
+│   └── src/
+├── sntl-migrate/        # REAL CODE — forward-only migrations + diff scaffolder (v0.3)
+│   └── src/
+├── sntl-cli/            # REAL CODE — `sntl init/prepare/check/doctor/migrate`
 │   └── src/
 ├── sntl-core/           # PLACEHOLDER — name reserved on crates.io, no real code yet
-├── sntl-migrate/        # PLACEHOLDER — name reserved on crates.io, no real code yet
-├── sntl-cli/            # PLACEHOLDER — name reserved on crates.io, prints stub message
 ├── tests/
 │   └── integration/
 │       └── setup.sql    # PostgreSQL schema for integration tests
@@ -39,9 +41,10 @@ sentinel/
 └── Cargo.toml           # Workspace root
 ```
 
-> **IMPORTANT:** Only `sntl` and `sntl-macros` contain real implementation.
-> `sntl-core`, `sntl-migrate`, `sntl-cli` are published as name reservations only.
-> Do NOT describe them as implemented in README or docs — mark them as `(planned)`.
+> **IMPORTANT:** `sntl`, `sntl-macros`, `sntl-schema`, `sntl-cli`, and
+> `sntl-migrate` contain real implementation. Only `sntl-core` is still a
+> name-reservation placeholder — mark `sntl-core` as `(planned)` in any
+> public-facing docs.
 
 ## README & Docs Rules
 - README.md is shared across all crates via `readme = "../README.md"` in each Cargo.toml
