@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Schema {
     pub version: u32,
     pub postgres_version: String,
@@ -16,7 +16,7 @@ pub struct Schema {
     pub composites: Vec<CompositeType>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Table {
     pub name: String,
     #[serde(default = "default_schema")]
@@ -31,7 +31,7 @@ fn default_schema() -> String {
     "public".into()
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Column {
     pub name: String,
     #[serde(flatten)]
@@ -47,7 +47,7 @@ pub struct Column {
     pub default: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PgTypeRef {
     pub pg_type: String,
 }
@@ -60,7 +60,7 @@ impl PgTypeRef {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ForeignKey {
     pub columns: Vec<String>,
     pub references: FkTarget,
@@ -70,20 +70,20 @@ pub struct ForeignKey {
     pub on_update: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FkTarget {
     pub table: String,
     pub columns: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EnumType {
     pub name: String,
     pub values: Vec<String>,
     pub oid: u32,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CompositeType {
     pub name: String,
     pub fields: Vec<CompositeField>,
@@ -91,7 +91,7 @@ pub struct CompositeType {
     pub oid: Option<u32>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CompositeField {
     pub name: String,
     pub pg_type: String,
