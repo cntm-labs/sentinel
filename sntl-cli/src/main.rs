@@ -46,7 +46,10 @@ pub enum MigrateCmd {
     Add {
         /// Free-form name (will be lowercased and snake-cased)
         name: String,
-        #[arg(long, help = "Fail if migrations/ does not exist instead of creating it")]
+        #[arg(
+            long,
+            help = "Fail if migrations/ does not exist instead of creating it"
+        )]
         no_create_dir: bool,
     },
     /// Apply pending migrations in version order

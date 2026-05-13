@@ -35,11 +35,7 @@ async fn clean(pool: &sentinel_driver::Pool, sql: &str) {
 #[tokio::test]
 async fn applies_pending_in_order_then_noop() {
     let Some(pool) = pool().await else { return };
-    clean(
-        &pool,
-        "DROP TABLE IF EXISTS _sntl_migrations, runner_test",
-    )
-    .await;
+    clean(&pool, "DROP TABLE IF EXISTS _sntl_migrations, runner_test").await;
 
     let dir = tempdir().unwrap();
     write_mig(

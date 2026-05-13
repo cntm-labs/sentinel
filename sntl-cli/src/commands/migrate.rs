@@ -36,11 +36,7 @@ pub async fn dispatch(
 }
 
 /// `sntl migrate add <name>` — create `migrations/<timestamp>_<sanitised>/up.sql`.
-pub async fn add(
-    workspace: Option<PathBuf>,
-    name: String,
-    no_create_dir: bool,
-) -> Result<()> {
+pub async fn add(workspace: Option<PathBuf>, name: String, no_create_dir: bool) -> Result<()> {
     let root = workspace
         .or_else(|| std::env::current_dir().ok())
         .context("cannot resolve workspace root")?;
@@ -239,10 +235,7 @@ fn header_template(ts: &str, name: &str) -> String {
     )
 }
 
-fn resolve(
-    workspace: Option<PathBuf>,
-    database_url: Option<String>,
-) -> Result<(PathBuf, String)> {
+fn resolve(workspace: Option<PathBuf>, database_url: Option<String>) -> Result<(PathBuf, String)> {
     let root = workspace
         .or_else(|| std::env::current_dir().ok())
         .context("cannot resolve workspace root")?;

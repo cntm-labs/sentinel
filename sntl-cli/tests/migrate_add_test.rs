@@ -28,10 +28,7 @@ fn add_creates_folder_and_up_sql() {
     let inside: Vec<_> = std::fs::read_dir(&mig_dir).unwrap().flatten().collect();
     assert_eq!(inside.len(), 1);
     let folder_name = inside[0].file_name().to_string_lossy().into_owned();
-    assert!(
-        folder_name.ends_with("_add_users"),
-        "got {folder_name}"
-    );
+    assert!(folder_name.ends_with("_add_users"), "got {folder_name}");
     assert!(Path::new(&inside[0].path().join("up.sql")).exists());
 }
 

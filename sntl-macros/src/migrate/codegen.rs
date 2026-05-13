@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use proc_macro2::TokenStream;
 use proc_macro_error2::abort;
+use proc_macro2::TokenStream;
 use quote::quote;
 use syn::LitStr;
 
