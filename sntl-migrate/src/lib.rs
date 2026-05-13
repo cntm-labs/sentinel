@@ -20,6 +20,7 @@ pub mod tracking;
 pub use error::{Error, Result};
 pub use migration::{Migration, TxMode, Version};
 pub use runner::{MigrationReport, MigrationStatus, Migrator, RefreshConfig, State};
+pub use sntl_macros::migrate;
 
 /// The PostgreSQL advisory-lock ID used to serialise concurrent migrators.
 /// ASCII bytes "sntlmgrt" — chosen to be unlikely to collide with other tools.

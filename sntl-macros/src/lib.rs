@@ -2,6 +2,7 @@
 //! derive(FromRow), and the sntl::query!() family.
 
 mod fromrow;
+mod migrate;
 mod model;
 mod partial;
 mod query;
@@ -100,6 +101,15 @@ pub fn query_as_unchecked(input: TokenStream) -> TokenStream {
 #[proc_macro_error2::proc_macro_error]
 pub fn query_pipeline(input: TokenStream) -> TokenStream {
     query::pipeline::expand(input.into()).into()
+}
+
+/// `sntl_migrate::migrate!("./migrations")` — embed a `migrations/` directory
+/// into the binary at compile time. Expands to a fully-populated `Migrator`
+/// that uses `include_str!` for each `up.sql` / `up.notx.sql` file.
+#[proc_macro]
+#[proc_macro_error2::proc_macro_error]
+pub fn migrate(input: TokenStream) -> TokenStream {
+    migrate::expand(input.into()).into()
 }
 
 /// Declare relations on a model.

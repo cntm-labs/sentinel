@@ -6,10 +6,24 @@ use crate::migration::Version;
 const TABLE_NAME: &str = "_sntl_migrations";
 
 /// Create the tracking table if it does not exist. Idempotent.
+///
+/// Uses `to_regclass` to skip the `CREATE TABLE` when the table is already
+/// there — `CREATE TABLE IF NOT EXISTS` would emit a NOTICE which the
+/// driver currently surfaces as a protocol error.
 pub async fn ensure(conn: &mut Connection) -> Result<()> {
+    let rows = conn
+        .query(
+            &format!("SELECT to_regclass('{TABLE_NAME}') IS NOT NULL"),
+            &[],
+        )
+        .await?;
+    let exists: bool = rows[0].try_get(0)?;
+    if exists {
+        return Ok(());
+    }
     conn.execute(
         &format!(
-            "CREATE TABLE IF NOT EXISTS {TABLE_NAME} (\
+            "CREATE TABLE {TABLE_NAME} (\
                 version    text PRIMARY KEY,\
                 applied_at timestamptz NOT NULL DEFAULT now(),\
                 checksum   text NOT NULL\

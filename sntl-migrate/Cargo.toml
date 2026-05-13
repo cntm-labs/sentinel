@@ -12,6 +12,7 @@ categories = ["database"]
 
 [dependencies]
 sentinel-driver.workspace = true
+sntl-macros.workspace = true
 sntl-schema = { workspace = true, features = ["online"] }
 thiserror.workspace = true
 serde.workspace = true
