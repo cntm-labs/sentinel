@@ -101,14 +101,10 @@ async fn lock_serialises_two_runners() {
     let path1 = path.clone();
     let path2 = path.clone();
 
-    let h1 = tokio::spawn(async move {
-        Migrator::from_dir(&path1).unwrap().run(&p1).await
-    });
+    let h1 = tokio::spawn(async move { Migrator::from_dir(&path1).unwrap().run(&p1).await });
     // Small head-start so h1 acquires the lock first.
     tokio::time::sleep(std::time::Duration::from_millis(100)).await;
-    let h2 = tokio::spawn(async move {
-        Migrator::from_dir(&path2).unwrap().run(&p2).await
-    });
+    let h2 = tokio::spawn(async move { Migrator::from_dir(&path2).unwrap().run(&p2).await });
 
     let (r1, r2) = tokio::join!(h1, h2);
     r1.unwrap().unwrap();
