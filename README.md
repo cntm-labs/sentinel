@@ -142,14 +142,17 @@ sentinel/
 ├── sntl           # Main crate — models, queries, transactions, types, query! family
 ├── sntl-macros    # Proc macros — derive(Model), derive(Partial), derive(FromRow), query!()
 ├── sntl-schema    # Shared SQL parsing, nullability, and .sentinel/ cache I/O
-├── sntl-cli       # CLI binary — `sntl prepare`, `sntl check`, `sntl doctor`
-├── sntl-core      # Core traits extraction (planned)
-└── sntl-migrate   # Schema diff & migration generation (planned)
+├── sntl-cli       # CLI binary — `sntl prepare`, `sntl check`, `sntl doctor`, `sntl migrate ...`
+├── sntl-migrate   # Forward-only migrations + schema-diff scaffolder (v0.3)
+└── sntl-core      # Core traits extraction (planned)
 ```
 
-> `sntl`, `sntl-macros`, `sntl-schema`, and `sntl-cli` are implemented today.
-> `sntl-core` and `sntl-migrate` are published on crates.io as name reservations
-> and will be filled in in future releases.
+> `sntl`, `sntl-macros`, `sntl-schema`, `sntl-cli`, and `sntl-migrate` are
+> implemented today. See [`docs/migration-guide.md`](docs/migration-guide.md)
+> for the `sntl-migrate` user guide.
+>
+> `sntl-core` is published on crates.io as a name reservation and will be
+> filled in in a future release.
 
 ## Development
 
