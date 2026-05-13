@@ -33,6 +33,45 @@ enum Command {
     Check,
     /// Diagnose config, DB, and cache health
     Doctor,
+    /// Manage SQL migrations
+    Migrate {
+        #[command(subcommand)]
+        action: MigrateCmd,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum MigrateCmd {
+    /// Scaffold a new migration folder under `migrations/`
+    Add {
+        /// Free-form name (will be lowercased and snake-cased)
+        name: String,
+        #[arg(long, help = "Fail if migrations/ does not exist instead of creating it")]
+        no_create_dir: bool,
+    },
+    /// Apply pending migrations in version order
+    Run {
+        #[arg(long, help = "List pending migrations without applying")]
+        dry_run: bool,
+        #[arg(long, help = "Skip the post-apply refresh of .sentinel/schema.toml")]
+        skip_refresh: bool,
+    },
+    /// Show applied + pending migration status
+    Info {
+        #[arg(long)]
+        applied: bool,
+        #[arg(long)]
+        pending: bool,
+        #[arg(long)]
+        all: bool,
+    },
+    /// Compare `.sentinel/schema.toml` with the live DB and emit a SQL scaffold
+    Diff {
+        #[arg(long, help = "Suffix for the generated migration folder name")]
+        out: Option<String>,
+    },
+    /// Verify applied migrations still match their on-disk files
+    Verify,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -45,5 +84,8 @@ async fn main() -> anyhow::Result<()> {
         }
         Command::Check => commands::check::run(cli.workspace).await,
         Command::Doctor => commands::doctor::run(cli.workspace, cli.database_url).await,
+        Command::Migrate { action } => {
+            commands::migrate::dispatch(cli.workspace, cli.database_url, action).await
+        }
     }
 }
