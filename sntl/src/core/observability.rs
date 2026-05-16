@@ -188,5 +188,15 @@ mod tests {
 
         // Verify the Arc<dyn Instrumentation> upcast compiles
         let _arc: Arc<dyn Instrumentation> = Arc::new(SntlTracing::default());
+
+        // Exercise install_default_tracing — Pool::new is lazy (no connection
+        // attempted), so we build one with a parseable URL and pass it through
+        // the helper without needing a live PG.
+        let cfg = driver::Config::parse("postgres://test:test@localhost:5432/test").unwrap();
+        let pool = driver::Pool::new(
+            cfg,
+            driver::pool::config::PoolConfig::new().max_connections(1),
+        );
+        let _pool = install_default_tracing(pool);
     }
 }
