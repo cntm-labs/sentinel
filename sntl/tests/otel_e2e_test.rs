@@ -26,7 +26,12 @@ struct CapturingExporter {
 impl CapturingExporter {
     fn new() -> (Self, Arc<Mutex<Vec<SpanData>>>) {
         let store = Arc::new(Mutex::new(Vec::new()));
-        (Self { spans: Arc::clone(&store) }, store)
+        (
+            Self {
+                spans: Arc::clone(&store),
+            },
+            store,
+        )
     }
 }
 
@@ -68,9 +73,7 @@ async fn query_exports_otel_span_with_db_system() {
 
     let cfg = sntl::driver::Config::parse(&url)
         .unwrap()
-        .with_instrumentation(Arc::new(
-            sntl::driver::TracingInstrumentation::default(),
-        ));
+        .with_instrumentation(Arc::new(sntl::driver::TracingInstrumentation::default()));
     let mut conn = sntl::driver::Connection::connect(cfg).await.unwrap();
 
     async {
@@ -78,7 +81,7 @@ async fn query_exports_otel_span_with_db_system() {
     }
     .instrument(tracing::info_span!(
         "db.query",
-        db.system  = tracing::field::Empty,
+        db.system = tracing::field::Empty,
         db.statement = tracing::field::Empty,
         db.operation = tracing::field::Empty,
         db.rows_affected = tracing::field::Empty,

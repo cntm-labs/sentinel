@@ -227,12 +227,7 @@ impl<'q> PipelineExecution<'q> {
     pub async fn run(self, conn: &mut Connection) -> Result<Vec<QueryResult>> {
         let mut batch = conn.pipeline();
         for spec in self.specs {
-            crate::__priv::emit_query_macro(
-                conn,
-                spec.macro_name,
-                spec.query_id,
-                spec.sql,
-            );
+            crate::__priv::emit_query_macro(conn, spec.macro_name, spec.query_id, spec.sql);
             let oids: Vec<u32> = spec.param_oids.iter().map(|o| u32::from(*o)).collect();
             batch.add(spec.sql.to_string(), oids, spec.encoded_params);
         }

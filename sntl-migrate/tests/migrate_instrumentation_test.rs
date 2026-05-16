@@ -15,7 +15,9 @@ struct Recorder(Mutex<Vec<String>>);
 impl Instrumentation for Recorder {
     fn on_event(&self, ev: &Event<'_>) {
         let tag = match ev {
-            Event::MigrationApply { version, checksum, .. } => {
+            Event::MigrationApply {
+                version, checksum, ..
+            } => {
                 format!("apply:{version}:{checksum}")
             }
             Event::MigrationDrift { version, .. } => format!("drift:{version}"),
@@ -51,11 +53,7 @@ async fn apply_then_drift() {
     let dir = tempdir().unwrap();
     let mig = dir.path().join("migrations/20260514_120000_create");
     std::fs::create_dir_all(&mig).unwrap();
-    std::fs::write(
-        mig.join("up.sql"),
-        "CREATE TABLE mig_instr_t (id int);",
-    )
-    .unwrap();
+    std::fs::write(mig.join("up.sql"), "CREATE TABLE mig_instr_t (id int);").unwrap();
 
     Migrator::from_dir(dir.path().join("migrations"))
         .unwrap()
@@ -77,12 +75,14 @@ async fn apply_then_drift() {
 
     let evs = rec.0.lock().unwrap();
     assert!(
-        evs.iter().any(|e| e.starts_with("apply:20260514_120000_create")),
+        evs.iter()
+            .any(|e| e.starts_with("apply:20260514_120000_create")),
         "expected apply event for 20260514_120000_create, got: {:?}",
         *evs
     );
     assert!(
-        evs.iter().any(|e| e.starts_with("drift:20260514_120000_create")),
+        evs.iter()
+            .any(|e| e.starts_with("drift:20260514_120000_create")),
         "expected drift event for 20260514_120000_create, got: {:?}",
         *evs
     );

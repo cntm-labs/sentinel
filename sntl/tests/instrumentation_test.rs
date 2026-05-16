@@ -10,7 +10,12 @@ struct Recorder(Mutex<Vec<String>>);
 
 impl Instrumentation for Recorder {
     fn on_event(&self, ev: &Event<'_>) {
-        if let Event::QueryMacro { macro_name, query_id, .. } = ev {
+        if let Event::QueryMacro {
+            macro_name,
+            query_id,
+            ..
+        } = ev
+        {
             self.0
                 .lock()
                 .unwrap()
@@ -39,6 +44,7 @@ async fn query_macro_fires_with_id() {
     assert!(!evs.is_empty(), "QueryMacro must fire");
     assert!(
         evs[0].starts_with("query_scalar:"),
-        "expected query_scalar prefix, got: {}", evs[0]
+        "expected query_scalar prefix, got: {}",
+        evs[0]
     );
 }

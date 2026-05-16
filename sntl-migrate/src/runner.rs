@@ -132,11 +132,12 @@ impl Migrator {
             apply_one(conn, m).await?;
             let checksum = sha256_of_sql(&m.sql);
             tracking::record(conn, &m.version, &checksum).await?;
-            conn.instrumentation().on_event(&sentinel_driver::Event::MigrationApply {
-                version: m.version.as_str(),
-                duration: started.elapsed(),
-                checksum: &checksum,
-            });
+            conn.instrumentation()
+                .on_event(&sentinel_driver::Event::MigrationApply {
+                    version: m.version.as_str(),
+                    duration: started.elapsed(),
+                    checksum: &checksum,
+                });
             report.applied.push(m.version.clone());
         }
         Ok(report)
@@ -156,11 +157,12 @@ impl Migrator {
                 let state = if current == *recorded {
                     State::Applied
                 } else {
-                    conn.instrumentation().on_event(&sentinel_driver::Event::MigrationDrift {
-                        version: m.version.as_str(),
-                        recorded,
-                        current: &current,
-                    });
+                    conn.instrumentation()
+                        .on_event(&sentinel_driver::Event::MigrationDrift {
+                            version: m.version.as_str(),
+                            recorded,
+                            current: &current,
+                        });
                     State::ChecksumDrift
                 };
                 out.push(MigrationStatus {
