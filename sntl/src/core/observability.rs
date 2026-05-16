@@ -10,17 +10,9 @@ use driver::{Event, Instrumentation, TracingInstrumentation};
 
 /// Observability adapter that handles Sentinel-level events and delegates
 /// all driver-level events to the inner [`TracingInstrumentation`].
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct SntlTracing {
     inner: TracingInstrumentation,
-}
-
-impl Default for SntlTracing {
-    fn default() -> Self {
-        Self {
-            inner: TracingInstrumentation::default(),
-        }
-    }
 }
 
 impl SntlTracing {
