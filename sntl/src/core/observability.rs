@@ -85,10 +85,8 @@ pub fn install_default_tracing(pool: driver::Pool) -> driver::Pool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use driver::{AcquireOutcome, DisconnectReason, Event, Outcome, RollbackReason, StmtRef};
     use std::time::Duration;
-    use driver::{
-        AcquireOutcome, DisconnectReason, Event, Outcome, RollbackReason, StmtRef,
-    };
 
     /// Drive every arm of `SntlTracing::on_event` so cargo-llvm-cov sees
     /// each branch executed at least once.
@@ -176,10 +174,7 @@ mod tests {
         adapter.on_event(&Event::Disconnect {
             reason: DisconnectReason::Graceful,
         });
-        adapter.on_event(&Event::PrepareStart {
-            name: "stmt1",
-            sql,
-        });
+        adapter.on_event(&Event::PrepareStart { name: "stmt1", sql });
         adapter.on_event(&Event::PipelineStart { batch_len: 5 });
         adapter.on_event(&Event::PoolAcquireStart { pending: 0 });
 
