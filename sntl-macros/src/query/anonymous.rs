@@ -55,6 +55,8 @@ pub fn expand(ts: TokenStream) -> TokenStream {
         sql: &sql,
         params: &resolved.params,
         param_exprs: &args.params,
+        macro_name: "query",
+        query_id: entry.sql_hash.clone(),
     };
     let handle = build_handle(&codegen_input);
     let params_slice = build_params(&codegen_input);

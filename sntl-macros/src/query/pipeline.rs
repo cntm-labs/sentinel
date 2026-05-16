@@ -106,6 +106,7 @@ pub fn expand(ts: TokenStream) -> TokenStream {
         let lit_sql = LitStr::new(&sql, e.sql.span());
         let oids = resolved.params.iter().map(|p| p.oid);
         let params = &e.params;
+        let query_id = &entry.sql_hash;
         spec_items.push(quote! {
             ::sntl::__macro_support::PipelineQuerySpec {
                 sql: #lit_sql,
@@ -113,6 +114,8 @@ pub fn expand(ts: TokenStream) -> TokenStream {
                 encoded_params: ::sntl::__macro_support::encode_params(
                     &[ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ]
                 )?,
+                macro_name: "query_pipeline",
+                query_id: #query_id,
             }
         });
     }
