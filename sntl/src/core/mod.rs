@@ -4,6 +4,7 @@ pub mod copy;
 pub mod error;
 pub mod expr;
 pub mod model;
+pub mod observability;
 pub mod prelude;
 pub mod query;
 pub mod relation;

@@ -43,6 +43,7 @@ pub use macros::{
 pub use macros::sentinel;
 
 pub use core::error::{Error, Result};
+pub use core::observability;
 
 // Re-export driver traits for custom PG types
 pub use driver::{FromSql, ToSql};
