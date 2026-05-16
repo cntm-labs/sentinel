@@ -24,11 +24,23 @@ pub trait FromRow: Sized {
 pub struct TypedQueryHandle<'sql> {
     pub sql: &'sql str,
     pub param_oids: Vec<Oid>,
+    pub macro_name: &'static str,
+    pub query_id: &'static str,
 }
 
 impl<'sql> TypedQueryHandle<'sql> {
-    pub fn new(sql: &'sql str, param_oids: Vec<Oid>) -> Self {
-        Self { sql, param_oids }
+    pub fn new(
+        sql: &'sql str,
+        param_oids: Vec<Oid>,
+        macro_name: &'static str,
+        query_id: &'static str,
+    ) -> Self {
+        Self {
+            sql,
+            param_oids,
+            macro_name,
+            query_id,
+        }
     }
 
     fn pair_with<'a>(
@@ -67,12 +79,24 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
     }
 
     pub async fn fetch_one(self, conn: &mut Connection) -> Result<T> {
+        crate::__priv::emit_query_macro(
+            conn,
+            self.handle.macro_name,
+            self.handle.query_id,
+            self.handle.sql,
+        );
         let pairs = self.handle.pair_with(&self.params);
         let row = conn.query_typed_one(self.handle.sql, &pairs).await?;
         T::from_row(&row)
     }
 
     pub async fn fetch_optional(self, conn: &mut Connection) -> Result<Option<T>> {
+        crate::__priv::emit_query_macro(
+            conn,
+            self.handle.macro_name,
+            self.handle.query_id,
+            self.handle.sql,
+        );
         let pairs = self.handle.pair_with(&self.params);
         match conn.query_typed_opt(self.handle.sql, &pairs).await? {
             Some(row) => Ok(Some(T::from_row(&row)?)),
@@ -81,12 +105,24 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
     }
 
     pub async fn fetch_all(self, conn: &mut Connection) -> Result<Vec<T>> {
+        crate::__priv::emit_query_macro(
+            conn,
+            self.handle.macro_name,
+            self.handle.query_id,
+            self.handle.sql,
+        );
         let pairs = self.handle.pair_with(&self.params);
         let rows = conn.query_typed(self.handle.sql, &pairs).await?;
         rows.iter().map(T::from_row).collect()
     }
 
     pub async fn execute(self, conn: &mut Connection) -> Result<u64> {
+        crate::__priv::emit_query_macro(
+            conn,
+            self.handle.macro_name,
+            self.handle.query_id,
+            self.handle.sql,
+        );
         let pairs = self.handle.pair_with(&self.params);
         Ok(conn.execute_typed(self.handle.sql, &pairs).await?)
     }
@@ -140,11 +176,13 @@ impl<'a, T: FromRow> UncheckedExecution<'a, T> {
     }
 
     pub async fn fetch_one(self, conn: &mut Connection) -> Result<T> {
+        crate::__priv::emit_query_macro(conn, "query_unchecked", "unchecked", self.sql);
         let row = conn.query_one(self.sql, &self.params).await?;
         T::from_row(&row)
     }
 
     pub async fn fetch_optional(self, conn: &mut Connection) -> Result<Option<T>> {
+        crate::__priv::emit_query_macro(conn, "query_unchecked", "unchecked", self.sql);
         match conn.query_opt(self.sql, &self.params).await? {
             Some(row) => Ok(Some(T::from_row(&row)?)),
             None => Ok(None),
@@ -152,11 +190,13 @@ impl<'a, T: FromRow> UncheckedExecution<'a, T> {
     }
 
     pub async fn fetch_all(self, conn: &mut Connection) -> Result<Vec<T>> {
+        crate::__priv::emit_query_macro(conn, "query_unchecked", "unchecked", self.sql);
         let rows = conn.query(self.sql, &self.params).await?;
         rows.iter().map(T::from_row).collect()
     }
 
     pub async fn execute(self, conn: &mut Connection) -> Result<u64> {
+        crate::__priv::emit_query_macro(conn, "query_unchecked", "unchecked", self.sql);
         Ok(conn.execute(self.sql, &self.params).await?)
     }
 }
@@ -169,6 +209,8 @@ pub struct PipelineQuerySpec<'q> {
     pub sql: &'q str,
     pub param_oids: Vec<Oid>,
     pub encoded_params: Vec<Option<Vec<u8>>>,
+    pub macro_name: &'static str,
+    pub query_id: &'static str,
 }
 
 /// Multi-query single-round-trip executor. Each query in `specs` is appended
@@ -185,6 +227,7 @@ impl<'q> PipelineExecution<'q> {
     pub async fn run(self, conn: &mut Connection) -> Result<Vec<QueryResult>> {
         let mut batch = conn.pipeline();
         for spec in self.specs {
+            crate::__priv::emit_query_macro(conn, spec.macro_name, spec.query_id, spec.sql);
             let oids: Vec<u32> = spec.param_oids.iter().map(|o| u32::from(*o)).collect();
             batch.add(spec.sql.to_string(), oids, spec.encoded_params);
         }

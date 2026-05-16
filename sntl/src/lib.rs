@@ -11,6 +11,9 @@
 //! use sntl::prelude::*;
 //! ```
 
+#[doc(hidden)]
+pub mod __priv;
+
 /// Core — Model trait, QueryBuilder, types, and connection abstraction.
 pub mod core;
 
@@ -40,13 +43,13 @@ pub use macros::{
 pub use macros::sentinel;
 
 pub use core::error::{Error, Result};
+pub use core::observability;
 
 // Re-export driver traits for custom PG types
 pub use driver::{FromSql, ToSql};
 
 // Re-export key driver types for direct use
 pub use driver::{Config, Oid, Pool, PooledConnection};
-pub use driver::{ObservabilityConfig, QueryMetrics};
 
 /// PostgreSQL extension types re-exported from the driver.
 pub mod types {

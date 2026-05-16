@@ -60,6 +60,8 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
         sql: &sql,
         params: &resolved.params,
         param_exprs: &args.query.params,
+        macro_name: "query_as",
+        query_id: entry.sql_hash.clone(),
     };
     let handle = build_handle(&codegen);
     let params_slice = build_params(&codegen);
@@ -117,6 +119,8 @@ pub fn expand_scalar(ts: TokenStream) -> TokenStream {
         sql: &sql,
         params: &resolved.params,
         param_exprs: &args.params,
+        macro_name: "query_scalar",
+        query_id: entry.sql_hash.clone(),
     };
     let handle = build_handle(&codegen);
     let params_slice = build_params(&codegen);

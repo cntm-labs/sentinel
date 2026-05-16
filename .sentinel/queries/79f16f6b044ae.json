@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "sql_hash": "79f16f6b044ae",
+  "sql_normalized": "SELECT 1::int4",
+  "params": [],
+  "columns": [
+    {
+      "name": "int4",
+      "pg_type": "int4",
+      "oid": 23,
+      "nullable": false
+    }
+  ],
+  "query_kind": "Select",
+  "has_returning": false
+}

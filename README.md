@@ -134,6 +134,7 @@ See `docs/migration-from-sqlx.md` for a side-by-side migration guide.
 - **4-layer query system** — from simple CRUD to raw SQL, always type-safe, always parameterized
 - **Zero unsafe** in core — security by construction
 - **Built on sentinel-driver** — SCRAM-SHA-256, pipeline mode, binary format, rustls
+- **Production observability** — single `Instrumentation` trait hooks every wire site and every macro invocation; ships with a tracing/OTel adapter (see [`docs/observability-guide.md`](docs/observability-guide.md))
 
 ## Architecture
 
@@ -153,6 +154,12 @@ sentinel/
 >
 > `sntl-core` is published on crates.io as a name reservation and will be
 > filled in in a future release.
+>
+> **Observability (v0.4+):** `sntl` ships `sntl::observability::SntlTracing`, a
+> bridge over `sentinel-driver` v3.0+'s `Instrumentation` trait. It hooks every
+> wire-trip and every `query!()` / migration call — feeding `db.system`,
+> `sntl.macro`, and `sntl.query_id` into any `tracing`-compatible backend
+> (Jaeger, Zipkin, OTLP). See [`docs/observability-guide.md`](docs/observability-guide.md).
 
 ## Development
 

@@ -9,17 +9,23 @@ pub struct CodegenInput<'a> {
     pub sql: &'a str,
     pub params: &'a [ParamInfo],
     pub param_exprs: &'a [Expr],
+    pub macro_name: &'static str,
+    pub query_id: String,
 }
 
-/// Build the `TypedQueryHandle::new(sql, vec![oids])` expression. The `Vec`
-/// is owned so the resulting `QueryExecution` can move across `.await`.
+/// Build the `TypedQueryHandle::new(sql, vec![oids], macro_name, query_id)` expression.
+/// The `Vec` is owned so the resulting `QueryExecution` can move across `.await`.
 pub fn build_handle(input: &CodegenInput) -> TokenStream {
     let sql = input.sql;
     let oids = input.params.iter().map(|p| p.oid);
+    let macro_name = input.macro_name;
+    let query_id = &input.query_id;
     quote! {
         ::sntl::__macro_support::TypedQueryHandle::new(
             #sql,
             ::std::vec![ #( ::sntl::Oid::from(#oids) ),* ],
+            #macro_name,
+            #query_id,
         )
     }
 }
