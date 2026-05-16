@@ -46,7 +46,6 @@ pub use driver::{FromSql, ToSql};
 
 // Re-export key driver types for direct use
 pub use driver::{Config, Oid, Pool, PooledConnection};
-pub use driver::{ObservabilityConfig, QueryMetrics};
 
 /// PostgreSQL extension types re-exported from the driver.
 pub mod types {
