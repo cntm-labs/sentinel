@@ -11,6 +11,9 @@
 //! use sntl::prelude::*;
 //! ```
 
+#[doc(hidden)]
+pub mod __priv;
+
 /// Core — Model trait, QueryBuilder, types, and connection abstraction.
 pub mod core;
 
