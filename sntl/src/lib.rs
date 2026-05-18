@@ -20,6 +20,9 @@ pub mod core;
 /// Migration tools — schema diff and migration generation.
 pub mod migrate;
 
+/// Test-harness runtime for `#[sntl::test]` — fixture-isolated per-test databases.
+pub mod testing;
+
 /// Prelude — common imports for quick setup.
 pub mod prelude {
     pub use crate::core::prelude::*;
