@@ -51,7 +51,7 @@ pub fn expand(ts: TokenStream) -> TokenStream {
     let sql = args.sql;
     let params = args.params;
     quote! {
-        ::sntl::__macro_support::UncheckedExecution::<_>::new(
+        ::sntl::__macro_support::UncheckedExecution::new(
             #sql,
             ::std::vec![ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ],
         )
@@ -66,8 +66,16 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
     let target = args.target;
     let sql = args.inner.sql;
     let params = args.inner.params;
+    // TODO(v0.6): query_as_unchecked!(T, ...) currently parses `T` for source
+    // compatibility but does not enforce it on the resulting expression because
+    // UncheckedExecution dropped its phantom `T` in v0.5 to make
+    // `query_unchecked!().into_stream().fetch_stream()` infer cleanly. Restore
+    // the T-binding contract by introducing a thin typed wrapper
+    // (UncheckedExecutionAs<T>) the macro can return — tracked alongside the
+    // v0.6 driver-side query_stream_typed work.
+    let _ = target;
     quote! {
-        ::sntl::__macro_support::UncheckedExecution::<#target>::new(
+        ::sntl::__macro_support::UncheckedExecution::new(
             #sql,
             ::std::vec![ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ],
         )

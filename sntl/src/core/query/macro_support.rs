@@ -101,6 +101,34 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
         rows.iter().map(T::from_row).collect()
     }
 
+    /// Execute this query and return a row-by-row stream.
+    ///
+    /// Unlike `fetch_all`, this does not materialise rows in memory.
+    /// The stream borrows the connection until dropped — the caller
+    /// cannot reuse the connection for other queries until then.
+    /// PG portals are tx-scoped; the stream opens an implicit
+    /// transaction if none is active.
+    ///
+    /// # v0.5 limitations
+    ///
+    /// - Takes `&mut Connection` directly (not `impl GenericClient`) because
+    ///   `RowStream` borrows the connection for its lifetime; pool-acquired
+    ///   connections would need self-borrowing structs. Tracked for v0.6.
+    /// - Parameter OIDs are inferred from `ToSql::oid()` at the wire level
+    ///   rather than the macro-checked OIDs, because the driver's
+    ///   `query_stream` does not yet accept typed pairs. In the rare case of
+    ///   an explicit SQL cast (`$1::int4`) with a Rust type whose declared
+    ///   OID differs (e.g. `i64`), `fetch_stream` may diverge from
+    ///   `fetch_all`. Tracked for v0.6 (`query_stream_typed`).
+    pub async fn fetch_stream<'c>(
+        self,
+        conn: &'c mut driver::Connection,
+    ) -> Result<driver::RowStream<'c>> {
+        let pairs = self.handle.pair_with(&self.params);
+        let plain: Vec<&(dyn ToSql + Sync)> = pairs.iter().map(|(p, _)| *p).collect();
+        Ok(conn.query_stream(self.handle.sql, &plain).await?)
+    }
+
     pub async fn execute(self, mut conn: impl GenericClient + Send) -> Result<u64> {
         let pairs = self.handle.pair_with(&self.params);
         Ok(conn.execute_typed(self.handle.sql, &pairs).await?)
@@ -139,42 +167,87 @@ impl<'a, T, S: FromRow> ScalarExecution<'a, T, S> {
 
 /// Unchecked execution path: ordinary `query`/`execute` without the macro's
 /// pre-resolved OIDs. Used by `query_unchecked!` and friends.
-pub struct UncheckedExecution<'a, T> {
+///
+/// The row type `T` is inferred from how the result is consumed (`fetch_one`,
+/// `fetch_all`, etc.). For streaming — where rows are read from the raw
+/// [`driver::RowStream`] rather than decoded into `T` — call
+/// [`into_stream`][Self::into_stream] first to obtain an [`UncheckedStreamHandle`]
+/// that needs no `T` annotation.
+pub struct UncheckedExecution<'a> {
     pub sql: &'a str,
     pub params: Vec<&'a (dyn ToSql + Sync)>,
-    _t: PhantomData<T>,
 }
 
-impl<'a, T: FromRow> UncheckedExecution<'a, T> {
+impl<'a> UncheckedExecution<'a> {
     pub fn new(sql: &'a str, params: Vec<&'a (dyn ToSql + Sync)>) -> Self {
-        Self {
-            sql,
-            params,
-            _t: PhantomData,
-        }
+        Self { sql, params }
     }
 
-    pub async fn fetch_one(self, mut conn: impl GenericClient + Send) -> Result<T> {
+    pub async fn fetch_one<T: FromRow>(self, mut conn: impl GenericClient + Send) -> Result<T> {
         // Note: QueryMacro event skipped on the generic path (GenericClient
         // does not expose instrumentation()).
         let row = conn.query_one(self.sql, &self.params).await?;
         T::from_row(&row)
     }
 
-    pub async fn fetch_optional(self, mut conn: impl GenericClient + Send) -> Result<Option<T>> {
+    pub async fn fetch_optional<T: FromRow>(
+        self,
+        mut conn: impl GenericClient + Send,
+    ) -> Result<Option<T>> {
         match conn.query_opt(self.sql, &self.params).await? {
             Some(row) => Ok(Some(T::from_row(&row)?)),
             None => Ok(None),
         }
     }
 
-    pub async fn fetch_all(self, mut conn: impl GenericClient + Send) -> Result<Vec<T>> {
+    pub async fn fetch_all<T: FromRow>(
+        self,
+        mut conn: impl GenericClient + Send,
+    ) -> Result<Vec<T>> {
         let rows = conn.query(self.sql, &self.params).await?;
         rows.iter().map(T::from_row).collect()
     }
 
     pub async fn execute(self, mut conn: impl GenericClient + Send) -> Result<u64> {
         Ok(conn.execute(self.sql, &self.params).await?)
+    }
+
+    /// Convert this execution into a stream handle so that `fetch_stream` can
+    /// be called without any row-type annotation.
+    ///
+    /// ```ignore
+    /// sntl::query_unchecked!("SELECT id FROM t")
+    ///     .into_stream()
+    ///     .fetch_stream(&mut conn)
+    ///     .await?;
+    /// ```
+    pub fn into_stream(self) -> UncheckedStreamHandle<'a> {
+        UncheckedStreamHandle {
+            sql: self.sql,
+            params: self.params,
+        }
+    }
+}
+
+/// Type-erased streaming handle produced by [`UncheckedExecution::into_stream`].
+///
+/// Holds the SQL text and parameters without a row-type phantom, so callers
+/// can invoke [`fetch_stream`][Self::fetch_stream] without annotating `T`.
+pub struct UncheckedStreamHandle<'a> {
+    sql: &'a str,
+    params: Vec<&'a (dyn ToSql + Sync)>,
+}
+
+impl<'a> UncheckedStreamHandle<'a> {
+    /// Execute the query and return a row-by-row stream.
+    ///
+    /// See [`QueryExecution::fetch_stream`] for streaming semantics and v0.5
+    /// limitations.
+    pub async fn fetch_stream<'c>(
+        self,
+        conn: &'c mut driver::Connection,
+    ) -> Result<driver::RowStream<'c>> {
+        Ok(conn.query_stream(self.sql, &self.params).await?)
     }
 }
 
