@@ -108,6 +108,18 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
     /// cannot reuse the connection for other queries until then.
     /// PG portals are tx-scoped; the stream opens an implicit
     /// transaction if none is active.
+    ///
+    /// # v0.5 limitations
+    ///
+    /// - Takes `&mut Connection` directly (not `impl GenericClient`) because
+    ///   `RowStream` borrows the connection for its lifetime; pool-acquired
+    ///   connections would need self-borrowing structs. Tracked for v0.6.
+    /// - Parameter OIDs are inferred from `ToSql::oid()` at the wire level
+    ///   rather than the macro-checked OIDs, because the driver's
+    ///   `query_stream` does not yet accept typed pairs. In the rare case of
+    ///   an explicit SQL cast (`$1::int4`) with a Rust type whose declared
+    ///   OID differs (e.g. `i64`), `fetch_stream` may diverge from
+    ///   `fetch_all`. Tracked for v0.6 (`query_stream_typed`).
     pub async fn fetch_stream<'c>(
         self,
         conn: &'c mut driver::Connection,
