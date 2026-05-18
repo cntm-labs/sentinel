@@ -78,10 +78,7 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
         }
     }
 
-    pub async fn fetch_one(
-        self,
-        mut conn: impl GenericClient + Send,
-    ) -> Result<T> {
+    pub async fn fetch_one(self, mut conn: impl GenericClient + Send) -> Result<T> {
         // Note: QueryMacro event skipped on the generic path — GenericClient
         // does not expose instrumentation(). Driver-level ExecuteStart/Finish
         // events still fire from inside conn.query_typed_one.
@@ -90,10 +87,7 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
         T::from_row(&row)
     }
 
-    pub async fn fetch_optional(
-        self,
-        mut conn: impl GenericClient + Send,
-    ) -> Result<Option<T>> {
+    pub async fn fetch_optional(self, mut conn: impl GenericClient + Send) -> Result<Option<T>> {
         let pairs = self.handle.pair_with(&self.params);
         match conn.query_typed_opt(self.handle.sql, &pairs).await? {
             Some(row) => Ok(Some(T::from_row(&row)?)),
@@ -101,10 +95,7 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
         }
     }
 
-    pub async fn fetch_all(
-        self,
-        mut conn: impl GenericClient + Send,
-    ) -> Result<Vec<T>> {
+    pub async fn fetch_all(self, mut conn: impl GenericClient + Send) -> Result<Vec<T>> {
         let pairs = self.handle.pair_with(&self.params);
         let rows = conn.query_typed(self.handle.sql, &pairs).await?;
         rows.iter().map(T::from_row).collect()
@@ -133,10 +124,7 @@ impl<'a, T, S: FromRow> ScalarExecution<'a, T, S> {
         Ok((self.extract)(s))
     }
 
-    pub async fn fetch_optional(
-        self,
-        conn: impl GenericClient + Send,
-    ) -> Result<Option<T>> {
+    pub async fn fetch_optional(self, conn: impl GenericClient + Send) -> Result<Option<T>> {
         match self.inner.fetch_optional(conn).await? {
             Some(s) => Ok(Some((self.extract)(s))),
             None => Ok(None),
@@ -173,10 +161,7 @@ impl<'a, T: FromRow> UncheckedExecution<'a, T> {
         T::from_row(&row)
     }
 
-    pub async fn fetch_optional(
-        self,
-        mut conn: impl GenericClient + Send,
-    ) -> Result<Option<T>> {
+    pub async fn fetch_optional(self, mut conn: impl GenericClient + Send) -> Result<Option<T>> {
         match conn.query_opt(self.sql, &self.params).await? {
             Some(row) => Ok(Some(T::from_row(&row)?)),
             None => Ok(None),
