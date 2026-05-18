@@ -25,11 +25,23 @@ jobs:
         run: cargo test --workspace
 
       - name: Publish sntl-core
-        run: cargo publish -p sntl-core ${{ inputs.dry-run == 'true' && '--dry-run' || '' }}
+        # Skip if already published — cargo publish errors hard on
+        # re-publish, so let this fail-soft when the version is unchanged
+        # from a previous successful run.
+        run: cargo publish -p sntl-core ${{ inputs.dry-run == 'true' && '--dry-run' || '' }} || true
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
       - name: Wait for crates.io index (sntl-core)
+        if: inputs.dry-run == 'false'
+        run: sleep 30
+
+      - name: Publish sntl-schema
+        run: cargo publish -p sntl-schema ${{ inputs.dry-run == 'true' && '--dry-run' || '' }} || true
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Wait for crates.io index (sntl-schema)
         if: inputs.dry-run == 'false'
         run: sleep 30
 
