@@ -51,7 +51,7 @@ pub fn expand(ts: TokenStream) -> TokenStream {
     let sql = args.sql;
     let params = args.params;
     quote! {
-        ::sntl::__macro_support::UncheckedExecution::<_>::new(
+        ::sntl::__macro_support::UncheckedExecution::new(
             #sql,
             ::std::vec![ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ],
         )
@@ -66,8 +66,13 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
     let target = args.target;
     let sql = args.inner.sql;
     let params = args.inner.params;
+    // query_as_unchecked! still captures the target type but UncheckedExecution
+    // is now unparameterised; the type hint is carried by the fetch_one::<T> call site.
+    // We emit the execution struct and ignore `target` here — callers use
+    // `.fetch_one::<Target>(conn)` or Rust infers T from the let binding.
+    let _ = target; // type hint provided by the call site, not the macro
     quote! {
-        ::sntl::__macro_support::UncheckedExecution::<#target>::new(
+        ::sntl::__macro_support::UncheckedExecution::new(
             #sql,
             ::std::vec![ #( &(#params) as &(dyn ::sntl::driver::ToSql + ::std::marker::Sync) ),* ],
         )

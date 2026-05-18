@@ -1,8 +1,7 @@
-//! Verify `Connection::query_stream()` (the `fetch_stream` transport) yields
-//! rows lazily and that `RowStream::close()` properly drains the portal so the
-//! connection remains usable.
+//! Verify sntl::query_unchecked!().into_stream().fetch_stream() yields rows
+//! lazily and that closing the stream mid-iter leaves the connection usable.
 //!
-//! Live-PG integration tests; skipped silently when DATABASE_URL is absent.
+//! Live-PG integration test; skipped silently when DATABASE_URL is absent.
 
 use sntl::driver::pool::config::PoolConfig;
 use sntl::driver::{Config, GenericClient, Pool};
@@ -32,7 +31,7 @@ async fn setup(conn: &mut impl GenericClient) {
 }
 
 #[tokio::test]
-async fn streams_1000_rows() {
+async fn streams_1000_rows_via_macro() {
     let Some(pool) = make_pool().await else {
         return;
     };
@@ -40,8 +39,9 @@ async fn streams_1000_rows() {
     let mut conn = pool.acquire().await.unwrap();
     setup(&mut *conn).await;
 
-    let mut stream = conn
-        .query_stream("SELECT id FROM stream_test ORDER BY id", &[])
+    let mut stream = sntl::query_unchecked!("SELECT id FROM stream_test ORDER BY id")
+        .into_stream()
+        .fetch_stream(&mut conn)
         .await
         .unwrap();
 
@@ -64,12 +64,11 @@ async fn stream_close_mid_iter_leaves_conn_usable() {
     setup(&mut *conn).await;
 
     {
-        let mut stream = conn
-            .query_stream("SELECT id FROM stream_test", &[])
+        let mut stream = sntl::query_unchecked!("SELECT id FROM stream_test")
+            .into_stream()
+            .fetch_stream(&mut conn)
             .await
             .unwrap();
-        // Consume just one row, then close — this must drain remaining server
-        // messages so the connection is left in a clean ReadyForQuery state.
         let _first = stream.next().await.unwrap();
         stream.close().await.unwrap();
     }
