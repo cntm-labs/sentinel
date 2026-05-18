@@ -20,7 +20,11 @@ chrono.workspace = true
 uuid.workspace = true
 tokio.workspace = true
 bytes.workspace = true
+anyhow.workspace = true
 tracing = "0.1"
+sha2.workspace = true
+hex.workspace = true
+sntl-migrate.workspace = true
 
 [dev-dependencies]
 cargo-husky.workspace = true
