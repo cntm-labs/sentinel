@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 
 use crate::core::error::Result;
 use driver::pipeline::QueryResult;
-use driver::{Connection, FromSql, Oid, Row, ToSql};
+use driver::{FromSql, GenericClient, Oid, Row, ToSql};
 
 /// Trait implemented by types that can be constructed from a Sentinel row.
 ///
@@ -78,25 +78,22 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
         }
     }
 
-    pub async fn fetch_one(self, conn: &mut Connection) -> Result<T> {
-        crate::__priv::emit_query_macro(
-            conn,
-            self.handle.macro_name,
-            self.handle.query_id,
-            self.handle.sql,
-        );
+    pub async fn fetch_one(
+        self,
+        conn: &mut (impl GenericClient + Send),
+    ) -> Result<T> {
+        // Note: QueryMacro event skipped on the generic path — GenericClient
+        // does not expose instrumentation(). Driver-level ExecuteStart/Finish
+        // events still fire from inside conn.query_typed_one.
         let pairs = self.handle.pair_with(&self.params);
         let row = conn.query_typed_one(self.handle.sql, &pairs).await?;
         T::from_row(&row)
     }
 
-    pub async fn fetch_optional(self, conn: &mut Connection) -> Result<Option<T>> {
-        crate::__priv::emit_query_macro(
-            conn,
-            self.handle.macro_name,
-            self.handle.query_id,
-            self.handle.sql,
-        );
+    pub async fn fetch_optional(
+        self,
+        conn: &mut (impl GenericClient + Send),
+    ) -> Result<Option<T>> {
         let pairs = self.handle.pair_with(&self.params);
         match conn.query_typed_opt(self.handle.sql, &pairs).await? {
             Some(row) => Ok(Some(T::from_row(&row)?)),
@@ -104,25 +101,16 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
         }
     }
 
-    pub async fn fetch_all(self, conn: &mut Connection) -> Result<Vec<T>> {
-        crate::__priv::emit_query_macro(
-            conn,
-            self.handle.macro_name,
-            self.handle.query_id,
-            self.handle.sql,
-        );
+    pub async fn fetch_all(
+        self,
+        conn: &mut (impl GenericClient + Send),
+    ) -> Result<Vec<T>> {
         let pairs = self.handle.pair_with(&self.params);
         let rows = conn.query_typed(self.handle.sql, &pairs).await?;
         rows.iter().map(T::from_row).collect()
     }
 
-    pub async fn execute(self, conn: &mut Connection) -> Result<u64> {
-        crate::__priv::emit_query_macro(
-            conn,
-            self.handle.macro_name,
-            self.handle.query_id,
-            self.handle.sql,
-        );
+    pub async fn execute(self, conn: &mut (impl GenericClient + Send)) -> Result<u64> {
         let pairs = self.handle.pair_with(&self.params);
         Ok(conn.execute_typed(self.handle.sql, &pairs).await?)
     }
@@ -140,19 +128,22 @@ impl<'a, T, S: FromRow> ScalarExecution<'a, T, S> {
         Self { inner, extract }
     }
 
-    pub async fn fetch_one(self, conn: &mut Connection) -> Result<T> {
+    pub async fn fetch_one(self, conn: &mut (impl GenericClient + Send)) -> Result<T> {
         let s = self.inner.fetch_one(conn).await?;
         Ok((self.extract)(s))
     }
 
-    pub async fn fetch_optional(self, conn: &mut Connection) -> Result<Option<T>> {
+    pub async fn fetch_optional(
+        self,
+        conn: &mut (impl GenericClient + Send),
+    ) -> Result<Option<T>> {
         match self.inner.fetch_optional(conn).await? {
             Some(s) => Ok(Some((self.extract)(s))),
             None => Ok(None),
         }
     }
 
-    pub async fn fetch_all(self, conn: &mut Connection) -> Result<Vec<T>> {
+    pub async fn fetch_all(self, conn: &mut (impl GenericClient + Send)) -> Result<Vec<T>> {
         let rows = self.inner.fetch_all(conn).await?;
         Ok(rows.into_iter().map(self.extract).collect())
     }
@@ -175,28 +166,29 @@ impl<'a, T: FromRow> UncheckedExecution<'a, T> {
         }
     }
 
-    pub async fn fetch_one(self, conn: &mut Connection) -> Result<T> {
-        crate::__priv::emit_query_macro(conn, "query_unchecked", "unchecked", self.sql);
+    pub async fn fetch_one(self, conn: &mut (impl GenericClient + Send)) -> Result<T> {
+        // Note: QueryMacro event skipped on the generic path (GenericClient
+        // does not expose instrumentation()).
         let row = conn.query_one(self.sql, &self.params).await?;
         T::from_row(&row)
     }
 
-    pub async fn fetch_optional(self, conn: &mut Connection) -> Result<Option<T>> {
-        crate::__priv::emit_query_macro(conn, "query_unchecked", "unchecked", self.sql);
+    pub async fn fetch_optional(
+        self,
+        conn: &mut (impl GenericClient + Send),
+    ) -> Result<Option<T>> {
         match conn.query_opt(self.sql, &self.params).await? {
             Some(row) => Ok(Some(T::from_row(&row)?)),
             None => Ok(None),
         }
     }
 
-    pub async fn fetch_all(self, conn: &mut Connection) -> Result<Vec<T>> {
-        crate::__priv::emit_query_macro(conn, "query_unchecked", "unchecked", self.sql);
+    pub async fn fetch_all(self, conn: &mut (impl GenericClient + Send)) -> Result<Vec<T>> {
         let rows = conn.query(self.sql, &self.params).await?;
         rows.iter().map(T::from_row).collect()
     }
 
-    pub async fn execute(self, conn: &mut Connection) -> Result<u64> {
-        crate::__priv::emit_query_macro(conn, "query_unchecked", "unchecked", self.sql);
+    pub async fn execute(self, conn: &mut (impl GenericClient + Send)) -> Result<u64> {
         Ok(conn.execute(self.sql, &self.params).await?)
     }
 }
@@ -224,10 +216,13 @@ impl<'q> PipelineExecution<'q> {
         Self { specs }
     }
 
-    pub async fn run(self, conn: &mut Connection) -> Result<Vec<QueryResult>> {
-        let mut batch = conn.pipeline();
+    pub async fn run(self, conn: &mut (impl GenericClient + Send)) -> Result<Vec<QueryResult>> {
+        // Note: QueryMacro events skipped on the generic path. Driver-level
+        // ExecuteStart/Finish events still fire inside execute_pipeline.
+        // PipelineBatch::new() used directly because GenericClient does not
+        // expose conn.pipeline() (a Connection-only convenience method).
+        let mut batch = driver::pipeline::batch::PipelineBatch::new();
         for spec in self.specs {
-            crate::__priv::emit_query_macro(conn, spec.macro_name, spec.query_id, spec.sql);
             let oids: Vec<u32> = spec.param_oids.iter().map(|o| u32::from(*o)).collect();
             batch.add(spec.sql.to_string(), oids, spec.encoded_params);
         }
