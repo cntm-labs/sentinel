@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/cntm-labs/sentinel/compare/sntl-macros-v0.1.1...sntl-macros-v0.1.2) (2026-05-18)
+
+
+### Features
+
+* **sntl:** #[sntl::test] fixture-isolated test harness (v0.5 Phase 3) ([#27](https://github.com/cntm-labs/sentinel/issues/27)) ([57404ff](https://github.com/cntm-labs/sentinel/commit/57404ff69fee7941f683cb912e52b0686740803b))
+* **sntl:** fetch_stream() at the macro layer (v0.5 Phase 2) ([#26](https://github.com/cntm-labs/sentinel/issues/26)) ([e6cb6e0](https://github.com/cntm-labs/sentinel/commit/e6cb6e061104036aa26ee0cf0346452495145234))
+
 ## [0.1.1](https://github.com/cntm-labs/sentinel/compare/sntl-macros-v0.1.0...sntl-macros-v0.1.1) (2026-05-17)
 
 
