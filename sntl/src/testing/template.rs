@@ -86,7 +86,7 @@ fn template_key(migrations_dir: Option<&Path>) -> anyhow::Result<String> {
 ///
 /// Handles both `postgres://host/db` and `postgres://host:port/db` forms.
 /// Returns the original string unchanged when no `/db` suffix is found.
-fn with_db(admin_url: &str, db_name: &str) -> String {
+pub(crate) fn with_db(admin_url: &str, db_name: &str) -> String {
     // Find the last `/` after the authority section.
     // A proper postgres URL has the form `postgres://auth/dbname[?opts]`.
     if let Some(after_proto) = admin_url
