@@ -7,6 +7,7 @@ mod model;
 mod partial;
 mod query;
 mod relation;
+mod test;
 
 use proc_macro::TokenStream;
 
@@ -128,4 +129,25 @@ pub fn sentinel(attr: TokenStream, item: TokenStream) -> TokenStream {
     } else {
         panic!("unknown sentinel attribute: `{attr_str}` — expected `relations`");
     }
+}
+
+/// Attribute macro for Sentinel integration tests.
+///
+/// Wraps an `async fn` in a synchronous `#[test]` that spins up a fresh
+/// per-test PostgreSQL database, optionally runs migrations and fixtures,
+/// then passes a [`sentinel_driver::Pool`] to the test body.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// #[sntl::test(migrations = "./tests/test_migrations", fixtures("users", "posts"))]
+/// async fn my_test(pool: sentinel_driver::Pool) -> anyhow::Result<()> {
+///     // ... use pool
+///     Ok(())
+/// }
+/// ```
+#[proc_macro_attribute]
+#[proc_macro_error2::proc_macro_error]
+pub fn test(attr: TokenStream, item: TokenStream) -> TokenStream {
+    test::expand(attr.into(), item.into()).into()
 }

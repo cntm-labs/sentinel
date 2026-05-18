@@ -45,6 +45,9 @@ pub use macros::{
 /// Attribute macro — `#[sentinel(relations)]`.
 pub use macros::sentinel;
 
+/// Attribute macro — `#[sntl::test]` for fixture-isolated integration tests.
+pub use macros::test;
+
 pub use core::error::{Error, Result};
 pub use core::observability;
 
