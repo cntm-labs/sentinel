@@ -101,6 +101,22 @@ impl<'a, T: FromRow> QueryExecution<'a, T> {
         rows.iter().map(T::from_row).collect()
     }
 
+    /// Execute this query and return a row-by-row stream.
+    ///
+    /// Unlike `fetch_all`, this does not materialise rows in memory.
+    /// The stream borrows the connection until dropped — the caller
+    /// cannot reuse the connection for other queries until then.
+    /// PG portals are tx-scoped; the stream opens an implicit
+    /// transaction if none is active.
+    pub async fn fetch_stream<'c>(
+        self,
+        conn: &'c mut driver::Connection,
+    ) -> Result<driver::RowStream<'c>> {
+        let pairs = self.handle.pair_with(&self.params);
+        let plain: Vec<&(dyn ToSql + Sync)> = pairs.iter().map(|(p, _)| *p).collect();
+        Ok(conn.query_stream(self.handle.sql, &plain).await?)
+    }
+
     pub async fn execute(self, mut conn: impl GenericClient + Send) -> Result<u64> {
         let pairs = self.handle.pair_with(&self.params);
         Ok(conn.execute_typed(self.handle.sql, &pairs).await?)

@@ -49,7 +49,7 @@ pub use core::observability;
 pub use driver::{FromSql, ToSql};
 
 // Re-export key driver types for direct use
-pub use driver::{Config, Oid, Pool, PooledConnection};
+pub use driver::{Config, Oid, Pool, PooledConnection, RowStream};
 
 /// PostgreSQL extension types re-exported from the driver.
 pub mod types {
