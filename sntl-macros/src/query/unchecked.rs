@@ -66,11 +66,14 @@ pub fn expand_as(ts: TokenStream) -> TokenStream {
     let target = args.target;
     let sql = args.inner.sql;
     let params = args.inner.params;
-    // query_as_unchecked! still captures the target type but UncheckedExecution
-    // is now unparameterised; the type hint is carried by the fetch_one::<T> call site.
-    // We emit the execution struct and ignore `target` here — callers use
-    // `.fetch_one::<Target>(conn)` or Rust infers T from the let binding.
-    let _ = target; // type hint provided by the call site, not the macro
+    // TODO(v0.6): query_as_unchecked!(T, ...) currently parses `T` for source
+    // compatibility but does not enforce it on the resulting expression because
+    // UncheckedExecution dropped its phantom `T` in v0.5 to make
+    // `query_unchecked!().into_stream().fetch_stream()` infer cleanly. Restore
+    // the T-binding contract by introducing a thin typed wrapper
+    // (UncheckedExecutionAs<T>) the macro can return — tracked alongside the
+    // v0.6 driver-side query_stream_typed work.
+    let _ = target;
     quote! {
         ::sntl::__macro_support::UncheckedExecution::new(
             #sql,
