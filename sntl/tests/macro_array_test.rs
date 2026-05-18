@@ -24,7 +24,7 @@ async fn array_with_null_elements_roundtrips() {
     .unwrap();
 
     let row = sntl::query!("SELECT tags FROM users")
-        .fetch_one(&mut conn)
+        .fetch_one(conn)
         .await
         .unwrap();
     assert_eq!(
@@ -49,7 +49,7 @@ async fn array_non_null_override_emits_vec_t() {
     .unwrap();
 
     let row = sntl::query!("SELECT tags FROM users", non_null_elements = [tags])
-        .fetch_one(&mut conn)
+        .fetch_one(conn)
         .await
         .unwrap();
     assert_eq!(row.tags, vec!["a".to_string(), "b".to_string()]);
@@ -73,7 +73,7 @@ async fn array_non_null_override_errors_on_actual_null() {
     // The auto-generated anonymous record struct does not derive Debug, so
     // .expect_err is unavailable; pattern-match on the result instead.
     let result = sntl::query!("SELECT tags FROM users", non_null_elements = [tags])
-        .fetch_one(&mut conn)
+        .fetch_one(conn)
         .await;
     match result {
         Ok(_) => panic!("decoding NULL into Vec<T> should have errored"),

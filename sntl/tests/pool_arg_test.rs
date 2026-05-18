@@ -1,5 +1,5 @@
 //! Verify sntl::query!() / query_as!() / query_scalar!() accept &Pool,
-//! &mut Connection, and &mut PooledConnection identically.
+//! Connection, and PooledConnection identically.
 //! Live-PG; skips silently without DATABASE_URL.
 
 use sntl::driver::pool::config::PoolConfig;
@@ -17,7 +17,7 @@ async fn query_scalar_accepts_pool_ref() {
         return;
     };
     let n: i64 = sntl::query_scalar!("SELECT 42::int8")
-        .fetch_one(&mut &pool)
+        .fetch_one(&pool)
         .await
         .unwrap();
     assert_eq!(n, 42);
@@ -28,9 +28,9 @@ async fn query_scalar_accepts_connection() {
     let Some(pool) = make_pool().await else {
         return;
     };
-    let mut conn = pool.acquire().await.unwrap();
+    let conn = pool.acquire().await.unwrap();
     let n: i64 = sntl::query_scalar!("SELECT 42::int8")
-        .fetch_one(&mut *conn)
+        .fetch_one(conn)
         .await
         .unwrap();
     assert_eq!(n, 42);
@@ -42,7 +42,7 @@ async fn query_accepts_pool_ref() {
         return;
     };
     let row = sntl::query!("SELECT 'alice'::text AS name, 42::int4 AS age")
-        .fetch_one(&mut &pool)
+        .fetch_one(&pool)
         .await
         .unwrap();
     let name: String = row.name;

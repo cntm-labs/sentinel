@@ -33,10 +33,10 @@ async fn query_macro_fires_with_id() {
     let cfg = sntl::driver::Config::parse(&url)
         .unwrap()
         .with_instrumentation(rec.clone());
-    let mut conn = sntl::driver::Connection::connect(cfg).await.unwrap();
+    let conn = sntl::driver::Connection::connect(cfg).await.unwrap();
 
     let _: i32 = sntl::query_scalar!("SELECT 1::int4")
-        .fetch_one(&mut conn)
+        .fetch_one(conn)
         .await
         .unwrap();
 
