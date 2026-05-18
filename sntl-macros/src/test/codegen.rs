@@ -76,7 +76,6 @@ pub fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let fn_name_str = input_fn.sig.ident.to_string();
     let body = input_fn.block.clone();
-    let inputs = input_fn.sig.inputs.clone();
 
     let migrations_dir_lit = match args.migrations_dir {
         Some(s) => quote! { Some(#s) },
@@ -84,7 +83,11 @@ pub fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
     };
     let fixtures_lits: Vec<_> = args.fixtures.iter().map(|s| quote! { #s }).collect();
 
+    // Strip parameters and return type from the outer fn:
+    // #[test] functions must take no args and return ().
     input_fn.sig.asyncness = None;
+    input_fn.sig.inputs.clear();
+    input_fn.sig.output = syn::ReturnType::Default;
     input_fn.block = syn::parse2(quote! {
         {
             let cfg = ::sntl::testing::run::TestConfig {
@@ -95,7 +98,7 @@ pub fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
             };
             let rt = ::tokio::runtime::Runtime::new().expect("build test tokio runtime");
             rt.block_on(::sntl::testing::run::run(cfg, |pool| async move {
-                async fn __body(#inputs) -> ::anyhow::Result<()> {
+                async fn __body(pool: ::sntl::driver::Pool) -> ::anyhow::Result<()> {
                     #body
                 }
                 __body(pool).await

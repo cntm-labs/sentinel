@@ -121,6 +121,16 @@ async fn create_template(
         admin
             .execute("SET client_min_messages = ERROR", &[])
             .await?;
+        // Template databases cannot be dropped directly. Un-mark first.
+        admin
+            .execute(
+                &format!(
+                    "UPDATE pg_database SET datistemplate = false \
+                     WHERE datname = '{db_name}'"
+                ),
+                &[],
+            )
+            .await?;
         admin
             .execute(&format!("DROP DATABASE IF EXISTS {db_name}"), &[])
             .await?;
