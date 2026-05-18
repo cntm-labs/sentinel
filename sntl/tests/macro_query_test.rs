@@ -28,7 +28,7 @@ async fn query_macro_fetches_user_id() {
     // schema snapshot in .sentinel/schema.toml mirrors setup.sql so the
     // proc-macro picks i32 for both the parameter and the column.
     let row = sntl::query!("SELECT id FROM users WHERE id = $1", inserted_id)
-        .fetch_one(&mut conn)
+        .fetch_one(conn)
         .await
         .expect("query!");
     assert_eq!(row.id, inserted_id);

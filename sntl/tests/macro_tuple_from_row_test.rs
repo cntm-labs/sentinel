@@ -25,7 +25,7 @@ async fn tuple_query_as_returns_tuple_directly() {
         .unwrap();
 
     let (id,): (i32,) = sntl::query_as!((i32,), "SELECT id FROM users WHERE id = $1", inserted_id)
-        .fetch_one(&mut conn)
+        .fetch_one(conn)
         .await
         .unwrap();
     assert_eq!(id, inserted_id);

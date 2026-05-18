@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "sql_hash": "d1b6981d50ed3",
+  "sql_normalized": "SELECT 42::int8",
+  "params": [],
+  "columns": [
+    {
+      "name": "int8",
+      "pg_type": "int8",
+      "oid": 20,
+      "nullable": false
+    }
+  ],
+  "query_kind": "Select",
+  "has_returning": false
+}
