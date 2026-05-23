@@ -59,18 +59,21 @@ For the bread-and-butter cases the syntax is unchanged:
 
 ```diff
 -let user = sqlx::query!("SELECT id, email FROM users WHERE id = $1", id)
--    .fetch_one(&mut conn)
+-    .fetch_one(&pool)
 -    .await?;
 +let user = sntl::query!("SELECT id, email FROM users WHERE id = $1", id)
-+    .fetch_one(&mut conn)
++    .fetch_one(&pool)
 +    .await?;
 ```
+
+`fetch_*` / `execute` accept any `impl GenericClient + Send` — pass `&pool`,
+`&mut conn`, or `&mut PooledConnection` interchangeably (v0.5).
 
 Type-targeted form:
 
 ```diff
 -let users: Vec<User> = sqlx::query_as!(User, "SELECT id, email FROM users").fetch_all(&pool).await?;
-+let users: Vec<User> = sntl::query_as!(User, "SELECT id, email FROM users").fetch_all(&mut conn).await?;
++let users: Vec<User> = sntl::query_as!(User, "SELECT id, email FROM users").fetch_all(&pool).await?;
 ```
 
 `sqlx::query_scalar!` → `sntl::query_scalar!` (single-column projection).
@@ -82,8 +85,29 @@ If you have one-off SQL that you intentionally do not want to cache, use
 the escape hatches:
 
 ```rust
-let _ = sntl::query_unchecked!("SET search_path = public").execute(&mut conn).await?;
+let _ = sntl::query_unchecked!("SET search_path = public").execute(&pool).await?;
 ```
+
+### Streaming large result sets
+
+`sqlx::query!(...).fetch(&mut conn)` returns a `Stream`. Sentinel's
+equivalent lives on `QueryExecution`:
+
+```diff
+-let mut stream = sqlx::query!("SELECT id FROM big_table").fetch(&mut conn);
+-while let Some(row) = stream.try_next().await? {
++let mut stream = sntl::query!("SELECT id FROM big_table").fetch_stream(&mut conn).await?;
++while let Some(row) = stream.next().await? {
+     let id: i32 = row.try_get(0)?;
+ }
+```
+
+`fetch_stream` requires `&mut Connection` specifically — the returned
+`RowStream` borrows the connection for its lifetime, so pool-acquired
+handles (`&pool`) are not yet supported here.
+
+Use `sntl::query_unchecked!("...").into_stream().fetch_stream(&mut conn)` if
+you want the streaming path on a query you have not cached.
 
 ## 5. Lift sqlx's nullability annotations
 
@@ -107,6 +131,34 @@ was non-null to `Option<T>`.
 
 ---
 
+## 6. Swap `#[sqlx::test]` for `#[sntl::test]`
+
+Sentinel ships a fixture-isolated test harness that creates a fresh
+PostgreSQL database per test via `CREATE DATABASE ... TEMPLATE` — the same
+shape as `sqlx::test`.
+
+```diff
+-#[sqlx::test(migrations = "./migrations", fixtures("users", "posts"))]
+-async fn user_has_two_posts(pool: sqlx::PgPool) -> sqlx::Result<()> {
++#[sntl::test(migrations = "./migrations", fixtures("users", "posts"))]
++async fn user_has_two_posts(pool: sentinel_driver::Pool) -> anyhow::Result<()> {
+     // … assertions …
+     Ok(())
+ }
+```
+
+Differences:
+
+- **Admin URL via `SNTL_TEST_DATABASE_URL`** (fallback `DATABASE_URL`).
+  Point it at the `postgres` system DB so the test role can CREATE DATABASE.
+- **Migrations are sntl-migrate folders**, not sqlx's flat `up.sql` files.
+  See [migration-guide.md](migration-guide.md).
+- **Body must return `anyhow::Result<()>`.** Sentinel does not use a
+  bespoke `Result` alias.
+- **First test per process is slow** while it builds the template DB;
+  subsequent clones are ~milliseconds. Detail in
+  [testing-guide.md](testing-guide.md).
+
 ## What's different on purpose
 
 - **No `DATABASE_URL` at compile time.** The cache is the source of truth.
@@ -119,3 +171,10 @@ was non-null to `Option<T>`.
 - **OIDs come from `sntl prepare`, not the call site.** The macro emits
   `query_typed_*` calls with the cached parameter OIDs, skipping a Parse
   round-trip versus untyped `query` paths.
+- **`Pool` is a first-class macro argument (v0.5).** No need to acquire a
+  connection by hand for one-off queries — `&pool` works everywhere
+  `&mut conn` does, except `fetch_stream` (which borrows the connection).
+- **Streaming, transactions, and `#[sntl::test]`** are all built on the
+  same `Instrumentation` trait — see
+  [observability-guide.md](observability-guide.md) for the wire-level
+  events you can hook into.

@@ -157,10 +157,17 @@ sentinel/
 > filled in in a future release.
 >
 > **Observability (v0.4+):** `sntl` ships `sntl::observability::SntlTracing`, a
-> bridge over `sentinel-driver` v3.0+'s `Instrumentation` trait. It hooks every
+> bridge over `sentinel-driver` v4.0+'s `Instrumentation` trait. It hooks every
 > wire-trip and every `query!()` / migration call — feeding `db.system`,
 > `sntl.macro`, and `sntl.query_id` into any `tracing`-compatible backend
 > (Jaeger, Zipkin, OTLP). See [`docs/observability-guide.md`](docs/observability-guide.md).
+>
+> **Day-one DX (v0.5+):** `query!().fetch_*(&pool)` works directly — no
+> manual `pool.acquire()` round-trip; `fetch_stream(&mut conn)` returns a
+> lazy `RowStream` for million-row scans; `#[sntl::test]` spins a fresh
+> isolated PG database per test via `CREATE DATABASE ... TEMPLATE`. See
+> [`docs/testing-guide.md`](docs/testing-guide.md) and
+> [`docs/migration-from-sqlx.md`](docs/migration-from-sqlx.md).
 
 ## Development
 

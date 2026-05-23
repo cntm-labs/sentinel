@@ -10,6 +10,30 @@
 //! ```rust
 //! use sntl::prelude::*;
 //! ```
+//!
+//! ## Day-one DX (v0.5)
+//!
+//! - **`Pool` is a first-class macro argument.** Pass `&pool` directly to
+//!   `fetch_*` / `execute` instead of pulling a connection by hand:
+//!   ```ignore
+//!   let users: Vec<User> = sntl::query_as!(User, "SELECT * FROM users")
+//!       .fetch_all(&pool).await?;
+//!   ```
+//!   See [`__macro_support::QueryExecution`].
+//!
+//! - **Streaming.** `fetch_stream(&mut conn)` returns a [`RowStream`] that
+//!   yields rows lazily without materialising the whole result set.
+//!
+//! - **`#[sntl::test]`.** Fixture-isolated test harness — every test gets
+//!   a fresh PostgreSQL database via `CREATE DATABASE ... TEMPLATE`. See
+//!   [`testing`] and `docs/testing-guide.md`.
+//!
+//! ## Guides
+//!
+//! - `docs/migration-from-sqlx.md` — switch from `sqlx::query!` to `sntl::query!`
+//! - `docs/migration-guide.md` — write and run schema migrations with `sntl-migrate`
+//! - `docs/observability-guide.md` — wire `tracing` / OpenTelemetry to every query
+//! - `docs/testing-guide.md` — write fixture-isolated tests with `#[sntl::test]`
 
 #[doc(hidden)]
 pub mod __priv;

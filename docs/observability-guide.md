@@ -330,7 +330,7 @@ Every event arm, when it fires, and which fields are available.
 
 | Arm | Fires when | Key fields |
 |-----|-----------|------------|
-| `QueryMacro` | Any `sntl::query!()` family call entering `fetch_*` / `execute` | `macro_name` (e.g. `"query_scalar!"`), `query_id` (13-char cache hash), `sql` |
+| `QueryMacro` | Any `sntl::query!()` family call entering `fetch_*` / `execute` | `macro_name` (e.g. `"query_scalar!"`), `query_id` (13-char cache hash), `sql` (see v0.5 note below) |
 | `ReducerBegin` | **(future)** — declared for `#[reducer]` macro; not yet emitted | `name` |
 | `ReducerCommit` | **(future)** — same | `name`, `duration` |
 | `ReducerRollback` | **(future)** — same | `name`, `error` |
@@ -349,3 +349,4 @@ Every event arm, when it fires, and which fields are available.
 | **`cache_hit` always `false`** | The `PrepareFinish.cache_hit` field is always `false` today because prepared-statement cache wiring is not yet complete in the driver. |
 | **`Reducer*` events dormant** | `ReducerBegin`, `ReducerCommit`, and `ReducerRollback` are declared in `Event` and handled by `SntlTracing`, but the `#[reducer]` macro does not yet exist in `sntl-macros`. The handler arms are ready; they will activate once the macro lands. |
 | **`Connect` / `Authenticated` / `Disconnect` not emitted** | These require pre-Connection plumbing changes in the driver that are deferred post-3.0. |
+| **`QueryMacro` events temporarily dormant in v0.5** | Phase 1B widened the macro-layer `fetch_*` / `execute` methods from `&mut Connection` to `impl GenericClient`, which gave us `&pool` ergonomics but lost the instrumentation handle (the trait does not expose `instrumentation()` yet). Driver-level `ExecuteStart` / `ExecuteFinish` continue to fire, so spans still get `db.statement` and timing — only the `sntl.macro` / `sntl.query_id` attributes are missing on the generic path. Tracked for v0.6: add `instrumentation()` accessor (default no-op) to `GenericClient` so the bridge can be reattached. |
