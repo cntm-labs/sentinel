@@ -69,6 +69,9 @@ pub use macros::{
 /// Attribute macro — `#[sentinel(relations)]`.
 pub use macros::sentinel;
 
+/// Attribute macro — `#[sntl::reducer]` wraps an async fn in BEGIN/COMMIT/ROLLBACK with auto-rollback on Err/panic.
+pub use macros::reducer;
+
 /// Attribute macro — `#[sntl::test]` for fixture-isolated integration tests.
 pub use macros::test;
 

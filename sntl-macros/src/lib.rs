@@ -6,6 +6,7 @@ mod migrate;
 mod model;
 mod partial;
 mod query;
+mod reducer;
 mod relation;
 mod test;
 
@@ -129,6 +130,24 @@ pub fn sentinel(attr: TokenStream, item: TokenStream) -> TokenStream {
     } else {
         panic!("unknown sentinel attribute: `{attr_str}` — expected `relations`");
     }
+}
+
+/// Attribute macro — wraps an async fn in BEGIN/COMMIT/ROLLBACK with
+/// auto-rollback on `Err` or panic.
+///
+/// # Example
+///
+/// ```rust,ignore
+/// #[sntl::reducer]
+/// async fn transfer(conn: &mut Connection, from: Uuid, to: Uuid, amount: i64) -> sntl::Result<()> {
+///     // body runs inside a transaction; auto-committed on Ok, rolled back on Err/panic
+///     Ok(())
+/// }
+/// ```
+#[proc_macro_attribute]
+#[proc_macro_error2::proc_macro_error]
+pub fn reducer(attr: TokenStream, item: TokenStream) -> TokenStream {
+    reducer::expand(attr.into(), item.into()).into()
 }
 
 /// Attribute macro for Sentinel integration tests.
