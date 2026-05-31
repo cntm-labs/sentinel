@@ -90,4 +90,5 @@ pub mod types {
 #[doc(hidden)]
 pub mod __macro_support {
     pub use crate::core::query::macro_support::*;
+    pub use ::futures::FutureExt;
 }

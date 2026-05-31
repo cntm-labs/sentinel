@@ -25,6 +25,7 @@ tracing = "0.1"
 sha2.workspace = true
 hex.workspace = true
 sntl-migrate.workspace = true
+futures = { version = "0.3", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 cargo-husky.workspace = true
