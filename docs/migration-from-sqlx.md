@@ -178,3 +178,45 @@ Differences:
   same `Instrumentation` trait — see
   [observability-guide.md](observability-guide.md) for the wire-level
   events you can hook into.
+
+## 7. Replacing `sqlx::Transaction` with `#[sntl::reducer]`
+
+sqlx:
+
+```rust
+let mut tx = pool.begin().await?;
+sqlx::query!("UPDATE accounts SET balance = balance - $1 WHERE id = $2", amount, from)
+    .execute(&mut *tx).await?;
+sqlx::query!("UPDATE accounts SET balance = balance + $1 WHERE id = $2", amount, to)
+    .execute(&mut *tx).await?;
+tx.commit().await?;
+```
+
+Sentinel:
+
+```rust
+use sntl::driver::Connection;
+
+#[sntl::reducer]
+async fn transfer(conn: &mut Connection, from: i32, to: i32, amount: i64) -> sntl::Result<()> {
+    conn.execute(
+        "UPDATE accounts SET balance = balance - $1 WHERE id = $2",
+        &[&amount, &from],
+    ).await?;
+    conn.execute(
+        "UPDATE accounts SET balance = balance + $1 WHERE id = $2",
+        &[&amount, &to],
+    ).await?;
+    Ok(())
+}
+
+let mut conn = pool.acquire().await?;
+transfer(&mut conn, 1, 2, 100).await?;
+```
+
+The reducer macro emits the `BEGIN`/`COMMIT`/`ROLLBACK` boilerplate for you,
+adds panic safety (automatic rollback if the body panics), and emits
+observability events. Inside the body, use the driver's raw `conn.execute(...)`
+/ `conn.query(...)` methods — the `sntl::query!()` macro family does not yet
+work with `&mut Connection` (tracked for v0.7). See
+[`docs/reducer-guide.md`](reducer-guide.md).

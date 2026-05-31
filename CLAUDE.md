@@ -76,7 +76,7 @@ Integration tests (pg_*.rs) skip silently when DATABASE_URL is absent. CI runs t
 ## Key Patterns
 - **Type-state pattern** for relations: `User<Bare>` vs `User<WithPosts>` — compile error if accessing unloaded relation
 - **Partial types** for select: `#[derive(Partial)]` generates narrow return types
-- **Reducer pattern** for transactions: `#[reducer]` = auto-commit/rollback
+- **Reducer pattern** for transactions: `#[sntl::reducer]` = auto-commit/rollback + panic safety + observability events (`sntl-macros/src/reducer/`, `docs/reducer-guide.md`)
 - **Deadlock prevention**: auto-reorder locks by ID
 
 ## Conventions

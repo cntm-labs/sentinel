@@ -1,0 +1,13 @@
+error: isolation must be one of: read_committed, repeatable_read, serializable
+ --> tests/compile_fail/reducer_bad_isolation.rs:5:29
+  |
+5 | #[sntl::reducer(isolation = "snapshot")]
+  |                             ^^^^^^^^^^
+
+warning: unused import: `sntl::driver::Connection`
+ --> tests/compile_fail/reducer_bad_isolation.rs:3:5
+  |
+3 | use sntl::driver::Connection;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

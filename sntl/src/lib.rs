@@ -28,11 +28,16 @@
 //!   a fresh PostgreSQL database via `CREATE DATABASE ... TEMPLATE`. See
 //!   [`testing`] and `docs/testing-guide.md`.
 //!
+//! - **`#[sntl::reducer]`.** Wrap any async fn in `BEGIN`/`COMMIT`/`ROLLBACK`
+//!   with panic safety and `ReducerBegin/Commit/Rollback` events. See
+//!   `docs/reducer-guide.md`.
+//!
 //! ## Guides
 //!
 //! - `docs/migration-from-sqlx.md` — switch from `sqlx::query!` to `sntl::query!`
 //! - `docs/migration-guide.md` — write and run schema migrations with `sntl-migrate`
 //! - `docs/observability-guide.md` — wire `tracing` / OpenTelemetry to every query
+//! - `docs/reducer-guide.md` — wrap async fns in atomic transactions with `#[sntl::reducer]`
 //! - `docs/testing-guide.md` — write fixture-isolated tests with `#[sntl::test]`
 
 #[doc(hidden)]
@@ -69,6 +74,9 @@ pub use macros::{
 /// Attribute macro — `#[sentinel(relations)]`.
 pub use macros::sentinel;
 
+/// Attribute macro — `#[sntl::reducer]` wraps an async fn in BEGIN/COMMIT/ROLLBACK with auto-rollback on Err/panic.
+pub use macros::reducer;
+
 /// Attribute macro — `#[sntl::test]` for fixture-isolated integration tests.
 pub use macros::test;
 
@@ -90,4 +98,5 @@ pub mod types {
 #[doc(hidden)]
 pub mod __macro_support {
     pub use crate::core::query::macro_support::*;
+    pub use ::futures::FutureExt;
 }

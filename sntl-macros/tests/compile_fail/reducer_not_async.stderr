@@ -1,0 +1,13 @@
+error: #[sntl::reducer] requires async fn
+ --> tests/compile_fail/reducer_not_async.rs:6:1
+  |
+6 | fn not_async(conn: &mut Connection) -> sntl::Result<()> {
+  | ^^
+
+warning: unused import: `sntl::driver::Connection`
+ --> tests/compile_fail/reducer_not_async.rs:3:5
+  |
+3 | use sntl::driver::Connection;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default

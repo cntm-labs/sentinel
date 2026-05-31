@@ -1,0 +1,5 @@
+error: first arg of #[sntl::reducer] must be `&mut driver::Connection`
+ --> tests/compile_fail/reducer_no_conn_arg.rs:4:30
+  |
+4 | async fn missing_conn(other: i32) -> sntl::Result<()> {
+  |                              ^^^
