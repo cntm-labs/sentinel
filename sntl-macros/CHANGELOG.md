@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/cntm-labs/sentinel/compare/sntl-macros-v0.1.2...sntl-macros-v0.1.3) (2026-05-31)
+
+
+### Features
+
+* **sntl-macros:** #[sntl::reducer] proc-macro (v0.6 phase 1) ([#28](https://github.com/cntm-labs/sentinel/issues/28)) ([1b96225](https://github.com/cntm-labs/sentinel/commit/1b96225c1429d72409c9d08d31405b9eb8107863))
+
 ## [0.1.2](https://github.com/cntm-labs/sentinel/compare/sntl-macros-v0.1.1...sntl-macros-v0.1.2) (2026-05-18)
 
 
