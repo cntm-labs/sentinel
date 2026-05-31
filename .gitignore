@@ -27,3 +27,8 @@ lcov.info
 # Benchmark example targets
 examples/*/target/
 examples/*/Cargo.lock
+
+# Design / implementation plans — internal notes from superpowers brainstorming
+# + writing-plans skills. Files already committed remain in git history;
+# this rule only stops new plan files from being tracked going forward.
+docs/plans/
