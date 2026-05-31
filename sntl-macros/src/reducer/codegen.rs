@@ -162,11 +162,19 @@ pub fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
 
             #begin_expr
 
-            // No move on the inner async block — body captures `conn` by reference,
-            // and the outer scope still needs it for commit/rollback after .await.
-            // Panic safety lands in Task 7 (AssertUnwindSafe + catch_unwind).
-            match (async { #body }).await {
-                Ok(__r) => {
+            let __conn_ptr: *mut ::sntl::driver::Connection = #conn_ident;
+            let __result = ::sntl::__macro_support::FutureExt::catch_unwind(
+                ::std::panic::AssertUnwindSafe(async move {
+                    // SAFETY: __conn_ptr was derived from #conn_ident whose outer borrow
+                    // outlives this scope, and we do not run the outer borrow concurrently
+                    // with this future. Re-borrowing here is sound.
+                    let #conn_ident = unsafe { &mut *__conn_ptr };
+                    #body
+                })
+            ).await;
+
+            match __result {
+                Ok(Ok(__r)) => {
                     #conn_ident.commit().await?;
                     #conn_ident.instrumentation().on_event(&Event::ReducerCommit {
                         name: __name,
@@ -174,7 +182,7 @@ pub fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
                     });
                     Ok(__r)
                 }
-                Err(__e) => {
+                Ok(Err(__e)) => {
                     let __err = format!("{}", __e);
                     #conn_ident.rollback().await.ok();
                     #conn_ident.instrumentation().on_event(&Event::ReducerRollback {
@@ -182,6 +190,14 @@ pub fn expand(attr: TokenStream, item: TokenStream) -> TokenStream {
                         error: &__err,
                     });
                     Err(__e)
+                }
+                Err(__panic_payload) => {
+                    #conn_ident.rollback().await.ok();
+                    #conn_ident.instrumentation().on_event(&Event::ReducerRollback {
+                        name: __name,
+                        error: "panic",
+                    });
+                    ::std::panic::resume_unwind(__panic_payload);
                 }
             }
         }
