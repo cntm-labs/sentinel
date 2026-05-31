@@ -136,6 +136,7 @@ See `docs/migration-from-sqlx.md` for a side-by-side migration guide.
 - **Built on sentinel-driver** — SCRAM-SHA-256, pipeline mode, binary format, rustls
 - **Production observability** — single `Instrumentation` trait hooks every wire site and every macro invocation; ships with a tracing/OTel adapter (see [`docs/observability-guide.md`](docs/observability-guide.md))
 - **Fixture-isolated test harness** — `#[sntl::test(migrations, fixtures)]` spins a fresh PG database per test via `CREATE DATABASE ... TEMPLATE`; first test pays the migration cost, the rest clone in milliseconds (see [`docs/testing-guide.md`](docs/testing-guide.md))
+- **Transactional reducers** — `#[sntl::reducer]` wraps any async fn in `BEGIN`/`COMMIT`/`ROLLBACK` with isolation control, panic safety, and `ReducerBegin/Commit/Rollback` events (see [`docs/reducer-guide.md`](docs/reducer-guide.md))
 
 ## Architecture
 
